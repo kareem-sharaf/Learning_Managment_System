@@ -1,5 +1,4 @@
 <?php
-//hellllllllllooooooooooo
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
@@ -127,30 +126,48 @@ public function add_subject_and_assign_teachers(Request $request)
 
 
 
-public function edit_subject(Request $request,$subject_id)
+public function edit_subject(Request $request, $subject_id)
 {
     $user = auth()->user();
-  //  if($user->role == 2){
-    $subject = Subject::where('id', $subject_id)->first();
-    $input = $request->all();
-    $validator = Validator::make($input, [
-        'name' => 'required',
-       // 'image' => 'required',
-        //'video' => 'required',
-    ]);
 
-    if ($validator->fails()) {
-        $message = "There is an error in the inputs.";
+// if($user->role == 2){
+    $subject = Subject::find($subject_id);
+
+    if (!$subject) {
         return response()->json([
             'status' => 0,
-            'message' => $message,
-            'data' => $input,
+            'message' => 'Subject not found.'
         ]);
     }
-    $subject->name = $input['name'];
-   // $subject->image = $input['image'];
-   // $subject->video = $input['video'];
-    $subject->save();
+
+    $input = $request->all();
+
+    $validator_subject = Validator::make($input, [
+        'name' => 'required',
+        // 'image' => 'required',
+        // 'video' => 'required',
+        'stage_id' => 'required',
+        'year_id' => 'required'
+    ]);
+
+    $validator_content = Validator::make($input, [
+        'content' => 'required|array',
+        'content.*.teacher_id' => 'required|integer',
+    ]);
+
+    if ($validator_subject->fails() || $validator_content->fails()) {
+        return 'Error in validation.';
+    }
+
+    $subject->update([
+        'name' => $input['name'],
+        // 'image' => $input['image'],
+        // 'video' => $input['video'],
+        'stage_id' => $input['stage_id'],
+        'year_id' => $input['year_id']
+    ]);
+
+    $subject->teachers()->sync($input['content']);
 
     $message = "The subject has been updated successfully.";
     return response()->json([
@@ -158,52 +175,51 @@ public function edit_subject(Request $request,$subject_id)
         'message' => $message,
         'data' => $subject
     ]);
-
-  /*  }else{
-        $message="you can't edite subject ";
-        return response()->json(
-            [
-                'status'=>'500',
-                'message'=>$message
-            ]
-        );
-    }*/
-
+    // } else {
+    //     $message = "You can't add the subject and assign teachers.";
+    //     return response()->json([
+    //         'status' => '500',
+    //         'message' => $message
+    //     ]);
+    // }
 }
 
 
 
 
 public function delete_subject($subject_id)
-    {
-        $user = auth()->user();
-       // if($user->role == 2){
-            $subject = Subject::where('id', $subject_id)->first();
-            if (is_null($subject)) {
-                $message = "The subject doesn't exist.";
-                return response()->json([
-                    'status' => '500',
-                    'message' => $message,
-                ]);
-            }
-            $subject->delete();
-            $message = "The subject deleted successfully.";
-             return response()->json([
-            'status' => 1,
+{
+    $user = auth()->user();
+// if($user->role == 2){
+
+
+    $subject = Subject::find($subject_id);
+
+    if (!$subject) {
+        $message = "The subject doesn't exist.";
+        return response()->json([
+            'status' => 500,
             'message' => $message,
-            'data' => $subject,
         ]);
-   /* }else{
-        $message="you can't delete subject ";
-        return response()->json(
-            [
-                'status'=>'500',
-                'message'=>$message
-            ]
-        );
-    }*/
+    }
 
+    $subject->teachers()->detach();
 
+    $subject->delete();
+
+    $message = "The subject deleted successfully.";
+    return response()->json([
+        'status' => 1,
+        'message' => $message,
+    ]);
+    // } else {
+        //     $message = "You can't add the subject and assign teachers.";
+        //     return response()->json([
+        //         'status' => '500',
+        //         'message' => $message
+        //     ]);
+        // }
 }
+
 
 }
