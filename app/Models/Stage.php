@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Stage extends Model
 {
     use HasFactory;
-    protected $fillable=[
-        'stage'
-    ];
-    public $timestamps=false;
+
+
+
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class);
+    }
 }
