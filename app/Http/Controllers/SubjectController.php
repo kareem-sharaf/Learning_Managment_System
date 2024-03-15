@@ -1,5 +1,5 @@
 <?php
-//hellllllllllooooooooooo
+//hellllllllllooooooooooossssss
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
