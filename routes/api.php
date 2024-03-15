@@ -85,16 +85,11 @@ Route::group(['prefix' => 'unit'], function () {
 
 Route::group(['prefix' => 'teacher'], function () {
     Route::controller(TeachersController::class)->group(function () {
-        Route::get('show_one_teacher/{teacher_id}', 'show_one_teacher');
         Route::post('show_all_teachers', 'show_all_teachers');
-        Route::get('show_stage_teachers/{stage_id}', 'show_stage_teachers');
-        Route::get('show_year_teachers/{year_id}', 'show_year_teachers');
-
         Route::post('search_to_teacher', 'search_to_teacher');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('add_teacher', 'add_teacher');
-            Route::post('add_teacher_and_assign_subjects', 'add_teacher_and_assign_subjects');
             Route::post('edit_teacher/{teacher_id}', 'edit_teacher');
             Route::delete('delete_teacher/{teacher_id}', 'delete_teacher');
 
