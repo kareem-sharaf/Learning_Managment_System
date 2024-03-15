@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('subjects', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-          //  $table->string('image');
+            $table->binary('image_data')->default('default_image.jpg');
            // $table->string('video');
            $table->integer('stage_id')->unsigned();
            $table->foreign('stage_id')->references('id')->on('stages')->onDelete('cascade');
