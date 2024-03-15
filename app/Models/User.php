@@ -24,11 +24,7 @@ class User extends Authenticatable
         'birth_date',
         'father_name',
         'address',
-        'phone_number',
-        'role_id',
-        'stage_id',
-        'year_id',
-        'device_id'
+        'phone_number'
     ];
 
     /**
@@ -50,14 +46,4 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    // public function courses()
-    // {
-    //     return $this->hasMany(Course::class);
-    // }
-
-    public function favorites()
-    {
-        return $this->belongsToMany(Favorite::class);
-    }
 }

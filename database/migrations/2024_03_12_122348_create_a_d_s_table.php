@@ -13,12 +13,6 @@ return new class extends Migration
     {
         Schema::create('a_d_s', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('description');
-            $table->binary('image_data')->default(0);
-            $table->boolean('isExpired')->default(0);
-            $table->foreignId('stage_id')->constrained('stages')->cascadeOnDelete();
-            $table->foreignId('year_id')->constrained('years')->cascadeOnDelete();
             $table->timestamps();
         });
     }
