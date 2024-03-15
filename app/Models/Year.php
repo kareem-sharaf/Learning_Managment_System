@@ -8,10 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Year extends Model
 {
     use HasFactory;
-
-
-    public function subjects()
-    {
-        return $this->hasMany(Subject::class);
-    }
+    protected $fillable=[
+        'year',
+        'stage_id'
+    ];
+    public $timestamps=false;
 }
