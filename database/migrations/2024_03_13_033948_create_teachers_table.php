@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-           //$table->byte('image');
+            $table->binary('image_data')->default('default_image.jpg');
            //$table->integer('subject_id')->unsigned();
          //  $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
           // $table->integer('year_id')->unsigned();

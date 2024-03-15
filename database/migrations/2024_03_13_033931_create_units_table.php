@@ -15,7 +15,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->json('content')->nullable();
-           //$table->byte('image');
+            $table->binary('image_data')->default('default_image.jpg');
            // $table->byte('video');
            $table->integer('price')->nullable();
            $table->integer('subject_id')->unsigned();

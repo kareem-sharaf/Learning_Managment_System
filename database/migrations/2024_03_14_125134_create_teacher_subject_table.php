@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->integer('teacher_id');
             $table->integer('subject_id');
-            $table->timestamps();
         });
     }
 

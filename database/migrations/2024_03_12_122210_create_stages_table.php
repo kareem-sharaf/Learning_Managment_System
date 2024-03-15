@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stages', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('title');
-            $table->string('description');
+      /*  Schema::create('stages', function (Blueprint $table) {
+          //  $table->increments('id');
+          //  $table->string('title');
+          //  $table->string('description');
          //   $table->binary('image_data')->default(0);
           //  $table->foreignId('stage_id')->constrained('classifications')->cascadeOnDelete();
            // $table->foreignId('year_id')->constrained('companies')->cascadeOnDelete();
             $table->timestamps();
-        });
+        });*/
     }
 
     /**
