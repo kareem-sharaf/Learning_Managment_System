@@ -13,6 +13,77 @@ use App\Http\Controllers\TeachersController;
 class SubjectController extends Controller
 {
 
+
+
+    public function show_all_subjects(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'year_id' => 'required',
+            'stage_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return 'error in validation.';
+        }
+
+
+        $input= $request->all();
+        $year_id = $input['year_id'];
+        $stage_id = $input['stage_id'];
+        $subject = Subject::where('stage_id', $stage_id)->whereHas('years', function($q) use ($year_id) {
+            $q->where('year_id', $year_id);
+        })->get();
+        $message = "this is the all subjects";
+
+        return response()->json([
+            'message' => $message,
+            'data' => $subject
+        ]);
+    }
+
+
+
+
+
+
+
+    public function search_to_subject(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'year_id' => 'required',
+            'stage_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return 'error in validation.';
+        }
+
+        $input = $request->all();
+        $year_id = $input['year_id'];
+        $subject = subject::where('name', 'like', '%' . $input['name'] . '%')
+            ->where('stage_id', $input['stage_id'])->whereHas('years', function($q) use ($year_id) {
+                $q->where('year_id', $year_id);
+            })->get();
+        if ($subject->isEmpty()) {
+            $message = "The subject doesn't exist.";
+            return response()->json([
+                'message' => $message,
+            ]);
+        }
+
+        $message = "This is the subject.";
+        return response()->json([
+            'message' => $message,
+            'data' => $subject,
+        ]);
+    }
+
+
+
+
+
+
+
+
     public function add_subject(Request $request)
     {
         $user = auth()->user();
@@ -85,84 +156,6 @@ class SubjectController extends Controller
              ]);
          }
     }
-
-
-
-
-
-
-
-
-
-    public function show_all_subjects(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'year_id' => 'required',
-            'stage_id' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
-
-
-        $input= $request->all();
-        $year_id = $input['year_id'];
-        $stage_id = $input['stage_id'];
-        $subject = Subject::where('stage_id', $stage_id)->whereHas('years', function($q) use ($year_id) {
-            $q->where('year_id', $year_id);
-        })->get();
-        $message = "this is the all subjects";
-
-        return response()->json([
-            'message' => $message,
-            'data' => $subject
-        ]);
-    }
-
-
-
-
-
-
-
-    public function search_to_subject(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'year_id' => 'required',
-            'stage_id' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
-
-        $input = $request->all();
-        $year_id = $input['year_id'];
-        $subject = subject::where('name', 'like', '%' . $input['name'] . '%')
-            ->where('stage_id', $input['stage_id'])->whereHas('years', function($q) use ($year_id) {
-                $q->where('year_id', $year_id);
-            })->get();
-        if ($subject->isEmpty()) {
-            $message = "The subject doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ]);
-        }
-
-        $message = "This is the subject.";
-        return response()->json([
-            'message' => $message,
-            'data' => $subject,
-        ]);
-    }
-
-
-
-
-
-
-
-
 
 
 
