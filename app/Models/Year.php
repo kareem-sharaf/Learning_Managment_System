@@ -22,6 +22,13 @@ class Year extends Model
     {
         return $this->belongsToMany(Subject::class,'subject_year');
     }
+
+
+
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class,'teacher_year');
+    }
 }
 
 

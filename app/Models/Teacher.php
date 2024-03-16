@@ -10,9 +10,7 @@ class Teacher extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'image',
-        'subject_id',
-        'year_id'
+        'image_data',
     ];
 
 
@@ -22,4 +20,9 @@ public function subjects()
 }
 
 
+
+public function years()
+{
+    return $this->belongsToMany(Year::class, 'teacher_year');
+}
 }
