@@ -13,4 +13,15 @@ class Year extends Model
         'stage_id'
     ];
     public $timestamps=false;
+
+
+
+
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class,'subject_year');
+    }
 }
+
+

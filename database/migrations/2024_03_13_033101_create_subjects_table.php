@@ -15,12 +15,11 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->binary('image_data')->default('default_image.jpg');
-           // $table->string('video');
-           $table->integer('stage_id')->unsigned();
-           $table->foreign('stage_id')->references('id')->on('stages')->onDelete('cascade');
-           $table->integer('year_id')->unsigned();
-           $table->foreign('year_id')->references('id')->on('years')->onDelete('cascade');
-           $table->timestamps();
+            $table->integer('stage_id')->unsigned();
+            $table->foreign('stage_id')->references('id')->on('stages')->onDelete('cascade');
+        /*    $table->integer('year_id')->unsigned();
+            $table->foreign('year_id')->references('id')->on('years')->onDelete('cascade');*/
+            $table->timestamps();
         });
     }
     /**
@@ -31,4 +30,3 @@ return new class extends Migration
         Schema::dropIfExists('subjects');
     }
 };
-//654654654

@@ -10,10 +10,8 @@ class Subject extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'image',
-        'vedio',
-        'stage_id',
-        'year_id'
+        'image_data',
+        'stage_id'
     ];
 
     public function stage()
@@ -21,15 +19,11 @@ class Subject extends Model
         return $this->belongsTo(Stage::class);
     }
 
-    public function year()
+    public function years()
     {
-        return $this->belongsTo(Year::class);
+        return $this->belongsToMany(Year::class,'subject_year');
     }
 
-    public function units()
-    {
-        return $this->hasMany(Unit::class);
-    }
     public function teachers()
     {
         return $this->belongsToMany(Teacher::class, 'teacher_subject');

@@ -9,6 +9,8 @@ use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
 
+use App\Http\Controllers\SubjectController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -86,8 +88,7 @@ Route::group(['prefix' => 'subject'], function () {
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('add_subject', 'add_subject');
-            Route::post('add_subject_and_assign_teachers', 'add_subject_and_assign_teachers');
-            Route::post('edit_subject/{subject_id}', 'edit_subject');
+            Route::post('edit_subject', 'edit_subject');
             Route::delete('delete_subject/{subject_id}', 'delete_subject');
 
         });
