@@ -13,17 +13,22 @@ use Validator;
 class TeachersController extends Controller
 {
 
+
+
     public function show_all_teachers()
     {
     $teacher = Teacher::get();
     $message = "this is the all teachers.";
 
     return response()->json([
-        'status' => '200',
         'message' => $message,
         'data' => $teacher,
     ]);
     }
+
+
+
+
 
     public function show_one_teacher($teacher_id)
     {
@@ -31,31 +36,31 @@ class TeachersController extends Controller
     $message = "this is the teacher.";
 
     return response()->json([
-        'status' => '200',
         'message' => $message,
         'data' => $teacher,
     ]);
     }
-    public function show_stage_teachers($stage_id)
-    {
-        $teachers = Stage::find($stage_id)->teachers()->get();
-        $message = "this is the teachers.";
-        return response()->json([
-            'status' => '200',
-            'message' => $message,
-            'data' => $teacher,
-        ]);
-    }
-public function show_year_teachers($year_id)
+
+
+
+
+
+
+
+
+        public function show_year_teachers($year_id)
     {
         $teachers = Year::find($year_id)->teachers()->get();
         $message = "this is the teachers.";
         return response()->json([
-            'status' => '200',
             'message' => $message,
-            'data' => $teacher,
+            'data' => $teachers,
         ]);
     }
+
+
+
+
 
     public function search_to_teacher(Request $request)
 {
@@ -72,14 +77,12 @@ public function show_year_teachers($year_id)
         if (is_null($teacher)) {
             $message = "The teacher doesn't exist.";
             return response()->json([
-            'status' => 0,
             'message' => $message,
             ]);
           }
 
     $message = "This is the teacher.";
     return response()->json([
-        'status' => 200,
         'message' => $message,
         'data' => $teacher,
     ]);
@@ -90,10 +93,13 @@ public function show_year_teachers($year_id)
 
 
 
-public function add_teacher_and_assign_subjects(Request $request)
+
+
+
+public function add_teacher(Request $request)
 {
     $user = auth()->user();
-    // if($user->role == 2){
+     if($user->role_id == 2){
 
     $input = $request->all();
 
@@ -102,12 +108,15 @@ public function add_teacher_and_assign_subjects(Request $request)
         // 'image' => 'required',
     ]);
 
-    $validator_content = Validator::make($input, [
-        'content' => 'required|array',
-        'content.*.subject_id' => 'required|integer',
+    $validator_subject = Validator::make($input, [
+        'subject_content' => 'required|array',
+        'subject_content.*.subject_id' => 'required|integer',
     ]);
-
-    if ($validator_teacher->fails() || $validator_content->fails()) {
+    $validator_year = Validator::make($input, [
+        'year_content' => 'required|array',
+        'year_content.*.year_id' => 'required|integer',
+    ]);
+    if ($validator_teacher->fails() || $validator_subject->fails() || $validator_year->fails()) {
         return 'Error in validation.';
     }
 
@@ -115,33 +124,40 @@ public function add_teacher_and_assign_subjects(Request $request)
         'name' => $input['name'],
     ]);
 
-    foreach ($input['content'] as $item) {
+    foreach ($input['subject_content'] as $item) {
         $subject = Subject::find($item['subject_id']);
 
         if (!$subject) {
             return response()->json([
-                'status' => 0,
                 'message' => 'subject with ID ' . $item['subject_id'] . ' not found.'
             ]);
         }
 
         $subject->teachers()->attach($teacher->id);
     }
+    foreach ($input['year_content'] as $item) {
+        $year = Year::find($item['year_id']);
 
-    $message = "tacher added and subjects assigned successfully.";
+        if (!$year) {
+            return response()->json([
+                'message' => 'year with ID ' . $item['year_id'] . ' not found.'
+            ]);
+        }
+
+        $year->teachers()->attach($teacher->id);
+    }
+    $message = "tacher added successfully.";
     return response()->json([
-        'status' => '200',
         'message' => $message,
         'data' => $teacher
     ]);
 
-    // } else {
-    //     $message = "You can't add the teacher and assign teachers.";
-    //     return response()->json([
-    //         'status' => '500',
-    //         'message' => $message
-    //     ]);
-    // }
+     } else {
+         $message = "You can't add the teacher.";
+         return response()->json([
+             'message' => $message
+         ]);
+     }
 }
 
 
@@ -153,57 +169,61 @@ public function add_teacher_and_assign_subjects(Request $request)
 
 
 
-public function edit_teacher(Request $request, $teacher_id)
+public function edit_teacher(Request $request)
 {
     $user = auth()->user();
-
-// if($user->role == 2){
-    $teacher = Teacher::find($teacher_id);
-
-    if (!$teacher) {
-        return response()->json([
-            'status' => 0,
-            'message' => 'teacher not found.'
-        ]);
-    }
-
     $input = $request->all();
 
+ if($user->role_id == 2){
     $validator_teacher = Validator::make($input, [
+        'teacher_id' =>'required',
         'name' => 'required',
         // 'image' => 'required'
     ]);
 
-    $validator_content = Validator::make($input, [
-        'content' => 'required|array',
-        'content.*.subject_id' => 'required|integer',
+    $validator_subject = Validator::make($input, [
+        'subject_content' => 'required|array',
+        'subject_content.*.subject_id' => 'required|integer',
     ]);
-
-    if ($validator_teacher->fails() || $validator_content->fails()) {
+    $validator_year = Validator::make($input, [
+        'year_content' => 'required|array',
+        'year_content.*.year_id' => 'required|integer',
+    ]);
+    if ($validator_teacher->fails() || $validator_subject->fails() || $validator_year->fails()) {
         return 'Error in validation.';
     }
+
+    $teacher = Teacher::find($input['teacher_id']);
+
+    if (!$teacher) {
+        return response()->json([
+            'message' => 'teacher not found.'
+        ]);
+    }
+
 
     $teacher->update([
         'name' => $input['name'],
         // 'image' => $input['image']
     ]);
 
-    $teacher->subjects()->sync($input['content']);
+    $teacher->subjects()->sync($input['subject_content']);
+    $teacher->years()->sync($input['year_content']);
 
     $message = "The teacher has been updated successfully.";
     return response()->json([
-        'status' => 1,
         'message' => $message,
         'data' => $teacher
     ]);
-    // } else {
-    //     $message = "You can't add the teacher and assign teachers.";
-    //     return response()->json([
-    //         'status' => '500',
-    //         'message' => $message
-    //     ]);
-    // }
+     } else {
+         $message = "You can't edite the teacher.";
+         return response()->json([
+             'message' => $message
+         ]);
+     }
 }
+
+
 
 
 
@@ -213,7 +233,7 @@ public function edit_teacher(Request $request, $teacher_id)
 public function delete_teacher($teacher_id)
 {
     $user = auth()->user();
-// if($user->role == 2){
+ if($user->role_id == 2){
 
 
     $teacher = Teacher::find($teacher_id);
@@ -221,26 +241,24 @@ public function delete_teacher($teacher_id)
     if (!$teacher) {
         $message = "The teacher doesn't exist.";
         return response()->json([
-            'status' => 500,
             'message' => $message,
         ]);
     }
 
     $teacher->subjects()->detach();
+    $teacher->years()->detach();
 
     $teacher->delete();
 
     $message = "The teacher deleted successfully.";
     return response()->json([
-        'status' => 1,
         'message' => $message,
     ]);
-    // } else {
-        //     $message = "You can't add the teacher and assign teachers.";
-        //     return response()->json([
-        //         'status' => '500',
-        //         'message' => $message
-        //     ]);
-        // }
+     } else {
+             $message = "You can't delete the teacher.";
+             return response()->json([
+                 'message' => $message
+             ]);
+         }
 }
 }
