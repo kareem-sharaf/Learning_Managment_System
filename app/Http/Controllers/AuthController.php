@@ -48,7 +48,7 @@ class AuthController extends Controller
             'year_id' => $request->year_id,
             'stage_id' => $stage_id
         ]);
-//gfgfgfg
+//gfgfgfgasdfgjk
         if ($user->save()) {
             $token = $user->createToken('Personal Access Token')->plainTextToken;
             Auth::login($user, $remember = true);
