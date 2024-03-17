@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('years', function (Blueprint $table) {
+        Schema::create('bookmarks', function (Blueprint $table) {
             $table->id();
-            $table->string('year');
-            $table->foreignId('stage_id')->constrained('stages')->cascadeOnDelete();
-            // $table->timestamps();
+            $table->timestamps();
         });
     }
 
@@ -24,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('years');
+        Schema::dropIfExists('bookmarks');
     }
 };

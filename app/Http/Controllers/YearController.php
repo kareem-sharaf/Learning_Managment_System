@@ -123,8 +123,13 @@ class YearController extends Controller
     {
         $user = Auth::user();
 
-        $year = Year::where('Year', $request->Year)
+        $stage = Stage::where('stage', $request->stage)
             ->first();
+
+        $year = Year::where('year', $request->year)
+            ->where('stage_id', $stage->id)
+            ->first();
+
         if ($year) {
             $year->delete();
             return response()->json(

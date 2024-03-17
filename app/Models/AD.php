@@ -13,6 +13,7 @@ class AD extends Model
         'description',
         'image_data',
         'year_id',
-        'stage_id'
+        'stage_id',
+        'isExpired'
     ];
 }
