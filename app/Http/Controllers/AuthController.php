@@ -31,7 +31,8 @@ class AuthController extends Controller
         $stage_id = null;
 
         if ($year_id) {
-            $year = Year::findOrFail($year_id);
+            $year = Year::where('id', $year_id)
+                ->first();
             $stage_id = $year->stage_id;
         }
 

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-       /* Schema::create('a_d_s', function (Blueprint $table) {
+        Schema::create('a_d_s', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('description');
@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('stage_id')->nullable()->constrained('stages')->cascadeOnDelete();
             $table->foreignId('year_id')->nullable()->constrained('years')->cascadeOnDelete();
             $table->timestamps();
-        });*/
+        });
     }
 
     /**

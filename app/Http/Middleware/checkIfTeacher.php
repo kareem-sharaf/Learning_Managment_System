@@ -16,7 +16,9 @@ class checkIfTeacher
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role == 3) {
+        $user = Auth::user();
+
+        if (Auth::check() && ($user->role == 1 || $user->role == 2 || $user->role == 3)) {
             return $next($request);
         }
         return response()->json(['error' => 'Unauthorized'], 403);
