@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('teachers', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
+            $table->id();            $table->string('name');
             $table->binary('image_data')->default('default_image.jpg');
 
           // $table->integer('year_id')->unsigned();

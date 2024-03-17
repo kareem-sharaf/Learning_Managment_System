@@ -14,6 +14,8 @@ class Subject extends Model
         'stage_id'
     ];
 
+    // public $timestamps=false;
+
     public function stage()
     {
         return $this->belongsTo(Stage::class);

@@ -12,13 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subjects', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->string('name');
             $table->binary('image_data')->default('default_image.jpg');
-            $table->integer('stage_id')->unsigned();
-            $table->foreign('stage_id')->references('id')->on('stages')->onDelete('cascade');
-        /*    $table->integer('year_id')->unsigned();
-            $table->foreign('year_id')->references('id')->on('years')->onDelete('cascade');*/
+            $table->foreignId('stage_id')->constrained('stages')->cascadeOnDelete();
+            $table->foreignId('year_id')->constrained('years')->cascadeOnDelete();
             $table->timestamps();
         });
     }

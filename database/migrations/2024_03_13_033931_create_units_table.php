@@ -12,14 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('units', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->string('name');
             $table->json('content')->nullable();
             $table->binary('image_data')->default('default_image.jpg');
            // $table->byte('video');
            $table->integer('price')->nullable();
-           $table->integer('subject_id')->unsigned();
-           $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
+           $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
           // $table->integer('lesson_id')->unsigned();
            //$table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade');
            $table->timestamps();

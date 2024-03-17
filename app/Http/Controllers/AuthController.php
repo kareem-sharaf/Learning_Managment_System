@@ -24,7 +24,7 @@ class AuthController extends Controller
             'address' => 'required|string',
             'birth_date' => 'required|date',
             'role_id' => 'string',
-            'year_id' => 'string'
+            'year_id' => 'numeric'
         ]);
 
         $year_id = $request->year_id;
@@ -69,8 +69,8 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'phone_number' => 'required|numeric',
-            'password' => 'required',
+            'phone_number' => 'numeric',
+            'password' => 'string',
             'device_id' => 'required|string'
         ]);
 
