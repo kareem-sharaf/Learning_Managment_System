@@ -65,7 +65,7 @@ class ADController extends Controller
             200
         );
     }
-
+    
     //  show last 6 ads added
     public function show()
     {
