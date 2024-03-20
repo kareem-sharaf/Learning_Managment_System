@@ -17,16 +17,6 @@ class TeachersController extends Controller
 //********************************************************************************************** */
     public function show_all_teachers()
     {
-
-
-
-
-
-
-
-
-
-
         $teacher = Teacher::get();
         $message = "this is the all teachers.";
         return response()->json([
