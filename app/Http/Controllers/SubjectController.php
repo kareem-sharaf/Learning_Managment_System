@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\Year;
+use App\Models\Stage;
 
 use Illuminate\Http\Request;
 use Validator;
@@ -12,77 +13,6 @@ use App\Http\Controllers\TeachersController;
 
 class SubjectController extends Controller
 {
-
-
-
-    public function show_all_subjects(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'year_id' => 'required',
-            'stage_id' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
-
-
-        $input= $request->all();
-        $year_id = $input['year_id'];
-        $stage_id = $input['stage_id'];
-        $subject = Subject::where('stage_id', $stage_id)->whereHas('years', function($q) use ($year_id) {
-            $q->where('year_id', $year_id);
-        })->get();
-        $message = "this is the all subjects";
-
-        return response()->json([
-            'message' => $message,
-            'data' => $subject
-        ]);
-    }
-
-
-
-
-
-
-
-    public function search_to_subject(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'year_id' => 'required',
-            'stage_id' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
-
-        $input = $request->all();
-        $year_id = $input['year_id'];
-        $subject = subject::where('name', 'like', '%' . $input['name'] . '%')
-            ->where('stage_id', $input['stage_id'])->whereHas('years', function($q) use ($year_id) {
-                $q->where('year_id', $year_id);
-            })->get();
-        if ($subject->isEmpty()) {
-            $message = "The subject doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ]);
-        }
-
-        $message = "This is the subject.";
-        return response()->json([
-            'message' => $message,
-            'data' => $subject,
-        ]);
-    }
-
-
-
-
-
-
-
 
     public function add_subject(Request $request)
     {
@@ -161,22 +91,98 @@ class SubjectController extends Controller
 
 
 
-    public function edit_subject(Request $request)
+
+
+
+
+    public function show_all_subjects(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'year_id' => 'required',
+            'stage_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return 'error in validation.';
+        }
+
+
+        $input= $request->all();
+        $year_id = $input['year_id'];
+        $stage_id = $input['stage_id'];
+        $subject = Subject::where('stage_id', $stage_id)->whereHas('years', function($q) use ($year_id) {
+            $q->where('year_id', $year_id);
+        })->get();
+        $message = "this is the all subjects";
+
+        return response()->json([
+            'message' => $message,
+            'data' => $subject
+        ]);
+    }
+
+
+
+
+
+
+
+    public function search_to_subject(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'year_id' => 'required',
+            'stage_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return 'error in validation.';
+        }
+
+        $input = $request->all();
+        $year_id = $input['year_id'];
+        $subject = subject::where('name', 'like', '%' . $input['name'] . '%')
+            ->where('stage_id', $input['stage_id'])->whereHas('years', function($q) use ($year_id) {
+                $q->where('year_id', $year_id);
+            })->get();
+        if ($subject->isEmpty()) {
+            $message = "The subject doesn't exist.";
+            return response()->json([
+                'message' => $message,
+            ]);
+        }
+
+        $message = "This is the subject.";
+        return response()->json([
+            'message' => $message,
+            'data' => $subject,
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function edit_subject(Request $request)
     {
         $user = auth()->user();
-        if($user->role_id == 2){
         $input = $request->all();
 
         $validator_subject = Validator::make($input, [
             'subject_id'=>'required',
             'name' => 'required',
             // 'image' => 'required',
-            'stage_id' => 'required',
         ]);
 
         $validator_teacher = Validator::make($input, [
-            'teacher_content' => 'required|array',
-            'teacher_content.*.teacher_id' => 'required|integer',
+            'teacher_content' => 'array',
+            'teacher_content.*.teacher_id' => 'integer',
         ]);
         $validator_year = Validator::make($input, [
             'year_content' => 'required|array',
@@ -185,11 +191,7 @@ class SubjectController extends Controller
         if ($validator_subject->fails() || $validator_teacher->fails() || $validator_year->fails()) {
             return 'Error in validation.';
         }
-
-
-
         $subject = Subject::find($input['subject_id']);
-
         if (!$subject) {
             return response()->json([
                 'message' => 'Subject not found.'
@@ -200,7 +202,6 @@ class SubjectController extends Controller
         $subject->update([
             'name' => $input['name'],
             // 'image' => $input['image'],
-            'stage_id' => $input['stage_id'],
         ]);
 
         $subject->teachers()->sync($input['teacher_content']);
@@ -211,29 +212,13 @@ class SubjectController extends Controller
             'message' => $message,
             'data' => $subject
         ]);
-         } else {
-             $message = "You can't deite the subject.";
-             return response()->json([
-                 'message' => $message
-             ]);
-         }
+
     }
-
-
-
-
-
-
-
-
-    public function delete_subject($subject_id)
+    //***********************************************************************************************************************\\
+ public function delete_subject($subject_id)
     {
         $user = auth()->user();
-         if($user->role_id == 2){
-
-
         $subject = Subject::find($subject_id);
-
         if (!$subject) {
             $message = "The subject doesn't exist.";
             return response()->json([
@@ -250,11 +235,7 @@ class SubjectController extends Controller
         return response()->json([
             'message' => $message,
         ]);
-         } else {
-             $message = "You can't delete the subject.";
-             return response()->json([
-                 'message' => $message
-             ]);
-         }
+
     }
 }
+    //***********************************************************************************************************************\\

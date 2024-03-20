@@ -13,6 +13,10 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
 
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\TeachersController;
+use App\Http\Controllers\UnitsController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes

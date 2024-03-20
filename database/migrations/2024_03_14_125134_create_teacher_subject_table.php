@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('teacher_subject', function (Blueprint $table) {
             $table->id();
-            $table->integer('teacher_id');
-            $table->integer('subject_id');
+           // $table->integer('teacher_id');
+          //  $table->integer('subject_id');
+            $table->unsignedBigInteger('teacher_id')->constrained('teachers')->cascadeOnDelete();
+            $table->unsignedBigInteger('subject_id')->constrained('subjects')->cascadeOnDelete();
+
         });
     }
 
