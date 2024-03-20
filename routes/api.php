@@ -8,6 +8,10 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
+use App\Http\Controllers\LeasonController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\TeachersController;
+use App\Http\Controllers\UnitsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -131,3 +135,21 @@ Route::group(['prefix' => 'teacher'], function () {
         });
     });
 });
+Route::group(['prefix' => 'file'], function () {
+    Route::controller(LeasonController::class)->group(function () {
+        Route::post('/upload', 'upload');
+        Route::post('/update', 'update');
+        Route::post('/delete', 'delete');
+        Route::post('/uploadvedio', ['uploadvedio']);
+        Route::post('/updateVideo',[ 'updateVideo']);
+        Route::post('/deletevedio',[  'deletevedio']);
+        Route::post('/uploadpdf', [  'uploadpdf']);
+        Route::post('/updatepdf',[  'updatepdf']);
+        Route::post('/deletepdf',[  'deletepdf']);
+        Route::get('/getall', [  'getall']);
+        
+
+        });
+    });
+
+ 
