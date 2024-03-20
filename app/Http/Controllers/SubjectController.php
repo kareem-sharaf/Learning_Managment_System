@@ -14,7 +14,7 @@ use App\Http\Controllers\TeachersController;
 class SubjectController extends Controller
 {
 
-
+//**********************************************************************************************
   public function show_all_subjects(Request $request)
     {
         $validator = Validator::make($request->all(), [
