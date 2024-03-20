@@ -145,8 +145,8 @@ public function edit_subject(Request $request)
             'teacher_content.*.teacher_id' => 'integer',
         ]);
         $validator_year = Validator::make($input, [
-            'year_content' => 'required|array',
-            'year_content.*.year_id' => 'required|integer',
+            'year_content' => 'array',
+            'year_content.*.year_id' => 'integer',
         ]);
         if ($validator_subject->fails() || $validator_teacher->fails() || $validator_year->fails()) {
             return 'Error in validation.';
@@ -164,8 +164,11 @@ public function edit_subject(Request $request)
             // 'image' => $input['image'],
         ]);
 
-        $subject->teachers()->sync($input['teacher_content']);
-        $subject->years()->sync($input['year_content']);
+        $subject->teachers()->detach();
+        $subject->years()->detach(); 
+
+        $subject->teachers()->syncWithoutDetaching($input['teacher_content']);
+        $subject->years()->syncWithoutDetaching($input['year_content']);
 
         $message = "The subject has been updated successfully.";
         return response()->json([

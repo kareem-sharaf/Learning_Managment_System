@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('subject_id');*/
             $table->unsignedBigInteger('year_id')->constrained('years')->cascadeOnDelete();
             $table->unsignedBigInteger('subject_id')->constrained('subject')->cascadeOnDelete();
-            $table->unique(['subject_id', 'year_id']);
+            //$table->unique(['subject_id', 'year_id']);
         });
     }
 
