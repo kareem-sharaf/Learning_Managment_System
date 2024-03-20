@@ -10,8 +10,9 @@ class Subject extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'image_data',
-        'stage_id'
+        'image_data'
+        // 'stage_id',
+        // 'year_id'
     ];
 
     public function stage()

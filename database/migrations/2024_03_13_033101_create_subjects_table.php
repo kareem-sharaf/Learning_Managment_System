@@ -15,10 +15,10 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->binary('image_data')->default('default_image.jpg');
-            $table->integer('stage_id')->unsigned();
-            $table->foreign('stage_id')->references('id')->on('stages')->onDelete('cascade');
-        /*    $table->integer('year_id')->unsigned();
-            $table->foreign('year_id')->references('id')->on('years')->onDelete('cascade');*/
+            // $table->unsignedBigInteger('stage_id')->references('id')->on('stages')->onDelete('cascade');
+            // $table->unsignedBigInteger('year_id')->references('id')->on('years')->onDelete('cascade');
+            // $table->unique(['name', 'year_id']);
+
             $table->timestamps();
         });
     }
