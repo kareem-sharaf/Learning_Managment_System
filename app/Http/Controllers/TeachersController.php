@@ -6,6 +6,9 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\Stage;
 use App\Models\Year;
+use App\Models\SubjectYear;
+use App\Models\TeacherSubjectYear;
+
 
 use Illuminate\Http\Request;
 use Validator;
@@ -27,9 +30,6 @@ class TeachersController extends Controller
     //********************************************************************************************** */
     public function show_one_teacher($teacher_id)
     {
-
-
-
         $teacher = Teacher::where('id', $teacher_id)->first();
         $message = "this is the teacher.";
         return response()->json([
@@ -42,29 +42,26 @@ class TeachersController extends Controller
     {
         $teachers = Year::find($year_id)->teachers()->get();
         $message = "this is the teachers.";
-
-
-
         return response()->json([
             'message' => $message,
             'data' => $teachers,
         ]);
-
-
-
     }
     //********************************************************************************************** */
     public function search_to_teacher(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required'
+            'name' => 'required',
+            'year_id' => 'required'
         ]);
         if ($validator->fails()) {
             return 'error in validation.';
         }
         $input = $request->all();
         $teacher = Teacher::where('name', 'like', '%' . $input['name'] . '%')
-            ->get();
+                    ->whereHas('years', function ($query) use ($input) {
+                        $query->where('year_id', $input['year_id']);
+                    })->get();
 
         if (is_null($teacher)) {
             $message = "The teacher doesn't exist.";
@@ -79,15 +76,7 @@ class TeachersController extends Controller
             'data' => $teacher,
         ]);
     }
-
-
-
-
-
-
-
-
-
+//****************************************************************************************************** */
     public function add_teacher(Request $request)
     {
         $user = auth()->user();
@@ -111,23 +100,31 @@ class TeachersController extends Controller
         ]);
 
         foreach ($input['content'] as $item) {
-            $year = Year::where('id', $item['year_id'])->first();
-            if (!$year) {
-                return response()->json([
-                    'message' => 'year with ID ' . $item['year_id'] . ' not found.'
-                ]);
-            }
-            $subject = Subject::where('id', $item['subject_id'])->first();
-            if (!$subject) {
-                return response()->json([
-                    'message' => 'subject with ID ' . $item['subject_id'] . ' not found.'
-                ]);
-            }
-            $year->teachers()->attach($teacher->id);
-            $subject->teachers()->attach($teacher->id);
+            $year = Year::find($item['year_id']);
+   if (!$year) {
+       return response()->json([
+           'message' => 'Year with ID ' . $item['year_id'] . ' not found.'
+       ]);
+   } else {
+       $subject = Subject::find($item['subject_id']);
+       if (!$subject) {
+           return response()->json([
+               'message' => 'Subject with ID ' . $item['subject_id'] . ' not found.'
+           ]);
+       } else {
+           $subjectYear = SubjectYear::where('year_id', $year->id)->where('subject_id', $subject->id)->first();
+           if ($subjectYear) {
+               $teacher->subjectYears()->attach($subjectYear->id);
+           } else {
+               return response()->json([
+                   'message' => 'Subject Year not found.'
+               ]);
+           }
+       }
+   }
         }
 
-        $message = "tacher added successfully.";
+        $message = "teacher added successfully.";
         return response()->json([
             'message' => $message,
             'data' => $teacher

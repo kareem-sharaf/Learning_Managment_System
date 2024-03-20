@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teacher_year', function (Blueprint $table) {
+        Schema::create('subject_years', function (Blueprint $table) {
             $table->id();
-          /*  $table->integer('teacher_id');
-            $table->integer('year_id');*/
-            $table->unsignedBigInteger('teacher_id')->constrained('teachers')->cascadeOnDelete();
             $table->unsignedBigInteger('year_id')->constrained('years')->cascadeOnDelete();
-
+            $table->unsignedBigInteger('subject_id')->constrained('subject')->cascadeOnDelete();
         });
     }
 
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teacher_year');
+        Schema::dropIfExists('subject_years');
     }
 };

@@ -11,18 +11,13 @@ class Teacher extends Model
     protected $fillable = [
         'name',
         'image_data',
+        'description'
     ];
 
 
-public function subjects()
+public function subjectYears()
 {
-    return $this->belongsToMany(Subject::class, 'teacher_subject');
+    return $this->belongsToMany(SubjectYear::class,'teacher_subject_years');
 }
 
-
-
-public function years()
-{
-    return $this->belongsToMany(Year::class, 'teacher_year');
-}
 }

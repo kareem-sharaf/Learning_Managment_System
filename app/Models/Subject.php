@@ -24,7 +24,7 @@ class Subject extends Model
 
     public function years()
     {
-        return $this->belongsToMany(Year::class,'subject_year');
+        return $this->belongsToMany(Year::class,'subject_years');
     }
 
     public function teachers()
