@@ -37,7 +37,11 @@ class SubjectController extends Controller
             'data' => $subject
         ]);
     }
+<<<<<<< Updated upstream
 //5
+=======
+
+>>>>>>> Stashed changes
     //***********************************************************************************************************************\\
     public function search_to_subject(Request $request)
     {
