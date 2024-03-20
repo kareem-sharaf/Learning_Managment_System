@@ -140,15 +140,13 @@ Route::group(['prefix' => 'file'], function () {
         Route::post('/upload', 'upload');
         Route::post('/update', 'update');
         Route::post('/delete', 'delete');
-        Route::post('/uploadvedio', ['uploadvedio']);
-        Route::post('/updateVideo',[ 'updateVideo']);
-        Route::post('/deletevedio',[  'deletevedio']);
-        Route::post('/uploadpdf', [  'uploadpdf']);
-        Route::post('/updatepdf',[  'updatepdf']);
-        Route::post('/deletepdf',[  'deletepdf']);
-        Route::get('/getall', [  'getall']);
-        
-
+        Route::post('/uploadvideo', 'uploadvideo');
+        Route::post('/updateVideo', 'updateVideo');
+        Route::post('/deletevideo','deletevideo');
+        Route::post('/uploadpdf',   'uploadpdf');
+        Route::post('/updatepdf',  'updatepdf');
+        Route::post('/deletepdf',  'deletepdf');
+        Route::get('/getall', 'getall');
         });
     });
 

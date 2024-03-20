@@ -12,5 +12,5 @@ class Leason extends Model
         'title'
        ,'image'
        ,'video'
-       ,'file'];
+       ,'pdf'];
 }

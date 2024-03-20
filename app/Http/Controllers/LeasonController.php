@@ -79,7 +79,7 @@ class LeasonController extends Controller
         }
     }
     //////////////////////////////////////
-    public function uploadvedio(Request $request)
+    public function uploadvideo(Request $request)
     {
         $request->validate([
             'title'=>'required',
@@ -127,7 +127,7 @@ class LeasonController extends Controller
         ]);
     }
     
-    public function deletevedio(Request $request){
+    public function deletevideo(Request $request){
     
         $vedio=Leason::find($request->id);
         $distination=public_path("storage\\".$vedio->video);
