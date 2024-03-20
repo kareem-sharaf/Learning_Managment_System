@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('units', function (Blueprint $table) {
+       /* Schema::create('units', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->json('content')->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
           // $table->integer('lesson_id')->unsigned();
            //$table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade');
            $table->timestamps();
-        });
+        });*/
     }
 
     /**
