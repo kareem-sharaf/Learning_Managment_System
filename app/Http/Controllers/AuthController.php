@@ -99,6 +99,7 @@ class AuthController extends Controller
         $user = Auth::user();
         $request->user()->tokens()->delete();
         $user->device_id = null;
+        $user->save();
         return response()->json(
             ['message' => 'Successfully logged out']
         );
