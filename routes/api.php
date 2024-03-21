@@ -8,6 +8,9 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\UnitsController;
+use App\Http\Controllers\TeachersController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,7 +75,8 @@ Route::group(['prefix' => 'role'], function () {
 Route::group(['prefix' => 'ad'], function () {
     Route::controller(ADController::class)->group(function () {
         Route::get('index', 'index');
-        Route::get('show', 'show');
+        Route::get('showNewest', 'showNewest');
+        Route::post('show', 'show');
         Route::post('store', 'store');
         Route::post('update', 'update');
         Route::post('setExpired', 'setExpired');

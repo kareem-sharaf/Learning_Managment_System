@@ -23,7 +23,6 @@ class AuthController extends Controller
             'email' => 'email|unique:users',
             'address' => 'required|string',
             'birth_date' => 'required|date',
-            'role_id' => 'string',
             'year_id' => 'numeric'
         ]);
 
@@ -45,7 +44,7 @@ class AuthController extends Controller
             'address' => $request->address,
             'birth_date' => $request->birth_date,
             'device_id' => $request->device_id,
-            'role_id' => $request->role_id,
+            'role_id' => 4,
             'year_id' => $request->year_id,
             'stage_id' => $stage_id
         ]);
@@ -98,7 +97,6 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $request->user()->tokens()->delete();
-        $user->device_id = null;
         $user->save();
         return response()->json(
             ['message' => 'Successfully logged out']
