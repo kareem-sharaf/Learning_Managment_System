@@ -13,7 +13,6 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
 
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -77,7 +76,8 @@ Route::group(['prefix' => 'role'], function () {
 Route::group(['prefix' => 'ad'], function () {
     Route::controller(ADController::class)->group(function () {
         Route::get('index', 'index');
-        Route::get('show', 'show');
+        Route::get('showNewest', 'showNewest');
+        Route::post('show', 'show');
         Route::post('store', 'store');
         Route::post('update', 'update');
         Route::post('setExpired', 'setExpired');

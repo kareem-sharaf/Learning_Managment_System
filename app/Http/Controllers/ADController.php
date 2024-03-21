@@ -65,31 +65,55 @@ class ADController extends Controller
             200
         );
     }
-    
+
+    //  show specific ad details
+    public function show(Request $request)
+    {
+        $ad = AD::find($request->ad_id);
+
+        if (!$ad) {
+            return response()->json(
+                ['error' => 'Ad not found'],
+                404
+            );
+        }
+
+        return response()->json(
+            ['ad' => $ad],
+            200
+        );
+    }
+
     //  show last 6 ads added
-    public function show()
+    public function showNewest()
     {
         $newestAD = AD::orderBy('id', 'desc')
             ->first();
-        $maxValue = $newestAD->id;
-        $newestADs = [];
-        for ($i = 0; $i < 6; $i++) {
-            $ad = AD::where('id', $maxValue)
-                ->first();
+        if ($newestAD) {
+            $maxValue = $newestAD->id;
+            $newestADs = [];
+            for ($i = 0; $i < 6; $i++) {
+                $ad = AD::where('id', $maxValue)
+                    ->first();
 
-            if ($ad && $ad->isExpired == 0) {
-                $newestADs[$i] = $ad;
-                $maxValue--;
-            } else {
-                $maxValue--;
-                $i--;
+                if ($ad && $ad->isExpired == 0) {
+                    $newestADs[$i] = $ad;
+                    $maxValue--;
+                } else {
+                    $maxValue--;
+                    $i--;
+                }
+                if ($maxValue == 0)
+                    break;
             }
-            if ($maxValue == 0)
-                break;
+            return response()->json(
+                ['message' => $newestADs],
+                200
+            );
         }
         return response()->json(
-            ['message' => $newestADs],
-            200
+            ['error' => 'no new ads found'],
+            404
         );
     }
 
@@ -179,7 +203,7 @@ class ADController extends Controller
     {
         $ad = AD::where('id', $request->ad_id)
             ->first();
-        if ($ad){
+        if ($ad) {
             $ad->delete();
             return response()->json(
                 ['message' => 'ad deleted successfully'],
