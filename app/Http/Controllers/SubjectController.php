@@ -164,10 +164,7 @@ public function edit_subject(Request $request)
             // 'image' => $input['image'],
         ]);
 
-        $subject->teachers()->detach();
-        $subject->years()->detach(); 
-
-        $subject->teachers()->syncWithoutDetaching($input['teacher_content']);
+        $subject->years()->detach();
         $subject->years()->syncWithoutDetaching($input['year_content']);
 
         $message = "The subject has been updated successfully.";
@@ -189,9 +186,7 @@ public function edit_subject(Request $request)
             ]);
         }
 
-        $subject->teachers()->detach();
         $subject->years()->detach();
-
         $subject->delete();
 
         $message = "The subject deleted successfully.";
