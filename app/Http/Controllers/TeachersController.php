@@ -123,28 +123,13 @@ class TeachersController extends Controller
        }
    }
         }
-
         $message = "teacher added successfully.";
         return response()->json([
             'message' => $message,
             'data' => $teacher
         ]);
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
+//********************************************************************************************************** */
     public function edit_teacher(Request $request)
     {
         $user = auth()->user();
@@ -152,20 +137,15 @@ class TeachersController extends Controller
 
 
         $validator_teacher = Validator::make($input, [
-            'teacher_id' => 'required',
+            'teacher_id' => 'required|integer',
             'name' => 'required',
-            // 'image' => 'required'
+            // 'image_data' => 'required',
+            'description' => 'required',
+            'content' => 'required|array',
+            'content.*.year_id' => 'required|integer',
+            'content.*.subject_id' => 'required|integer'
         ]);
-
-        $validator_subject = Validator::make($input, [
-            'subject_content' => 'array',
-            'subject_content.*.subject_id' => 'integer',
-        ]);
-        $validator_year = Validator::make($input, [
-            'year_content' => 'required|array',
-            'year_content.*.year_id' => 'required|integer',
-        ]);
-        if ($validator_teacher->fails() || $validator_subject->fails() || $validator_year->fails()) {
+        if ($validator_teacher->fails()) {
             return 'Error in validation.';
         }
 
@@ -180,35 +160,47 @@ class TeachersController extends Controller
 
         $teacher->update([
             'name' => $input['name'],
-            // 'image' => $input['image']
+            // 'image' => $input['image'],
+            'description' => $input['description']
         ]);
 
-        $teacher->subjects()->sync($input['subject_content']);
-        $teacher->years()->sync($input['year_content']);
+        $teacher->subjectYears()->detach(); // قم بفصل جميع الروابط الحالية
 
-        $message = "The teacher has been updated successfully.";
-        return response()->json([
-            'message' => $message,
-            'data' => $teacher
-        ]);
-
+        foreach ($input['content'] as $item) {
+            $year = Year::find($item['year_id']);
+   if (!$year) {
+       return response()->json([
+           'message' => 'Year with ID ' . $item['year_id'] . ' not found.'
+       ]);
+   } else {
+       $subject = Subject::find($item['subject_id']);
+       if (!$subject) {
+           return response()->json([
+               'message' => 'Subject with ID ' . $item['subject_id'] . ' not found.'
+           ]);
+       }else{
+        $subjectYear = SubjectYear::where('year_id', $year->id)->where('subject_id', $subject->id)->first();
+        if ($subjectYear) {
+            $teacher->subjectYears()->attach($subjectYear->id);
+        } else {
+            return response()->json([
+                'message' => 'Subject Year not found.'
+            ]);
+        }
+       }
     }
-
-
-
-
-
-
-
-
+}
+    $message = "The teacher update successfully.";
+    return response()->json([
+        'message' => $message,
+        'data' => $teacher
+    ]);
+}
+//*************************************************************************************************** */
     public function delete_teacher($teacher_id)
     {
         $user = auth()->user();
-
-
-
         $teacher = Teacher::find($teacher_id);
-
         if (!$teacher) {
             $message = "The teacher doesn't exist.";
             return response()->json([
@@ -216,17 +208,13 @@ class TeachersController extends Controller
             ]);
         }
 
-        $teacher->subjects()->detach();
-        $teacher->years()->detach();
-
+        $teacher->subjectYears()->detach();
         $teacher->delete();
 
         $message = "The teacher deleted successfully.";
         return response()->json([
             'message' => $message,
         ]);
-
-
-
     }
 }
+//******************************************************************************************************** */
