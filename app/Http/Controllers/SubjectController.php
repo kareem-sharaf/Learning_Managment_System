@@ -7,15 +7,18 @@ use App\Models\Teacher;
 use App\Models\Year;
 use App\Models\Stage;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use Validator;
 use App\Http\Controllers\TeachersController;
 
+
+
 class SubjectController extends Controller
 {
 
-//**********************************************************************************************
-  public function show_all_subjects(Request $request)
+    //**********************************************************************************************
+    public function show_all_subjects(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'year_id' => 'required',
@@ -25,9 +28,9 @@ class SubjectController extends Controller
         }
 
 
-        $input= $request->all();
+        $input = $request->all();
         $year_id = $input['year_id'];
-        $subject = Subject::whereHas('years', function($q) use ($year_id) {
+        $subject = Subject::whereHas('years', function ($q) use ($year_id) {
             $q->where('year_id', $year_id);
         })->get();
         $message = "this is the all subjects";
@@ -51,7 +54,7 @@ class SubjectController extends Controller
         $input = $request->all();
         $year_id = $input['year_id'];
         $subject = subject::where('name', 'like', '%' . $input['name'] . '%')
-            ->whereHas('years', function($q) use ($year_id) {
+            ->whereHas('years', function ($q) use ($year_id) {
                 $q->where('year_id', $year_id);
             })->get();
         if ($subject->isEmpty()) {
@@ -74,7 +77,7 @@ class SubjectController extends Controller
         $input = $request->all();
         $validator_subject = Validator::make($input, [
             'name' => 'required',
-      //      'image_data' => 'required',
+            //      'image_data' => 'required',
         ]);
 
         $validator_year = Validator::make($input, [
@@ -92,7 +95,7 @@ class SubjectController extends Controller
 
         $subject = Subject::create([
             'name' => $input['name'],
-           // 'image_data	' => $input['image_data	']
+            // 'image_data	' => $input['image_data	']
         ]);
 
 
@@ -125,17 +128,16 @@ class SubjectController extends Controller
             'message' => $message,
             'data' => $subject
         ]);
-
     }
     //***********************************************************************************************************************\\
 
-public function edit_subject(Request $request)
+    public function edit_subject(Request $request)
     {
         $user = auth()->user();
         $input = $request->all();
 
         $validator_subject = Validator::make($input, [
-            'subject_id'=>'required',
+            'subject_id' => 'required',
             'name' => 'required',
             // 'image' => 'required',
         ]);
@@ -172,10 +174,9 @@ public function edit_subject(Request $request)
             'message' => $message,
             'data' => $subject
         ]);
-
     }
     //***********************************************************************************************************************\\
- public function delete_subject($subject_id)
+    public function delete_subject($subject_id)
     {
         $user = auth()->user();
         $subject = Subject::find($subject_id);
@@ -193,7 +194,18 @@ public function edit_subject(Request $request)
         return response()->json([
             'message' => $message,
         ]);
+    }
 
+
+
+
+
+
+
+    //  seed subjects
+    public function seedAddress()
+    {
+        Artisan::call('db:seed', ['--class' => 'SubjectSeeder']);
     }
 }
     //***********************************************************************************************************************\\

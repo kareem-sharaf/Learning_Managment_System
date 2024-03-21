@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             StageSeeder::class,
             YearSeeder::class,
+            AddressSeeder::class,
+            UserSeeder::class,
+            SubjectSeeder::class
         ]);
     }
 }

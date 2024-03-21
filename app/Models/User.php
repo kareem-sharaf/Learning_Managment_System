@@ -31,6 +31,7 @@ class User extends Authenticatable
         'year_id',
     ];
 
+    public $timestamps=false;
     /**
      * The attributes that should be hidden for serialization.
      *

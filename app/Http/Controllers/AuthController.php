@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use App\Models\Year;
+use App\Models\Address;
 
 class AuthController extends Controller
 {
-    //     Create users
+    //  Create students (mobile)
     public function register(Request $request)
     {
         $request->validate([
@@ -64,7 +66,7 @@ class AuthController extends Controller
         }
     }
 
-    //  login user
+    //  login students (mobile)
     public function login(Request $request)
     {
         $request->validate([
@@ -92,7 +94,38 @@ class AuthController extends Controller
         }
     }
 
-    //     logout
+    //  Auth requirments
+
+    public function indexAddressYears()
+    {
+        $Addresses = Address::all();
+        $years = Year::all();
+        return response()->json(
+            ['years' => $years, 'addresses' => $Addresses],
+            200
+        );
+    }
+    //**********************************{ end of mobile Auth functions }*********************************//
+
+    //  create a user and generate a random code for verfication
+    public function createUser(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            'father_name' => 'required|string',
+            'phone_number' => 'required|numeric|unique:users',
+            'role' => 'required|numeric',
+        ]);
+
+        $user = User::creat([$validatedData]);
+    }
+
+    //  login users (web)
+    public function webLogin()
+    {
+    }
+
+    //   logout
     public function logout(Request $request)
     {
         $user = Auth::user();
@@ -101,5 +134,11 @@ class AuthController extends Controller
         return response()->json(
             ['message' => 'Successfully logged out']
         );
+    }
+
+    //     seed Owners
+    public function seedUsers(Request $request)
+    {
+        Artisan::call('db:seed', ['--class' => 'UserSeeder']);
     }
 }

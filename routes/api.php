@@ -8,6 +8,7 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\LeasonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
@@ -35,6 +36,7 @@ Route::group(['prefix' => 'auth'], function () {
     Route::controller(AuthController::class)->group(function () {
         Route::post('login', 'login');
         Route::post('register', 'register');
+        Route::get('indexAddressYears', 'indexAddressYears');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
@@ -84,7 +86,6 @@ Route::group(['prefix' => 'ad'], function () {
         Route::post('destroy', 'destroy');
     });
 });
-
 
 
 Route::group(['prefix' => 'subject'], function () {
