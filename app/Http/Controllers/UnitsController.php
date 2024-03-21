@@ -8,26 +8,27 @@ use Validator;
 
 class UnitsController extends Controller
 {
-
-
-
+    //******************************************************************************************* */
     public function show_all_units(Request $request)
     {
-        $input = $request->all();
+        $validator = Validator::make($request->all(), [
+            'subject_id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return 'error in validation.';
+        }
+
+        $input= $request->all();
+        $subject_id = $input['subject_id'];
         $unit = Unit::where('subject_id', $input['subject_id'])->get();
         $message = "this is the all units";
 
         return response()->json([
-            'status' => '200',
             'message' => $message,
             'data' => $unit,
         ]);
     }
-
-
 //************************************************************************************************************** */
-
-
 
     public function search_to_unit(Request $request)
     {
@@ -46,84 +47,57 @@ class UnitsController extends Controller
         if (is_null($unit)) {
             $message = "The unit doesn't exist.";
             return response()->json([
-                'status' => 0,
                 'message' => $message,
             ]);
         }
 
         $message = "This is the unit.";
         return response()->json([
-            'status' => 200,
             'message' => $message,
             'data' => $unit,
         ]);
     }
-
-
-
-
+//******************************************************************************************* */
     public function add_unit(Request $request)
     {
         $user = auth()->user();
-        //    if($user->role == 2){
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             //  'image'=>'required',
             //  'video'=>'required',
-            'price' => 'required',
             'subject_id' => 'required',
-            // 'content'=>'required|array',
-            //'content.*.lesson_id'=>'required|integer',
+            'description' => 'required'
         ]);
         if ($validator->fails()) {
             return 'error in validation.';
         }
+
         $input = $request->all();
         $unit = Unit::create($input);
         $message = "add unit successfully";
         return response()->json(
             [
-                'status' => '200',
                 'message' => $message,
                 'data' => $unit
             ]
         );
-        //}
-        /*   else{
-            $message="you can't add unit ";
-            return response()->json(
-                [
-                    'status'=>'500',
-                    'message'=>$message
-                ]
-            );
-        }*/
     }
-
-
-
-
-
-    public function edit_unit(Request $request, $unit_id)
+//**************************************************************** */
+   public function edit_unit(Request $request)
     {
         $user = auth()->user();
-        //  if($user->role == 2){
-        $unit = Unit::where('id', $unit_id)->first();
         $input = $request->all();
         $validator = Validator::make($input, [
+            'unit_id' => 'required',
             'name' => 'required',
             //  'image'=>'required',
             //  'video'=>'required',
-            'price' => 'required',
-            'subject_id' => 'required',
-            // 'content'=>'required|array',
-            //'content.*.lesson_id'=>'required|integer',
+            'description' => 'required'
         ]);
-
+        $unit = Unit::where('id', $input['unit_id'])->first();
         if ($validator->fails()) {
             $message = "There is an error in the inputs.";
             return response()->json([
-                'status' => 0,
                 'message' => $message,
                 'data' => $input,
             ]);
@@ -131,60 +105,32 @@ class UnitsController extends Controller
         $unit->name = $input['name'];
         // $unit->image = $input['image'];
         // $unit->video = $input['video'];
-        $unit->price = $input['price'];
-        $unit->content = $input['content'];
+        $unit->name = $input['description'];
         $unit->save();
 
-        $message = "The unit has been updated successfully.";
+        $message = "The unit edit successfully.";
         return response()->json([
-            'status' => 1,
             'message' => $message,
             'data' => $unit
         ]);
-
-        /*  }else{
-        $message="you can't edite unit ";
-        return response()->json(
-            [
-                'status'=>'500',
-                'message'=>$message
-            ]
-        );
-    }*/
     }
-
-
-
-
-
-
+//********************************************************************************************************************************************* */
     public function delete_unit($unit_id)
     {
         $user = auth()->user();
-        // if($user->role == 2){
         $unit = Unit::where('id', $unit_id)->first();
         if (is_null($unit)) {
             $message = "The unit doesn't exist.";
             return response()->json([
-                'status' => 0,
                 'message' => $message,
             ]);
         }
         $unit->delete();
         $message = "The unit deleted successfully.";
         return response()->json([
-            'status' => 1,
             'message' => $message,
             'data' => $unit,
         ]);
-        /* }else{
-        $message="you can't delete unit ";
-        return response()->json(
-            [
-                'status'=>'500',
-                'message'=>$message
-            ]
-        );
-    }*/
     }
 }
+//******************************************************************************************************************************************* */

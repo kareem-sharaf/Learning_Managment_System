@@ -10,10 +10,8 @@ class Unit extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-       // 'content',
         'image',
         'video',
-        'price',
         'subject_id'
     ];
 
@@ -23,9 +21,4 @@ class Unit extends Model
         return $this->belongsTo(Subject::class);
     }
 
-
-    public function lessons()
-    {
-        return $this->hasMany(Lesson::class);
-    }
 }
