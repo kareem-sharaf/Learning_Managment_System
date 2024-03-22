@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Address extends Model
 {
     use HasFactory;
-    protected $fillable=[
+    protected $fillable = [
         'address'
     ];
-    public $timestamps=false;
+    public $timestamps = false;
 }

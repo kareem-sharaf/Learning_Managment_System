@@ -15,75 +15,75 @@ class AddressSeeder extends Seeder
     {
         Address::create([
             'id' => '1',
-            'Address' => 'damascus'
+            'address' => 'damascus'
         ]);
         Address::create([
             'id' => '2',
-            'Address' => 'aleppo'
+            'address' => 'aleppo'
         ]);
         Address::create([
             'id' => '3',
-            'Address' => 'homs'
+            'address' => 'homs'
         ]);
         Address::create([
             'id' => '4',
-            'Address' => 'latakia'
+            'address' => 'latakia'
         ]);
         Address::create([
             'id' => '5',
-            'Address' => 'tartous'
+            'address' => 'tartous'
         ]);
         Address::create([
             'id' => '6',
-            'Address' => 'hama'
+            'address' => 'hama'
         ]);
         Address::create([
             'id' => '7',
-            'Address' => 'raqa'
+            'address' => 'raqa'
         ]);
         Address::create([
             'id' => '8',
-            'Address' => 'hasakeh'
+            'address' => 'hasakeh'
         ]);
         Address::create([
             'id' => '9',
-            'Address' => 'daraa'
+            'address' => 'daraa'
         ]);
         Address::create([
             'id' => '10',
-            'Address' => 'swieda'
+            'address' => 'swieda'
         ]);
         Address::create([
             'id' => '11',
-            'Address' => 'edleb'
+            'address' => 'edleb'
         ]);
         Address::create([
             'id' => '12',
-            'Address' => 'dier azour'
+            'address' => 'dier azour'
         ]);
         Address::create([
             'id' => '13',
-            'Address' => 'jawlan'
+            'address' => 'jawlan'
         ]);
         Address::create([
             'id' => '14',
-            'Address' => 'qamashli'
+            'address' => 'qamashli'
         ]);
-        Address::create([
-            'id' => '15',
-            'Address' => ''
-        ]);
-        Address::create([
-            'id' => '16',
-            'Address' => ''
-        ]);
-        Address::create([
-            'id' => '17',
-            'Address' => ''
-        ]);
-        Address::create([
-            'id' => '18',
-            'Address' => ''
-        ]);
+        // Address::create([
+        //     'id' => '15',
+        //     'address' => ''
+        // ]);
+        // Address::create([
+        //     'id' => '16',
+        //     'address' => ''
+        // ]);
+        // Address::create([
+        //     'id' => '17',
+        //     'address' => ''
+        // ]);
+        // Address::create([
+        //     'id' => '18',
+        //     'address' => ''
+        // ]);
     }
 }

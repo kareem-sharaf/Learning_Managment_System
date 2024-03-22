@@ -22,8 +22,8 @@ class AuthController extends Controller
             'password' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
             'device_id' => 'required|string',
             'email' => 'email|unique:users',
-            'address' => 'required|string',
-            'birth_date' => 'required|date',
+            'address_id' => 'required|numeric',
+            'image_id' => 'required',
             'year_id' => 'numeric'
         ]);
 
@@ -42,9 +42,10 @@ class AuthController extends Controller
             'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
             'email' => $request->email,
-            'address' => $request->address,
+            'address_id' => $request->address_id,
             'birth_date' => $request->birth_date,
             'device_id' => $request->device_id,
+            'image_id' => $request->image_id,
             'role_id' => 4,
             'year_id' => $request->year_id,
             'stage_id' => $stage_id
@@ -94,7 +95,6 @@ class AuthController extends Controller
     }
 
     //  Auth requirments
-
     public function indexAddressYears()
     {
         $Addresses = Address::all();
@@ -104,38 +104,18 @@ class AuthController extends Controller
             200
         );
     }
-    //**********************************{ end of mobile Auth functions }*********************************//
-
-    //  create a user and generate a random code for verfication
-    public function createUser(Request $request)
-    {
-        $validatedData = $request->validate([
-            'name' => 'required|string',
-            'father_name' => 'required|string',
-            'phone_number' => 'required|numeric|unique:users',
-            'role' => 'required|numeric',
-        ]);
-
-        $user = User::creat([$validatedData]);
-    }
-
-    //  login users (web)
-    public function webLogin()
-    {
-    }
 
     //   logout
     public function logout(Request $request)
     {
         $user = Auth::user();
         $request->user()->tokens()->delete();
-        $user->save();
         return response()->json(
             ['message' => 'Successfully logged out']
         );
     }
 
-    //     seed Owners
+    //     seed users
     public function seedUsers(Request $request)
     {
         Artisan::call('db:seed', ['--class' => 'UserSeeder']);

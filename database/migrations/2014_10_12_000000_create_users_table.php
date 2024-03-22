@@ -19,9 +19,9 @@ return new class extends Migration
             $table->integer('phone_number')->unique();
             $table->string('password');
             $table->string('device_id')->unique()->nullable();
-            $table->binary('image_data')->default('default_image.jpg');
-            $table->string('address');
+            $table->integer('image_id');
             $table->date('birth_date')->nullable();
+            $table->foreignId('address_id')->constrained('addresses')->cascadeOnDelete();
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
             $table->unsignedBigInteger('stage_id')->constrained('stages')->cascadeOnDelete()->nullable();
             $table->unsignedBigInteger('year_id')->constrained('years')->cascadeOnDelete()->nullable();
