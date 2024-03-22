@@ -18,7 +18,6 @@ class AuthController extends Controller
             'father_name' => 'required|string',
             'phone_number' => 'required|unique:users|numeric|starts with:09|min_digits:10|max_digits:10',
             'password' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
-            'password_confirmation' => 'required|same:password',
             'device_id' => 'required|string',
             'email' => 'email|unique:users',
             'address' => 'required|string',
@@ -68,8 +67,8 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'phone_number' => 'numeric',
-            'password' => 'string',
+            'phone_number' => 'required|numeric',
+            'password' => 'required|string',
             'device_id' => 'required|string'
         ]);
 
