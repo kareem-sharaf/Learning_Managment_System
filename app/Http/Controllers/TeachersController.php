@@ -9,8 +9,8 @@ use App\Models\Year;
 use App\Models\SubjectYear;
 use App\Models\TeacherSubjectYear;
 
-
 use Illuminate\Http\Request;
+use App\Http\Requests\SubjectRequest;
 use Validator;
 
 class TeachersController extends Controller
@@ -50,26 +50,17 @@ class TeachersController extends Controller
     //********************************************************************************************** */
     public function search_to_teacher(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'year_id' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
         $input = $request->all();
         $teacher = Teacher::where('name', 'like', '%' . $input['name'] . '%')
-                    ->whereHas('years', function ($query) use ($input) {
+                    ->whereHas('subjectYears', function ($query) use ($input) {
                         $query->where('year_id', $input['year_id']);
                     })->get();
-
         if (is_null($teacher)) {
             $message = "The teacher doesn't exist.";
             return response()->json([
                 'message' => $message,
             ]);
         }
-
         $message = "This is the teacher.";
         return response()->json([
             'message' => $message,
@@ -81,18 +72,6 @@ class TeachersController extends Controller
     {
         $user = auth()->user();
         $input = $request->all();
-        $validator_teacher = Validator::make($input, [
-            'name' => 'required',
-            // 'image_data' => 'required',
-            'description' => 'required',
-            'content' => 'required|array',
-            'content.*.year_id' => 'required|integer',
-            'content.*.subject_id' => 'required|integer'
-        ]);
-        if ($validator_teacher->fails()) {
-            return 'Error in validation.';
-        }
-
         $teacher = Teacher::create([
             'name' => $input['name'],
             // 'naimage_datame' => $input['image_data'],
@@ -134,38 +113,18 @@ class TeachersController extends Controller
     {
         $user = auth()->user();
         $input = $request->all();
-
-
-        $validator_teacher = Validator::make($input, [
-            'teacher_id' => 'required|integer',
-            'name' => 'required',
-            // 'image_data' => 'required',
-            'description' => 'required',
-            'content' => 'required|array',
-            'content.*.year_id' => 'required|integer',
-            'content.*.subject_id' => 'required|integer'
-        ]);
-        if ($validator_teacher->fails()) {
-            return 'Error in validation.';
-        }
-
         $teacher = Teacher::find($input['teacher_id']);
-
         if (!$teacher) {
             return response()->json([
                 'message' => 'teacher not found.'
             ]);
         }
-
-
         $teacher->update([
             'name' => $input['name'],
             // 'image' => $input['image'],
             'description' => $input['description']
         ]);
-
-        $teacher->subjectYears()->detach(); // قم بفصل جميع الروابط الحالية
-
+        $teacher->subjectYears()->detach();
         foreach ($input['content'] as $item) {
             $year = Year::find($item['year_id']);
    if (!$year) {
