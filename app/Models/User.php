@@ -24,7 +24,7 @@ class User extends Authenticatable
         'password',
         'device_id',
         'birth_date',
-        'address',
+        'address_id',
         'phone_number',
         'role_id',
         'stage_id',

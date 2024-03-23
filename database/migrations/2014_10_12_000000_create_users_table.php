@@ -23,8 +23,8 @@ return new class extends Migration
             $table->date('birth_date')->nullable();
             $table->foreignId('address_id')->constrained('addresses')->cascadeOnDelete();
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
-            $table->unsignedBigInteger('stage_id')->constrained('stages')->cascadeOnDelete()->nullable();
-            $table->unsignedBigInteger('year_id')->constrained('years')->cascadeOnDelete()->nullable();
+            $table->foreignId('stage_id')->nullable()->constrained('stages')->cascadeOnDelete();
+            $table->foreignId('year_id')->nullable()->constrained('years')->cascadeOnDelete();
             $table->integer('points')->default(0);
             $table->rememberToken();
             // $table->timestamps();

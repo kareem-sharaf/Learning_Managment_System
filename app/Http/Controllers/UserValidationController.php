@@ -24,7 +24,7 @@ class UserValidationController extends Controller
         ]);
 
         $length = 7;
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $validation_code = substr(str_shuffle($characters), 0, $length);
 
         $validatedUser = new UserValidation([

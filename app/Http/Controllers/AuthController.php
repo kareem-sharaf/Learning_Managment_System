@@ -20,9 +20,10 @@ class AuthController extends Controller
             'father_name' => 'required|string',
             'phone_number' => 'required|unique:users|numeric|starts with:09|min_digits:10|max_digits:10',
             'password' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
-            'device_id' => 'required|string',
             'email' => 'email|unique:users',
             'address_id' => 'required|numeric',
+            'birth_date' => 'required|date',
+            'device_id' => 'required|string',
             'image_id' => 'required',
             'year_id' => 'numeric'
         ]);
@@ -70,27 +71,39 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'phone_number' => 'required|numeric',
             'password' => 'required|string',
             'device_id' => 'required|string'
         ]);
 
-        $credentials = $request->only('phone_number', 'password');
+        $user = User::where('device_id', $request->device_id)->first();
 
-        if (Auth::attempt($credentials)) {
-            $user = User::where('phone_number', $request->phone_number)->first();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        if (Hash::check($request->password, $user->password)) {
 
             if ($user->device_id === null || $user->device_id === $request->device_id) {
                 $user->device_id = $request->device_id;
                 $user->save();
 
+                // Generate and return the access token
                 $token = $user->createToken('Personal Access Token')->plainTextToken;
-                return response()->json(['accessToken' => $token], 200);
+                return response()->json(
+                    ['accessToken' => $token],
+                    200
+                );
             } else {
-                return response()->json(['error' => 'Unauthorized device.'], 401);
+                return response()->json(
+                    ['error' => 'Unauthorized device.'],
+                    401
+                );
             }
         } else {
-            return response()->json(['error' => 'Invalid credentials.'], 401);
+            return response()->json(
+                ['error' => 'Invalid password.'],
+                401
+            );
         }
     }
 
