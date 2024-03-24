@@ -17,37 +17,38 @@ class SubjectRequest extends FormRequest
 
     public function rules(): array
     {
-        $subject_id = '';
-        $year_id = '';
-        $name='';
-        $image_data='';
-        $years_content = '';
-
-
 
         if(request()->routeIs('show_all_subjects')){
-            $year_id='required';
-        }elseif(request()->routeIs('search_to_subject')){
-            $year_id='required';
-        }elseif(request()->routeIs('add_subject')){
-            $name='required';
-            //$image_data='required';
-            $years_content='required|array';
-        }elseif(request()->routeIs('edit_subject')){
-            $subject_id='required';
-            $name='required';
-            //$image_data='required';
-            $years_content='required|array';
+            return [
+                'year_id' => ['required']
+            ];
+            }elseif(request()->routeIs('search_to_subject')){
+                return [
+                    'year_id' => ['required']
+                ];
+                }elseif(request()->routeIs('add_subject')){
+                    return [
+                        'name' => ['required'],
+                        'image_data' => ['required'],
+                        'years_content' => ['required'],
+                        'years_content.*.year_id' => ['required|integer'],
+                    ];
+                }elseif(request()->routeIs('edit_subject')){
+                    return [
+                        'subject_id' => ['required'],
+                        'name' => ['required'],
+                        'image_data' => ['required'],
+                        'years_content' => ['required'],
+                        'years_content.*.year_id' => ['required|integer'],
+                    ];
+                }else{
+                    return [
+                        ['no validator']
+                    ];
+                }
+            }
         }
 
-        return [
-            'subject_id' => $subject_id,
-            'year_id' => $year_id,
-            'name' => $name,
-           // 'image_data' => $image_data,
-            'years_content' => $years_content,
-            'years_content.*.year_id' => 'required|integer',
 
-        ];
-    }
-}
+
+

@@ -7,7 +7,7 @@ use App\Models\Teacher;
 use App\Models\Year;
 use App\Models\Stage;
 
-use App\Http\Requests\SubjectRequest; 
+use App\Http\Requests\SubjectRequest;
 
 use Illuminate\Http\Request;
 use Validator;
@@ -29,7 +29,7 @@ class SubjectController extends Controller
             'message' => $message,
             'data' => $subject
         ]);
-    }
+    } 
     //***********************************************************************************************************************\\
     public function search_to_subject(SubjectRequest $request)
     {

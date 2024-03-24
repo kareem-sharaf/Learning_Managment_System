@@ -37,16 +37,7 @@ class TeachersController extends Controller
             'data' => $teacher,
         ]);
     }
-    //********************************************************************************************** */
-    public function show_year_teachers($year_id)
-    {
-        $teachers = Year::find($year_id)->teachers()->get();
-        $message = "this is the teachers.";
-        return response()->json([
-            'message' => $message,
-            'data' => $teachers,
-        ]);
-    }
+    
     //********************************************************************************************** */
     public function search_to_teacher(Request $request)
     {
