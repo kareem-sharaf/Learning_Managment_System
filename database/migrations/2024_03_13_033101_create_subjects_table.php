@@ -14,15 +14,10 @@ return new class extends Migration
         Schema::create('subjects', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->binary('image_data')->default('default_image.jpg')->nullable();
-            // $table->unsignedBigInteger('stage_id')->references('id')->on('stages')->onDelete('cascade');
-            // $table->unsignedBigInteger('year_id')->references('id')->on('years')->onDelete('cascade');
-            // $table->unique(['name', 'year_id']);
-
-
-            // بما اني عملت الكورس اضطريت ضيف عندك هون... أسفة :v
-
-            // $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->integer('price');
+            // $table->binary('image_data')->default('default_image.jpg')->nullable();
+            // $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
+            // $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
 
             $table->timestamps();
         });
