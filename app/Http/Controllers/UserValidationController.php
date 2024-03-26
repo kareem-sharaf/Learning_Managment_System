@@ -18,7 +18,6 @@ class UserValidationController extends Controller
         $request->validate([
             'name' => 'required|string',
             'father_name' => 'required|string',
-            'phone_number' => 'required|numeric|unique:user_validations',
             'role_id' => 'required|numeric',
         ]);
 

@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\classification;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -18,7 +20,8 @@ class DatabaseSeeder extends Seeder
             YearSeeder::class,
             AddressSeeder::class,
             UserSeeder::class,
-            SubjectSeeder::class
+            SubjectSeeder::class,
+            Classification::class
         ]);
     }
 }

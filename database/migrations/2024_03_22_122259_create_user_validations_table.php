@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('father_name');
-            $table->integer('phone_number')->unique();
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
             $table->string('validation_code')->nullable();
             $table->timestamps();
