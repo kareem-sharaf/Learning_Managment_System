@@ -35,7 +35,7 @@ class AuthController extends Controller
             $year = Year::where('id', $year_id)->first();
             $stage_id = $year->stage_id;
         }
-        
+
         $user = new User([
             'name' => $request->name,
             'father_name' => $request->father_name,
@@ -44,7 +44,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'address_id' => $request->address_id,
             'birth_date' => $request->birth_date,
-            'device_id' => hash('sha512', $request->device_id),
+            'device_id' => $request->device_id,
             'image_id' => $request->image_id,
             'role_id' => 4,
             'year_id' => $request->year_id,
@@ -55,7 +55,10 @@ class AuthController extends Controller
             $token = $user->createToken('Personal Access Token')->plainTextToken;
             Auth::login($user, $remember = true);
             return response()->json(
-                ['message' => 'successfully created user!', 'accessToken' => $token],
+                [
+                    'message' => 'successfully created user!',
+                    'accessToken' => $token,
+                ],
                 201
             );
         } else {
@@ -66,12 +69,10 @@ class AuthController extends Controller
         }
     }
 
-
-    //  login students (mobile)
+    // login students (mobile)
     public function login(Request $request)
     {
         $request->validate([
-            'password' => 'required|string',
             'device_id' => 'required|string'
         ]);
 
@@ -81,31 +82,19 @@ class AuthController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        if (Hash::check($request->password, $user->password)) {
-
-            if ($user->device_id === null || $user->device_id === $request->device_id) {
-                $user->device_id = $request->device_id;
-                $user->save();
-
-                // Generate and return the access token
-                $token = $user->createToken('Personal Access Token')->plainTextToken;
-                return response()->json(
-                    ['accessToken' => $token],
-                    200
-                );
-            } else {
-                return response()->json(
-                    ['error' => 'Unauthorized device.'],
-                    401
-                );
-            }
-        } else {
-            return response()->json(
-                ['error' => 'Invalid password.'],
-                401
-            );
+        if ($user->device_id !== $request->device_id) {
+            $user->device_id = $request->device_id;
+            $user->save();
         }
+
+        // Generate and return the access token
+        $token = $user->createToken('Personal Access Token')->plainTextToken;
+        return response()->json(
+            ['accessToken' => $token],
+            200
+        );
     }
+
 
     //  Auth requirments
     public function indexAddressYears()
