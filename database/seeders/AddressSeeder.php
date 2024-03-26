@@ -69,21 +69,5 @@ class AddressSeeder extends Seeder
             'id' => '14',
             'address' => 'qamashli'
         ]);
-        // Address::create([
-        //     'id' => '15',
-        //     'address' => ''
-        // ]);
-        // Address::create([
-        //     'id' => '16',
-        //     'address' => ''
-        // ]);
-        // Address::create([
-        //     'id' => '17',
-        //     'address' => ''
-        // ]);
-        // Address::create([
-        //     'id' => '18',
-        //     'address' => ''
-        // ]);
     }
 }
