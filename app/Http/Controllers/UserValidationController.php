@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserValidation;
@@ -30,7 +29,6 @@ class UserValidationController extends Controller
         $validatedUser = new UserValidation([
             'name' => $request->name,
             'father_name' => $request->father_name,
-            'phone_number' => $request->phone_number,
             'role_id' => $request->role_id,
             'validation_code' => $validation_code
         ]);
@@ -50,11 +48,12 @@ class UserValidationController extends Controller
     public function validateUser(Request $request)
     {
         $request->validate([
-            'phone_number' => 'required|numeric',
+            'name' => 'required|string',
+            'father_name' => 'required|string',
             'validation_code' => 'required|string'
         ]);
 
-        $userData = $request->only(['phone_number', 'validation_code']);
+        $userData = $request->only(['name', 'father_name', 'validation_code']);
 
         $user = UserValidation::where($userData)->first();
 
@@ -81,6 +80,7 @@ class UserValidationController extends Controller
     {
         $userValidation = UserValidation::find($request->user_id);
         $request->validate([
+            'phone_number' => 'required|unique:users|numeric|starts with:09|min_digits:10|max_digits:10',
             'password' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
             'email' => 'email|unique:users',
             'address_id' => 'required',
@@ -89,7 +89,7 @@ class UserValidationController extends Controller
         $user = new User([
             'name' => $userValidation->name,
             'father_name' => $userValidation->father_name,
-            'phone_number' => $userValidation->phone_number,
+            'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
             'email' => $request->email,
             'address_id' => $request->address_id,

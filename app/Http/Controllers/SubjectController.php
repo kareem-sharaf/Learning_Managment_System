@@ -9,7 +9,7 @@ use App\Models\Stage;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\TeachersController;
 
 

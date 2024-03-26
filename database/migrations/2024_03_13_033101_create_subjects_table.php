@@ -19,6 +19,11 @@ return new class extends Migration
             // $table->unsignedBigInteger('year_id')->references('id')->on('years')->onDelete('cascade');
             // $table->unique(['name', 'year_id']);
 
+
+            // بما اني عملت الكورس اضطريت ضيف عندك هون... أسفة :v
+
+            // $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

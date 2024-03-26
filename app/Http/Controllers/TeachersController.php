@@ -11,7 +11,7 @@ use App\Models\TeacherSubjectYear;
 
 
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class TeachersController extends Controller
 {
