@@ -32,11 +32,10 @@ class AuthController extends Controller
         $stage_id = null;
 
         if ($year_id) {
-            $year = Year::where('id', $year_id)
-                ->first();
+            $year = Year::where('id', $year_id)->first();
             $stage_id = $year->stage_id;
         }
-
+        
         $user = new User([
             'name' => $request->name,
             'father_name' => $request->father_name,
@@ -45,7 +44,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'address_id' => $request->address_id,
             'birth_date' => $request->birth_date,
-            'device_id' => $request->device_id,
+            'device_id' => hash('sha512', $request->device_id),
             'image_id' => $request->image_id,
             'role_id' => 4,
             'year_id' => $request->year_id,
@@ -66,6 +65,7 @@ class AuthController extends Controller
             );
         }
     }
+
 
     //  login students (mobile)
     public function login(Request $request)

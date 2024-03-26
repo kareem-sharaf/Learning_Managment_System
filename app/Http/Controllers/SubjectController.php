@@ -10,7 +10,7 @@ use App\Models\Stage;
 use App\Http\Requests\SubjectRequest;
 
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\TeachersController;
 
 class SubjectController extends Controller
