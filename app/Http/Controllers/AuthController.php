@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use App\Models\Year;
 use App\Models\Address;
+use App\Models\Stage;
 
 class AuthController extends Controller
 {
@@ -99,6 +100,7 @@ class AuthController extends Controller
     //  Auth requirments
     public function indexAddressYears()
     {
+        $stages = Stage::all();
         $Addresses = Address::all();
         $years = Year::all();
         return response()->json(

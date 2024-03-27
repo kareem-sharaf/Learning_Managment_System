@@ -11,7 +11,6 @@ class UserValidation extends Model
     protected $fillable=[
         'name',
         'father_name',
-        'phone_number',
         'role_id',
         'validation_code'
     ];

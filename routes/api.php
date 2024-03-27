@@ -12,6 +12,8 @@ use App\Http\Controllers\LeasonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
+use App\Http\Controllers\UserValidationController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -34,12 +36,23 @@ Route::group(['prefix' => 'auth'], function () {
     Route::controller(AuthController::class)->group(function () {
         Route::post('login', 'login');
         Route::post('register', 'register');
+        Route::get('indexAddressYears', 'indexAddressYears');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
         });
     });
 });
+
+//  userValidation routes
+Route::group(['prefix' => 'uservalidation'], function () {
+    Route::controller(UserValidationController::class)->group(function () {
+        Route::post('createUser', 'createUser');
+        Route::post('validateUser', 'validateUser');
+        Route::post('setupUser', 'setupUser');
+    });
+});
+
 
 //  stages routes
 Route::group(['prefix' => 'stage'], function () {
