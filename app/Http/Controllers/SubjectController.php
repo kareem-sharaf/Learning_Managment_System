@@ -17,8 +17,11 @@ class SubjectController extends Controller
 {
 
 //**********************************************************************************************
-  public function show_all_subjects(SubjectRequest $request)
+  public function show_all_subjects(Request $request)
     {
+        $request->validate([
+            'year_id' => 'required|integer'
+        ]);
         $year_id = $request->year_id;
         $subject = Subject::whereHas('years', function($q) use ($year_id) {
             $q->where('year_id', $year_id);
@@ -31,8 +34,12 @@ class SubjectController extends Controller
         ]);
     }
     //***********************************************************************************************************************\\
-    public function search_to_subject(SubjectRequest $request)
+    public function search_to_subject(Request $request)
     {
+        $request->validate([
+            'year_id' => 'required|string',
+            'name' => 'required|string'
+        ]);
         $year_id = $request->year_id;
         $name = $request->name;
         $subject = subject::where('name', 'like', '%' . $name . '%')
@@ -53,15 +60,25 @@ class SubjectController extends Controller
         ]);
     }
     //***********************************************************************************************************************\\
-    public function add_subject(SubjectRequest $request)
+    public function add_subject(Request $request)
     {
         $user = auth()->user();
+        $request->validate([
+            'name' => 'required',
+            'price' => 'required',
+            // 'image_data' => 'required',
+            // 'video_id' => 'required',
+            // 'file_id' => 'required',
+            'years_content' => 'required',
+            'years_content.*.year_id' => 'required|integer',
+        ]);
+
         $subject = Subject::create([
             'name' => $request->name,
+            'price	' => $request->price,
             //'image_data	' => $request->image_data,
             //'video_id	' => $request->video_id,
             //'file_id	' => $request->file_id,
-            'price	' => $request->price
         ]);
 
         foreach ($request->years_content as $item) {
@@ -82,9 +99,20 @@ class SubjectController extends Controller
 
     }
     //***********************************************************************************************************************\\
-public function edit_subject(SubjectRequest $request)
+public function edit_subject(Request $request)
     {
         $user = auth()->user();
+        $request->validate([
+            'subject_id' => 'required',
+            'name' => 'required',
+            'price' => 'required',
+            // 'image_data' => 'required',
+            // 'video_id' => 'required',
+            // 'file_id' => 'required',
+            'years_content' => 'required',
+            'years_content.*.year_id' => 'required|integer',
+        ]);
+
         $subject = Subject::find($request->subject_id);
         if (!$subject) {
             return response()->json([
@@ -93,10 +121,10 @@ public function edit_subject(SubjectRequest $request)
         }
         $subject->update([
             'name' => $request->name,
-            'price' => $request->price,
-            // 'image_data' => $request->image_data ,
-            // 'video_id' => $request->video_id ,
-            // 'file_id' => $request->file_id ,
+            'price	' => $request->price,
+            //'image_data	' => $request->image_data,
+            //'video_id	' => $request->video_id,
+            //'file_id	' => $request->file_id,
         ]);
 
         $subject->years()->detach();

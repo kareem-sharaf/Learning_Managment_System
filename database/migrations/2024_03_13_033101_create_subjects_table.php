@@ -18,7 +18,7 @@ return new class extends Migration
             $table->binary('image_data')->default('default_image.jpg')->nullable();
             $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
             $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
-
+            $table->unsignedBigInteger('class_id')->nullable()->references('id')->on('classifications')->onDelete('cascade');
             $table->timestamps();
         });
     }

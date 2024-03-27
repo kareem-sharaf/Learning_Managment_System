@@ -16,10 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->binary('image_data')->default('default_image.jpg')->nullable();
             $table->string('description')->nullable();
-          // $table->integer('year_id')->unsigned();
-          // $table->foreign('year_id')->references('id')->on('years')->onDelete('cascade');
-         //  $table->integer('stage_id')->unsigned();
-        //   $table->foreign('stage_id')->references('id')->on('years')->onDelete('cascade');
            $table->timestamps();
         });
     }

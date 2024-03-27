@@ -19,5 +19,4 @@ public function subjectYears()
 {
     return $this->belongsToMany(SubjectYear::class,'teacher_subject_years');
 }
-
 }

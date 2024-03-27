@@ -13,9 +13,11 @@ class Subject extends Model
         'image_data',
         'price',
         'video_id',
-        'file_id'
+        'file_id',
+        'class_id'
     ];
 
+     
     // public $timestamps=false;
 
     public function stage()
@@ -37,4 +39,10 @@ class Subject extends Model
     {
         return $this->hasMany(Unit::class);
     }
+
+    public function class()
+    {
+        return $this->belongsTo(classification::class);
+    }
+
 }
