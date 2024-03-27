@@ -9,7 +9,19 @@ class Classification extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'class'
+        'class',
+        'image_data'
     ];
     public $timestamps = false;
+
+
+
+
+
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class);
+    }
+
 }
+ 
