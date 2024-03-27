@@ -29,7 +29,10 @@ class SubjectRequest extends FormRequest
                 }elseif(request()->routeIs('add_subject')){
                     return [
                         'name' => ['required'],
+                        'price' => ['required'],
                         'image_data' => ['required'],
+                        'video_id' => ['required'],
+                        'file_id' => ['required'],
                         'years_content' => ['required'],
                         'years_content.*.year_id' => ['required|integer'],
                     ];
@@ -37,7 +40,10 @@ class SubjectRequest extends FormRequest
                     return [
                         'subject_id' => ['required'],
                         'name' => ['required'],
+                        'price' => ['required'],
                         'image_data' => ['required'],
+                        'video_id' => ['required'],
+                        'file_id' => ['required'],
                         'years_content' => ['required'],
                         'years_content.*.year_id' => ['required|integer'],
                     ];

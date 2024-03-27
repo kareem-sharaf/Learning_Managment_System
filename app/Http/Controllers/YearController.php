@@ -22,7 +22,6 @@ class YearController extends Controller
         $years = Year::all();
         return response()->json(['years' => $years]);
     }
-
     //  search for a year
     public function search(Request $request)
     {

@@ -29,7 +29,7 @@ class SubjectController extends Controller
             'message' => $message,
             'data' => $subject
         ]);
-    } 
+    }
     //***********************************************************************************************************************\\
     public function search_to_subject(SubjectRequest $request)
     {
@@ -58,7 +58,10 @@ class SubjectController extends Controller
         $user = auth()->user();
         $subject = Subject::create([
             'name' => $request->name,
-            //'image_data	' => $request->image_data
+            //'image_data	' => $request->image_data,
+            //'video_id	' => $request->video_id,
+            //'file_id	' => $request->file_id,
+            'price	' => $request->price
         ]);
 
         foreach ($request->years_content as $item) {
@@ -90,7 +93,10 @@ public function edit_subject(SubjectRequest $request)
         }
         $subject->update([
             'name' => $request->name,
+            'price' => $request->price,
             // 'image_data' => $request->image_data ,
+            // 'video_id' => $request->video_id ,
+            // 'file_id' => $request->file_id ,
         ]);
 
         $subject->years()->detach();
