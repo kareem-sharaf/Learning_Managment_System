@@ -16,7 +16,7 @@ class SubjectRequest extends FormRequest
 
 
     public function rules(): array
-    {
+    {/*
 
         if(request()->routeIs('show_all_subjects')){
             return [
@@ -51,7 +51,7 @@ class SubjectRequest extends FormRequest
                     return [
                         ['no validator']
                     ];
-                }
+                }*/
             }
         }
 

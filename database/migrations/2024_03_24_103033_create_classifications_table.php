@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('classifications', function (Blueprint $table) {
             $table->id();
-            $table->string('class');                              
+            $table->string('class');
+            $table->binary('image_data')->default('default_image.jpg')->nullable();
             $table->timestamps();
         });
     }
-
+ 
     /**
      * Reverse the migrations.
      */
