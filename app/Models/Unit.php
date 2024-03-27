@@ -10,9 +10,11 @@ class Unit extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'image',
-        'video',
-        'subject_id'
+        'image_data',
+        'video_id',
+        'file_id',
+        'subject_id',
+        'price'
     ];
 
 

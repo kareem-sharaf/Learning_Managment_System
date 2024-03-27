@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description')->nullable();
+            $table->integer('price')->default(0);
             $table->binary('image_data')->default('default_image.jpg')->nullable();
-            $table->binary('video_data')->nullable();
+            $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
+            $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
             $table->unsignedBigInteger('subject_id')->references('id')->on('subjects')->onDelete('cascade');
            $table->timestamps();
         });

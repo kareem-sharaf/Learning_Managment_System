@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('leasons', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('pdf')->nullable();
-            $table->string('image')->nullable();
-            $table->string('video')->nullable();
+            $table->integer('price')->default(0);
+            $table->binary('image_data')->default('default_image.jpg')->nullable();
+            $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
+            $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
 
             $table->timestamps();
         });

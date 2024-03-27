@@ -10,9 +10,10 @@ class Subject extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'image_data'
-        // 'stage_id',
-        // 'year_id'
+        'image_data',
+        'price',
+        'video_id',
+        'file_id'
     ];
 
     // public $timestamps=false;
@@ -31,7 +32,7 @@ class Subject extends Model
     {
         return $this->belongsToMany(Teacher::class, 'teacher_subject');
     }
-    
+
     public function units()
     {
         return $this->hasMany(Unit::class);

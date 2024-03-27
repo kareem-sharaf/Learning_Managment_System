@@ -9,8 +9,9 @@ class Leason extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'title'
-       ,'image'
-       ,'video'
-       ,'pdf'];
+        'title',
+       'image',
+       'video_id',
+       'file_id'
+    ];
 }
