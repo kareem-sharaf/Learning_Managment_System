@@ -17,7 +17,7 @@ class Subject extends Model
         'class_id'
     ];
 
-     
+
     // public $timestamps=false;
 
     public function stage()
@@ -27,7 +27,7 @@ class Subject extends Model
 
     public function years()
     {
-        return $this->belongsToMany(Year::class,'subject_years');
+        return $this->belongsToMany(Year::class, 'subject_years');
     }
 
     public function teachers()
@@ -40,9 +40,8 @@ class Subject extends Model
         return $this->hasMany(Unit::class);
     }
 
-    public function class()
+    public function classification()
     {
-        return $this->belongsTo(classification::class);
+        return $this->belongsTo(Classification::class, 'class_id');
     }
-
 }

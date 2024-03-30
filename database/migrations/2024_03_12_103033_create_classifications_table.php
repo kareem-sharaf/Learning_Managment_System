@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_validations', function (Blueprint $table) {
+        Schema::create('classifications', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('father_name');
-            $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
-            $table->string('validation_code')->nullable();
-            $table->timestamps();
+            $table->string('class');
+            $table->binary('image_data')->default('default_image.jpg')->nullable();
+
+            // $table->timestamps();
         });
     }
 
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_validations');
+        Schema::dropIfExists('classifications');
     }
 };
