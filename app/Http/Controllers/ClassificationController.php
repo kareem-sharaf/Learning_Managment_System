@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Classification;
+use App\Models\Subject;
 use Illuminate\Support\Facades\Artisan;
 
 class ClassificationController extends Controller
@@ -22,10 +23,13 @@ class ClassificationController extends Controller
     public function show(Request $request)
     {
         $class = Classification::where('class', $request->class)->first();
+        $subjects = Subject::where('class_id', $class->id)->get();
 
         if ($class) {
+            $subjects = $class->subjects;
+
             return response()->json(
-                ['class' => $class],
+                ['success' => 'Subjects of this class:', 'subjects' => $subjects],
                 200
             );
         }
@@ -59,7 +63,7 @@ class ClassificationController extends Controller
     //  delete class
     public function destroy(Request $request)
     {
-        $classification = Classification::find($request->class_id);
+        $classification = Classification::where('class', $request->class)->first();
 
         if (!$classification) {
             return response()->json(

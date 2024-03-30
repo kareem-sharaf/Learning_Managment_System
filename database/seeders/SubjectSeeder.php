@@ -15,19 +15,23 @@ class SubjectSeeder extends Seeder
     {
         Subject::create([
             'id' => '1',
-            'name' => 'physics'
+            'name' => 'physics',
+            'class_id' => 1
         ]);
         Subject::create([
             'id' => '2',
-            'name' => 'chemistry'
+            'name' => 'chemistry',
+            'class_id' => 1
         ]);
         Subject::create([
             'id' => '3',
-            'name' => 'programming'
+            'name' => 'programming',
+            'class_id' => 3
         ]);
         Subject::create([
             'id' => '4',
-            'name' => 'maths'
+            'name' => 'maths',
+            'class_id' => 1
         ]);
     }
 }

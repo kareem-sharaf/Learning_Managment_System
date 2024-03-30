@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserValidation extends Model
+class UserVerification extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'name',
-        'father_name',
+        'email',
         'role_id',
-        'validation_code'
+        'verificationCode',
+        'expiry_date'
     ];
 }

@@ -13,7 +13,8 @@ class Subject extends Model
         'image_data',
         'price',
         'video_id',
-        'file_id'
+        'file_id',
+        'class_id'
     ];
 
     // public $timestamps=false;
@@ -25,7 +26,7 @@ class Subject extends Model
 
     public function years()
     {
-        return $this->belongsToMany(Year::class,'subject_years');
+        return $this->belongsToMany(Year::class, 'subject_years');
     }
 
     public function teachers()
@@ -36,5 +37,10 @@ class Subject extends Model
     public function units()
     {
         return $this->hasMany(Unit::class);
+    }
+
+    public function classification()
+    {
+        return $this->belongsTo(Classification::class, 'class_id');
     }
 }

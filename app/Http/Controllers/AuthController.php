@@ -5,29 +5,83 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Artisan;
+use App\Models\UserVerification;
 use App\Models\User;
 use App\Models\Year;
 use App\Models\Address;
 use App\Models\Stage;
+use App\Mail\EmailVerification;
 
 class AuthController extends Controller
 {
-    //  Create students (mobile)
+    public function registerWeb(Request $request)
+    {
+        $UserVerification = UserVerification::find($request->user_id);
+        if ($UserVerification->role_id == 4) {
+            return response()->json(
+                ['error' => 'unauthorized'],
+                401
+            );
+        }
+        $request->validate([
+            'name' => 'required|string|min:4',
+            'password' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
+            'address_id' => 'required',
+            'birth_date' => 'required|date',
+            'gender' => 'required',
+            'image_id' => 'required|numeric'
+        ]);
+        $user = new User([
+            'name' => $request->name,
+            'email' => $UserVerification->email,
+            'address_id' => $request->address_id,
+            'birth_date' => $request->birth_date,
+            'gender' => $request->gender,
+            'image_id' => $request->image_id,
+            'password' => Hash::make($request->password),
+            'role_id' => $UserVerification->role_id
+        ]);
+
+        if ($user->save()) {
+            $token = $user->createToken('Personal Access Token')->plainTextToken;
+            Auth::login($user, $remember = true);
+            return response()->json(
+                ['message' => 'successfully created user!', 'accessToken' => $token],
+                201
+            );
+        } else {
+            return response()->json(
+                ['error' => 'provide proper details'],
+                422
+            );
+        }
+    }
+
+    //  Create students (mobile);
     public function register(Request $request)
     {
+        $UserVerification = UserVerification::find($request->user_id);
+        if ($UserVerification->role_id == 1 || $UserVerification->role_id == 2 || $UserVerification->role_id == 3) {
+            return response()->json(
+                ['error' => 'unauthorized'],
+                401
+            );
+        }
         $request->validate([
             'name' => 'required|string',
-            'father_name' => 'required|string',
-            'phone_number' => 'required|unique:users|numeric|starts with:09|min_digits:10|max_digits:10',
-            'password' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
-            'email' => 'email|unique:users',
             'address_id' => 'required|numeric',
             'birth_date' => 'required|date',
+            'gender' => 'required',
             'device_id' => 'required|string',
             'image_id' => 'required',
             'year_id' => 'numeric'
         ]);
+
+        $length = 7;
+        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $verificationCode = substr(str_shuffle($characters), 0, $length);
 
         $year_id = $request->year_id;
         $stage_id = null;
@@ -39,15 +93,13 @@ class AuthController extends Controller
 
         $user = new User([
             'name' => $request->name,
-            'father_name' => $request->father_name,
-            'phone_number' => $request->phone_number,
-            'password' => Hash::make($request->password),
-            'email' => $request->email,
+            'email' => $UserVerification->email,
             'address_id' => $request->address_id,
             'birth_date' => $request->birth_date,
+            'gender' => $request->gender,
             'device_id' => $request->device_id,
             'image_id' => $request->image_id,
-            'role_id' => 4,
+            'role_id' => $UserVerification->role_id,
             'year_id' => $request->year_id,
             'stage_id' => $stage_id
         ]);
@@ -56,10 +108,7 @@ class AuthController extends Controller
             $token = $user->createToken('Personal Access Token')->plainTextToken;
             Auth::login($user, $remember = true);
             return response()->json(
-                [
-                    'message' => 'successfully created user!',
-                    'accessToken' => $token,
-                ],
+                ['message' => 'successfully created user!', 'accessToken' => $token],
                 201
             );
         } else {
@@ -69,6 +118,7 @@ class AuthController extends Controller
             );
         }
     }
+
 
     // login students (mobile)
     public function login(Request $request)
@@ -88,19 +138,42 @@ class AuthController extends Controller
             $user->save();
         }
 
-        // Generate and return the access token
         $token = $user->createToken('Personal Access Token')->plainTextToken;
+        Auth::login($user, $remember = true);
         return response()->json(
             ['accessToken' => $token],
             200
         );
     }
 
+    //  login web
+    public function loginWeb(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || $user['role'] == 4 || !Hash::check($request->password, $user->password)) {
+            return response()->json(
+                ['error' => 'unauthenticated'],
+                400
+            );
+        }
+
+        $token = $user->createToken('Personal Access Token')->plainTextToken;
+        Auth::login($user, $remember = true);
+        return response()->json(
+            ['success' => 'user logged in successfuly', 'access token' => $token],
+            201
+        );
+    }
 
     //  Auth requirments
     public function indexAddressYears()
     {
-        $stages = Stage::all();
         $Addresses = Address::all();
         $years = Year::all();
         return response()->json(

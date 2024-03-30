@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('classifications', function (Blueprint $table) {
+        Schema::create('user_verifications', function (Blueprint $table) {
             $table->id();
-            $table->string('class');                              
+            $table->string('email')->unique();
+            $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
+            $table->string('verificationCode')->nullable();
+            $table->timestamp('expiry_date')->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('classifications');
+        Schema::dropIfExists('user_verifications');
     }
 };
