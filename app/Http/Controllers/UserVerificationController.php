@@ -20,32 +20,49 @@ class UserVerificationController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email',
             'role_id' => 'required|numeric'
         ]);
 
+        $length = 7;
+        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $verificationCode = substr(str_shuffle($characters), 0, $length);
+
+        $existingUser = User::where('email', $request->email)->first();
+
+        if (!$existingUser) {
+            $existingVerificationUser = UserVerification::where('email', $request->email)->first();
+
+            if ($existingVerificationUser) {
+
+                Mail::to($existingVerificationUser->email)->send(new EmailVerification($verificationCode));
+
+                return response()->json(['message' => 'Verification code sent successfully!.'], 200);
+            }
+        } else {
+            return response()->json(['error' => 'Email is already taken'], 400);
+        }
+
+
         if ($user->role_id == 1 || ($user->role_id == 2 && $request->role_id == 2)) {
-            $length = 7;
-            $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            $verificationCode = substr(str_shuffle($characters), 0, $length);
 
             $expiryDate = now()->addHours(24);
 
-            $user = new UserVerification([
+            $newUser = new UserVerification([
                 'email' => $request->email,
                 'role_id' => $request->role_id,
                 'verificationCode' => $verificationCode,
                 'expiry_date' => $expiryDate
             ]);
 
-            if ($user->save()) {
+            if ($newUser->save()) {
 
-                Mail::to($user->email)->send(new EmailVerification($verificationCode));
+                Mail::to($newUser->email)->send(new EmailVerification($verificationCode));
 
                 return response()->json(
                     [
-                        'success' => 'successfully created user!',
-                        'status' => 'waiting for verification'
+                        'success' => 'Successfully created user!',
+                        'status' => 'Waiting for verification'
                     ],
                     200
                 );
@@ -59,12 +76,27 @@ class UserVerificationController extends Controller
     public function createUser(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users'
+            'email' => 'required|email'
         ]);
 
         $length = 7;
         $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $verificationCode = substr(str_shuffle($characters), 0, $length);
+
+        $existingUser = User::where('email', $request->email)->first();
+
+        if (!$existingUser) {
+            $existingVerificationUser = UserVerification::where('email', $request->email)->first();
+
+            if ($existingVerificationUser) {
+
+                Mail::to($existingVerificationUser->email)->send(new EmailVerification($verificationCode));
+
+                return response()->json(['message' => 'Verification code sent successfully!.'], 200);
+            }
+        } else {
+            return response()->json(['error' => 'Email is already taken'], 400);
+        }
 
         $expiryDate = now()->addHours(24);
 
