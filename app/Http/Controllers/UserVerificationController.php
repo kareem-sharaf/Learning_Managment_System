@@ -31,7 +31,7 @@ class UserVerificationController extends Controller
         if ($existingUser && $existingUserVer->verified == 1) {
             return response()->json(['message' => 'Email is already taken'], 400);
         }
-        
+
         $length = 7;
         $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $verificationCode = substr(str_shuffle($characters), 0, $length);
@@ -99,16 +99,21 @@ class UserVerificationController extends Controller
     public function verifyUser(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email',
             'verificationCode' => 'required|string'
         ]);
 
         $userData = $request->only(['email', 'verificationCode']);
 
-        $user = UserVerification::where($userData)->first();
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+
+            $user = UserVerification::where($userData)->first();
+        }
 
         if ($user && $user->verificationCode === $request->verificationCode) {
-
+            
             $user->verificationCode = null;
             $user->verified = 1;
             $user->save();
@@ -122,11 +127,12 @@ class UserVerificationController extends Controller
             );
         } else {
             return response()->json(
-                ['message' => 'Invalid user or veirification code'],
+                ['message' => 'Invalid user or verification code'],
                 404
             );
         }
     }
+
 
     // resend email
     public function resend_email(Request $request)

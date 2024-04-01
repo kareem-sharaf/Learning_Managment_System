@@ -160,26 +160,7 @@ class AuthController extends Controller
 
         $user = null;
 
-        $hashedDeviceId = hash('sha512', $request->device_id);
-
-        if ($request->has('device_id')) {
-            $user = User::where('device_id', $hashedDeviceId)->first();
-
-            if (!$user) {
-                return response()->json(['message' => 'Please sign up before logging in.'], 401);
-            }
-
-            if ($user->role_id = 1 || $user->role_id = 2 || $user->role_id = 3) {
-                return response()->json(
-                    ['message' => 'unauthorized'],
-                    400
-                );
-            }
-
-            if ($user->verified == 0) {
-                return response()->json(['message' => 'User not verified.'], 401);
-            }
-        } else {
+        if ($request->has('verificationCode')) {
             $user = User::where('verificationCode', $request->verificationCode)->first();
 
             if (!$user) {
@@ -193,6 +174,26 @@ class AuthController extends Controller
             $user->device_id = $request->device_id;
             $user->verificationCode = null;
             $user->save();
+        } else {
+
+            $hashedDeviceId = hash('sha512', $request->device_id);
+            $user = User::where('device_id', $hashedDeviceId)->first();
+
+
+            if (!$user) {
+                return response()->json(['message' => 'Please sign up before logging in.'], 401);
+            }
+
+            if ($user->role_id == 1 || $user->role_id == 2 || $user->role_id == 3) {
+                return response()->json(
+                    ['message' => 'unauthorized'],
+                    400
+                );
+            }
+
+            if ($user->verified == 0) {
+                return response()->json(['message' => 'User not verified.'], 401);
+            }
         }
 
         $token = $user->createToken('Personal Access Token')->plainTextToken;
