@@ -48,6 +48,7 @@ class AuthController extends Controller
             'address_id' => $request->address_id,
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
+            'verified' => 1,
             'image_id' => $request->image_id,
             'password' => Hash::make($request->password),
             'role_id' => $UserVerification->role_id
@@ -115,7 +116,8 @@ class AuthController extends Controller
             'address_id' => $request->address_id,
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
-            'device_id' => $request->device_id,
+            'verified' => 1,
+            'device_id' => Hash::make($request->device_id),
             'image_id' => $request->image_id,
             'role_id' => $UserVerification->role_id,
             'year_id' => $request->year_id,
@@ -150,17 +152,14 @@ class AuthController extends Controller
         $user = null;
 
         if ($request->has('device_id')) {
-            $user = User::where('device_id', $request->device_id)->first();
-
-            if ($user->verified == 0) {
-                return response()->json(
-                    ['message' => 'not verified'],
-                    401
-                );
-            }
+            $user = User::where('device_id', Hash::make($request->device_id))->first();
 
             if (!$user) {
-                return response()->json(['message' => 'User not found.'], 404);
+                return response()->json(['message' => 'Please sign up before logging in.'], 401);
+            }
+
+            if ($user->verified == 0) {
+                return response()->json(['message' => 'User not verified.'], 401);
             }
         } else {
             $user = User::where('verificationCode', $request->verificationCode)->first();
@@ -183,7 +182,11 @@ class AuthController extends Controller
         Auth::login($user, $remember = true);
 
         return response()->json(
-            ['message' => 'User logged in successfully', 'access_token' => $token],
+            [
+                'message' => 'User logged in successfully',
+                'access_token' => $token,
+                'user' => $user
+            ],
             201
         );
     }
@@ -217,7 +220,11 @@ class AuthController extends Controller
         Auth::login($user, $remember = true);
 
         return response()->json(
-            ['message' => 'user logged in successfuly', 'access token' => $token],
+            [
+                'message' => 'User logged in successfully',
+                'access_token' => $token,
+                'user' => $user
+            ],
             201
         );
     }
