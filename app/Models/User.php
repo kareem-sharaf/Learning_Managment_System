@@ -26,6 +26,7 @@ class User extends Authenticatable
         'verificationCode',
         'birth_date',
         'gender',
+        'verified',
         'address_id',
         'role_id',
         'stage_id',

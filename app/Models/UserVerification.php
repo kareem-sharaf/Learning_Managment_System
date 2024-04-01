@@ -12,6 +12,7 @@ class UserVerification extends Model
         'email',
         'role_id',
         'verificationCode',
-        'email_sent_at'
+        'email_sent_at',
+        'verified'
     ];
 }
