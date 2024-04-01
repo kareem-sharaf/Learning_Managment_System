@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
             $table->string('verificationCode')->nullable();
             $table->boolean('verified')->default(0);
-            $table->timestamp('expiry_date')->nullable();
+            $table->timestamp('email_sent_at');
             $table->timestamps();
         });
     }

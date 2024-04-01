@@ -12,6 +12,6 @@ class UserVerification extends Model
         'email',
         'role_id',
         'verificationCode',
-        'expiry_date'
+        'email_sent_at'
     ];
 }

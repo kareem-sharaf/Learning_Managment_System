@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->timestamp('email_sent_at');
             $table->string('device_id')->unique()->nullable();
             $table->string('verificationCode')->nullable();
             $table->integer('image_id');

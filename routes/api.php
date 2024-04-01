@@ -40,6 +40,7 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('loginWeb', 'loginWeb');
         Route::post('login', 'login');
         Route::post('reset', 'reset');
+        Route::post('resendEmail', 'resendEmail');
         Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');
 
@@ -54,6 +55,8 @@ Route::group(['prefix' => 'auth'], function () {
         });
         Route::post('createUser', 'createUser');
         Route::post('verifyUser', 'verifyUser');
+        Route::post('resend_email', 'resend_email');
+
     });
 });
 //  stages routes

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -58,7 +59,11 @@ class AuthController extends Controller
             $token = $user->createToken('Personal Access Token')->plainTextToken;
             Auth::login($user, $remember = true);
             return response()->json(
-                ['message' => 'successfully created user!', 'accessToken' => $token],
+                [
+                    'message' => 'User logged in successfully',
+                    'access_token' => $token,
+                    'user' => $user
+                ],
                 201
             );
         } else {
@@ -130,7 +135,11 @@ class AuthController extends Controller
             $token = $user->createToken('Personal Access Token')->plainTextToken;
             Auth::login($user, $remember = true);
             return response()->json(
-                ['message' => 'successfully created user!', 'accessToken' => $token],
+                [
+                    'message' => 'User logged in successfully',
+                    'access_token' => $token,
+                    'user' => $user
+                ],
                 201
             );
         } else {
@@ -252,6 +261,46 @@ class AuthController extends Controller
         $user->verificationCode = $verificationCode;
         $user->verified = 0;
         $user->save();
+
+        Mail::to($user->email)->send(new EmailVerification($verificationCode));
+
+        return response()->json(
+            ['message' => 'Verification code sent successfully'],
+            200
+        );
+    }
+
+    // resend email
+    public function resendEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        $currentTime = Carbon::now();
+        $previousRequestTime = $user->email_sent_at;
+
+        if ($previousRequestTime && $currentTime->diffInSeconds($previousRequestTime) < 60) {
+            return response()->json(
+                ['message' => 'Please wait at least 1 minute before requesting another verification code.'],
+                400
+            );
+        }
+
+        $length = 7;
+        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $verificationCode = substr(str_shuffle($characters), 0, $length);
+
+        $user = User::updateOrCreate(
+            ['email' => $user->email],
+            [
+                'verificationCode' => $verificationCode,
+                'email_sent_at' => $currentTime,
+                'verified' => 0
+            ]
+        );
 
         Mail::to($user->email)->send(new EmailVerification($verificationCode));
 
