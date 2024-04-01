@@ -122,7 +122,7 @@ class AuthController extends Controller
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'verified' => 1,
-            'device_id' => Hash::make($request->device_id),
+            'device_id' => hash('sha512', $request->device_id),
             'image_id' => $request->image_id,
             'role_id' => $UserVerification->role_id,
             'year_id' => $request->year_id,
@@ -160,11 +160,20 @@ class AuthController extends Controller
 
         $user = null;
 
+        $hashedDeviceId = hash('sha512', $request->device_id);
+
         if ($request->has('device_id')) {
-            $user = User::where('device_id', Hash::make($request->device_id))->first();
+            $user = User::where('device_id', $hashedDeviceId)->first();
 
             if (!$user) {
                 return response()->json(['message' => 'Please sign up before logging in.'], 401);
+            }
+
+            if ($user->role_id = 1 || $user->role_id = 2 || $user->role_id = 3) {
+                return response()->json(
+                    ['message' => 'unauthorized'],
+                    400
+                );
             }
 
             if ($user->verified == 0) {
@@ -325,6 +334,13 @@ class AuthController extends Controller
             return response()->json(['message' => 'User not found.'], 404);
         }
 
+        if ($user->role_id = 4) {
+            return response()->json(
+                ['message' => 'unauthorized'],
+                400
+            );
+        }
+
         if (Hash::check($request->newPassword, $user->password)) {
             return response()->json(['message' => 'New password must be different from old password.'], 400);
         }
@@ -334,9 +350,15 @@ class AuthController extends Controller
             $user->verificationCode = null;
             $user->save();
 
-            return response()->json(['message' => 'Password reset successfully'], 200);
+            return response()->json(
+                ['message' => 'Password reset successfully'],
+                200
+            );
         } else {
-            return response()->json(['message' => 'Invalid verification code'], 400);
+            return response()->json(
+                ['message' => 'Invalid verification code'],
+                400
+            );
         }
     }
 

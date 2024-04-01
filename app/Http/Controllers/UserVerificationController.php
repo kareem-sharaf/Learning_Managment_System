@@ -25,12 +25,13 @@ class UserVerificationController extends Controller
             'role_id' => 'required|numeric'
         ]);
 
+        $existingUserVer = UserVerification::where('email', $request->email)->first();
         $existingUser = UserVerification::where('email', $request->email)->first();
 
-        if ($existingUser) {
+        if ($existingUser && $existingUserVer->verified == 1) {
             return response()->json(['message' => 'Email is already taken'], 400);
         }
-
+        
         $length = 7;
         $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $verificationCode = substr(str_shuffle($characters), 0, $length);
