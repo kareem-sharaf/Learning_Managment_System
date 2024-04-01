@@ -173,6 +173,7 @@ class AuthController extends Controller
 
             $user->device_id = $request->device_id;
             $user->verificationCode = null;
+            $user->verified = 1;
             $user->save();
         } else {
 
@@ -270,6 +271,7 @@ class AuthController extends Controller
 
         $user->verificationCode = $verificationCode;
         $user->verified = 0;
+        $user->device_id = null;
         $user->save();
 
         Mail::to($user->email)->send(new EmailVerification($verificationCode));
