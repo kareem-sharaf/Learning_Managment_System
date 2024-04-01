@@ -97,13 +97,13 @@ class YearController extends Controller
 
         if ($newYear) {
             return response()->json(
-                ['error' => 'Year alredy exists!'],
+                ['message' => 'Year alredy exists!'],
                 404
             );
         }
         if ($year->year === $newYear) {
             return response()->json(
-                ['error' => 'nothing to update!'],
+                ['message' => 'nothing to update!'],
                 404
             );
         }

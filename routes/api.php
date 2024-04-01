@@ -39,6 +39,8 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('register', 'register');
         Route::post('loginWeb', 'loginWeb');
         Route::post('login', 'login');
+        Route::post('reset', 'reset');
+        Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');
 
 

@@ -23,6 +23,7 @@ class UserSeeder extends Seeder
             'birth_date' => "2002/3/29",
             'gender' => 1,
             'role_id' => 1,
+            'verified' => 1
         ]);
         User::create([
             'name' => "kareem sharaf",
@@ -33,6 +34,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/24",
             'gender' => 0,
             'role_id' => 2,
+            'verified' => 1
+
         ]);
         User::create([
             'name' => "malek al-imam",
@@ -43,6 +46,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 3,
+            'verified' => 1
+
         ]);
     }
 }

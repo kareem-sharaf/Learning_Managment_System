@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('image_id');
             $table->date('birth_date');
             $table->boolean('gender');
+            $table->boolean('verified')->default(0);
             $table->string('password')->nullable();
             $table->foreignId('address_id')->constrained('addresses')->cascadeOnDelete();
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();

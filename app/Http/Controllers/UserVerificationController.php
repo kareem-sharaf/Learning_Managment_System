@@ -40,7 +40,7 @@ class UserVerificationController extends Controller
                 return response()->json(['message' => 'Verification code sent successfully!.'], 200);
             }
         } else {
-            return response()->json(['error' => 'Email is already taken'], 400);
+            return response()->json(['message' => 'Email is already taken'], 400);
         }
 
 
@@ -61,14 +61,14 @@ class UserVerificationController extends Controller
 
                 return response()->json(
                     [
-                        'success' => 'Successfully created user!',
+                        'message' => 'Successfully created user!',
                         'status' => 'Waiting for verification'
                     ],
                     200
                 );
             }
         } else {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
     }
 
@@ -95,7 +95,7 @@ class UserVerificationController extends Controller
                 return response()->json(['message' => 'Verification code sent successfully!.'], 200);
             }
         } else {
-            return response()->json(['error' => 'Email is already taken'], 400);
+            return response()->json(['message' => 'Email is already taken'], 400);
         }
 
         $expiryDate = now()->addHours(24);
@@ -113,7 +113,7 @@ class UserVerificationController extends Controller
 
             return response()->json(
                 [
-                    'success' => 'successfully created user!',
+                    'message' => 'successfully created user!',
                     'status' => 'waiting for verification'
                 ],
                 200
@@ -136,18 +136,19 @@ class UserVerificationController extends Controller
         if ($user && $user->verificationCode === $request->verificationCode) {
 
             $user->verificationCode = null;
+            $user->verified = 1;
             $user->save();
 
             return response()->json(
                 [
-                    'success' => 'User verified successfully',
+                    'message' => 'User verified successfully',
                     'user_id' => $user->id
                 ],
                 200
             );
         } else {
             return response()->json(
-                ['error' => 'Invalid user or veirification code'],
+                ['message' => 'Invalid user or veirification code'],
                 404
             );
         }

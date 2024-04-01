@@ -24,10 +24,10 @@ class SMSController extends Controller
         $response = $this->twilioService->sendSMS($request->phone, $request->message);
 
         if ($response->sid) {
-            return response()->json(['success' => true, 'message' => 'SMS sent successfully.']);
+            return response()->json(['message' => true, 'message' => 'SMS sent successfully.']);
         } else {
- 
-            return response()->json(['success' => false, 'message' => 'Failed to send SMS.']);
+
+            return response()->json(['message' => false, 'message' => 'Failed to send SMS.']);
         }
     }
 }

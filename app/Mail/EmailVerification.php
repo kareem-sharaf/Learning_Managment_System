@@ -30,7 +30,6 @@ class EmailVerification extends Mailable
      */
     public function build()
     {
-        return $this->subject('Email Verification')
-            ->text('verification_plain'); // Use a plain text email template (no Blade views)
+        return $this->view('email_verification');
     }
 }

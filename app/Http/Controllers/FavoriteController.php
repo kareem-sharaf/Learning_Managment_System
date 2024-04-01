@@ -12,7 +12,7 @@ class FavoriteController extends Controller
         $user = Auth::user();
         if (!$user) {
             return response()->json(
-                ['error' => 'User not found'],
+                ['message' => 'User not found'],
                 404
             );
         }
@@ -24,7 +24,7 @@ class FavoriteController extends Controller
             );
         } else {
             return response()->json(
-                ['error' => 'You do not have favorites']
+                ['message' => 'You do not have favorites']
             );
         }
     }

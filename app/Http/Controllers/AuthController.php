@@ -19,12 +19,21 @@ class AuthController extends Controller
     public function registerWeb(Request $request)
     {
         $UserVerification = UserVerification::find($request->user_id);
+
         if ($UserVerification->role_id == 4) {
             return response()->json(
-                ['error' => 'unauthorized'],
+                ['message' => 'unauthorized'],
                 401
             );
         }
+
+        if ($UserVerification->verified == 0) {
+            return response()->json(
+                ['message' => 'not verified'],
+                401
+            );
+        }
+
         $request->validate([
             'name' => 'required|string|min:4',
             'password' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
@@ -53,7 +62,7 @@ class AuthController extends Controller
             );
         } else {
             return response()->json(
-                ['error' => 'provide proper details'],
+                ['message' => 'provide proper details'],
                 422
             );
         }
@@ -63,12 +72,21 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $UserVerification = UserVerification::find($request->user_id);
+
         if ($UserVerification->role_id == 1 || $UserVerification->role_id == 2 || $UserVerification->role_id == 3) {
             return response()->json(
-                ['error' => 'unauthorized'],
+                ['message' => 'unauthorized'],
                 401
             );
         }
+
+        if ($UserVerification->verified == 0) {
+            return response()->json(
+                ['message' => 'not verified'],
+                401
+            );
+        }
+
         $request->validate([
             'name' => 'required|string',
             'address_id' => 'required|numeric',
@@ -104,6 +122,8 @@ class AuthController extends Controller
             'stage_id' => $stage_id
         ]);
 
+        $UserVerification->delete();
+
         if ($user->save()) {
             $token = $user->createToken('Personal Access Token')->plainTextToken;
             Auth::login($user, $remember = true);
@@ -113,36 +133,58 @@ class AuthController extends Controller
             );
         } else {
             return response()->json(
-                ['error' => 'provide proper details'],
+                ['message' => 'provide proper details'],
                 422
             );
         }
     }
 
-
     // login students (mobile)
     public function login(Request $request)
     {
         $request->validate([
-            'device_id' => 'required|string'
+            'device_id' => 'required|string',
+            'verificationCode' => 'string|sometimes'
         ]);
 
-        $user = User::where('device_id', $request->device_id)->first();
+        $user = null;
 
-        if (!$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
+        if ($request->has('device_id')) {
+            $user = User::where('device_id', $request->device_id)->first();
 
-        if ($user->device_id !== $request->device_id) {
+            if ($user->verified == 0) {
+                return response()->json(
+                    ['message' => 'not verified'],
+                    401
+                );
+            }
+
+            if (!$user) {
+                return response()->json(['message' => 'User not found.'], 404);
+            }
+        } else {
+            $user = User::where('verificationCode', $request->verificationCode)->first();
+
+            if (!$user) {
+                return response()->json(['message' => 'User not found.'], 404);
+            }
+
+            if ($request->verificationCode != $user->verificationCode) {
+                return response()->json(['message' => 'Invalid verification code.'], 400);
+            }
+
             $user->device_id = $request->device_id;
+            $user->verificationCode = null;
             $user->save();
         }
 
         $token = $user->createToken('Personal Access Token')->plainTextToken;
+
         Auth::login($user, $remember = true);
+
         return response()->json(
-            ['accessToken' => $token],
-            200
+            ['message' => 'User logged in successfully', 'access_token' => $token],
+            201
         );
     }
 
@@ -156,19 +198,90 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        if ($user->verified == 0) {
+            return response()->json(
+                ['message' => 'not verified'],
+                401
+            );
+        }
+
         if (!$user || $user['role'] == 4 || !Hash::check($request->password, $user->password)) {
             return response()->json(
-                ['error' => 'unauthenticated'],
+                ['message' => 'unauthenticated'],
                 400
             );
         }
 
         $token = $user->createToken('Personal Access Token')->plainTextToken;
+
         Auth::login($user, $remember = true);
+
         return response()->json(
-            ['success' => 'user logged in successfuly', 'access token' => $token],
+            ['message' => 'user logged in successfuly', 'access token' => $token],
             201
         );
+    }
+
+    //  send verification code to reset device_id
+    public function reset(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->verified == 0) {
+            return response()->json(
+                ['message' => 'not verified'],
+                401
+            );
+        }
+
+        $length = 7;
+        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $verificationCode = substr(str_shuffle($characters), 0, $length);
+
+        $user->verificationCode = $verificationCode;
+        $user->verified = 0;
+        $user->save();
+
+        Mail::to($user->email)->send(new EmailVerification($verificationCode));
+
+        return response()->json(
+            ['message' => 'Verification code sent successfully'],
+            200
+        );
+    }
+
+    //  set new password
+    public function setPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'verificationCode' => 'required|string',
+            'newPassword' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        if (Hash::check($request->newPassword, $user->password)) {
+            return response()->json(['message' => 'New password must be different from old password.'], 400);
+        }
+
+        if ($request->verificationCode == $user->verificationCode) {
+            $user->password = Hash::make($request->newPassword);
+            $user->verificationCode = null;
+            $user->save();
+
+            return response()->json(['message' => 'Password reset successfully'], 200);
+        } else {
+            return response()->json(['message' => 'Invalid verification code'], 400);
+        }
     }
 
     //  Auth requirments

@@ -44,7 +44,7 @@ class RoleController extends Controller
 
         if (!$updated_user) {
             return response()->json(
-                ['erorr' => 'user not found!'],
+                ['message' => 'user not found!'],
                 404
             );
         }

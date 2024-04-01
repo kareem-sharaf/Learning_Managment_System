@@ -29,13 +29,13 @@ class ClassificationController extends Controller
             $subjects = $class->subjects;
 
             return response()->json(
-                ['success' => 'Subjects of this class:', 'subjects' => $subjects],
+                ['message' => 'Subjects of this class:', 'subjects' => $subjects],
                 200
             );
         }
 
         return response()->json(
-            ['error' => 'Class not found!'],
+            ['message' => 'Class not found!'],
             404
         );
     }
@@ -67,7 +67,7 @@ class ClassificationController extends Controller
 
         if (!$classification) {
             return response()->json(
-                ['error' => 'Classification not found!'],
+                ['message' => 'Classification not found!'],
                 404
             );
         }
