@@ -10,6 +10,7 @@ class Subject extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'description',
         'image_data',
         'price',
         'video_id',
@@ -17,7 +18,7 @@ class Subject extends Model
         'class_id'
     ];
 
-     
+
     // public $timestamps=false;
 
     public function stage()
@@ -44,5 +45,8 @@ class Subject extends Model
     {
         return $this->belongsTo(classification::class);
     }
-
+    public function quizes()
+    {
+        return $this->belongsToMany(Quiz::class);
+    }
 }

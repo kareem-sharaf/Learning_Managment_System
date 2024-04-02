@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('subjects_quizes', function (Blueprint $table) {
             $table->id();
             $table->integer('subject_id');
-            $table->integer('quezes_id');
+            $table->integer('quiz_id');
 
         });
     }

@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             AddressSeeder::class,
             UserSeeder::class,
             SubjectSeeder::class,
-            ClassificationSeeder::class
+            ClassificationSeeder::class,
+            FormSeeder::class
         ]);
     }
 }

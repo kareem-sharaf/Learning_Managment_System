@@ -13,6 +13,7 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
 use App\Http\Controllers\UserValidationController;
+use App\Http\Controllers\FormController;
 
 /*
 |--------------------------------------------------------------------------
@@ -162,3 +163,15 @@ Route::group(['prefix' => 'file'], function () {
         });
     });
 
+    Route::group(['prefix' => 'forms'], function () {
+        Route::controller(FormController::class)->group(function () {
+            Route::get('index', 'index');
+
+            Route::group(['middleware' => 'auth:sanctum'], function () {
+                Route::post('create', 'create');
+                Route::post('edit', 'edit');
+                Route::delete('destroy/{form_id}', 'destroy');
+
+            });
+        });
+    });

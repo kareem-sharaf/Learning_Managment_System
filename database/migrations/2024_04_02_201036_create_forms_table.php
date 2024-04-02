@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('forms', function (Blueprint $table) {
             $table->id();
-            $table->text("text");
-            $table->char("answer");
-            $table->integer("mark");
-            $table->unsignedBigInteger('subject_year_id')->constrained('subject_year')->cascadeOnDelete();
+            $table->string('FormName');
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('forms');
     }
 };

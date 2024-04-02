@@ -13,21 +13,21 @@ class SubjectSeeder extends Seeder
      */
     public function run(): void
     {
-        Subject::create([
-            'id' => '1',
-            'name' => 'physics'
-        ]);
-        Subject::create([
-            'id' => '2',
-            'name' => 'chemistry'
-        ]);
-        Subject::create([
-            'id' => '3',
-            'name' => 'programming'
-        ]);
-        Subject::create([
-            'id' => '4',
-            'name' => 'maths'
-        ]);
+        // Subject::create([
+        //     'id' => '1',
+        //     'name' => 'physics'
+        // ]);
+        // Subject::create([
+        //     'id' => '2',
+        //     'name' => 'chemistry'
+        // ]);
+        // Subject::create([
+        //     'id' => '3',
+        //     'name' => 'programming'
+        // ]);
+        // Subject::create([
+        //     'id' => '4',
+        //     'name' => 'maths'
+        // ]);
     }
 }
