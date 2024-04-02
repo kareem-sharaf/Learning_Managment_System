@@ -10,6 +10,7 @@ class Subject extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'description',
         'image_data',
         'price',
         'video_id',
@@ -27,7 +28,7 @@ class Subject extends Model
 
     public function years()
     {
-        return $this->belongsToMany(Year::class, 'subject_years');
+        return $this->belongsToMany(Year::class,'subject_years');
     }
 
     public function teachers()
@@ -40,8 +41,12 @@ class Subject extends Model
         return $this->hasMany(Unit::class);
     }
 
-    public function classification()
+    public function class()
     {
-        return $this->belongsTo(Classification::class, 'class_id');
+        return $this->belongsTo(classification::class);
+    }
+    public function quizes()
+    {
+        return $this->belongsToMany(Quiz::class);
     }
 }

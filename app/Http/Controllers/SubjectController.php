@@ -66,6 +66,7 @@ class SubjectController extends Controller
         $request->validate([
             'name' => 'required',
             'price' => 'required',
+            'description' => 'required',
             // 'image_data' => 'required',
             // 'video_id' => 'required',
             // 'file_id' => 'required',
@@ -75,10 +76,11 @@ class SubjectController extends Controller
 
         $subject = Subject::create([
             'name' => $request->name,
-            'price	' => $request->price,
-            //'image_data	' => $request->image_data,
-            //'video_id	' => $request->video_id,
-            //'file_id	' => $request->file_id,
+            'price' => $request->price,
+            'description' => $request->description,
+            //'image_data' => $request->image_data,
+            //'video_id' => $request->video_id,
+            //'file_id' => $request->file_id,
         ]);
 
         foreach ($request->years_content as $item) {
@@ -106,6 +108,7 @@ public function edit_subject(Request $request)
             'subject_id' => 'required',
             'name' => 'required',
             'price' => 'required',
+            'description' => 'required',
             // 'image_data' => 'required',
             // 'video_id' => 'required',
             // 'file_id' => 'required',
@@ -122,6 +125,7 @@ public function edit_subject(Request $request)
         $subject->update([
             'name' => $request->name,
             'price	' => $request->price,
+            'description' => $request->description,
             //'image_data	' => $request->image_data,
             //'video_id	' => $request->video_id,
             //'file_id	' => $request->file_id,

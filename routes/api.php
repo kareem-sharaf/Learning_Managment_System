@@ -8,12 +8,12 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
-use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LeasonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
-use App\Http\Controllers\UserVerificationController;
+use App\Http\Controllers\UserValidationController;
+use App\Http\Controllers\FormController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,30 +35,26 @@ Route::post('sendSMS', [SMSController::class, 'sendSMS']);
 
 Route::group(['prefix' => 'auth'], function () {
     Route::controller(AuthController::class)->group(function () {
-        Route::post('registerWeb', 'registerWeb');
-        Route::post('register', 'register');
-        Route::post('loginWeb', 'loginWeb');
         Route::post('login', 'login');
-        Route::post('reset', 'reset');
-        Route::post('resendEmail', 'resendEmail');
-        Route::post('setPassword', 'setPassword');
+        Route::post('register', 'register');
         Route::get('indexAddressYears', 'indexAddressYears');
-
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
         });
     });
-    Route::controller(UserVerificationController::class)->group(function () {
-        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager', 'checkIfAdmin'], function () {
-            Route::post('createUserWeb', 'createUserWeb');
-        });
-        Route::post('createUser', 'createUser');
-        Route::post('verifyUser', 'verifyUser');
-        Route::post('resend_email', 'resend_email');
+});
 
+//  userValidation routes
+Route::group(['prefix' => 'uservalidation'], function () {
+    Route::controller(UserValidationController::class)->group(function () {
+        Route::post('createUser', 'createUser');
+        Route::post('validateUser', 'validateUser');
+        Route::post('setupUser', 'setupUser');
     });
 });
+
+
 //  stages routes
 Route::group(['prefix' => 'stage'], function () {
     Route::controller(StageController::class)->group(function () {
@@ -102,16 +98,6 @@ Route::group(['prefix' => 'ad'], function () {
     });
 });
 
-//  classifications routes
-Route::group(['prefix' => 'class'], function () {
-    Route::controller(ClassificationController::class)->group(function () {
-        Route::get('index', 'index');
-        Route::post('show', 'show');
-        Route::post('store', 'store');
-        Route::post('destroy', 'destroy');
-    });
-});
-
 
 
 Route::group(['prefix' => 'subject'], function () {
@@ -123,6 +109,7 @@ Route::group(['prefix' => 'subject'], function () {
             Route::post('add_subject', 'add_subject');
             Route::post('edit_subject', 'edit_subject');
             Route::delete('delete_subject/{subject_id}', 'delete_subject');
+
         });
     });
 });
@@ -138,6 +125,7 @@ Route::group(['prefix' => 'unit'], function () {
             Route::post('add_unit', 'add_unit');
             Route::post('edit_unit/{unit_id}', 'edit_unit');
             Route::delete('delete_unit/{unit_id}', 'delete_unit');
+
         });
     });
 });
@@ -156,6 +144,7 @@ Route::group(['prefix' => 'teacher'], function () {
             Route::post('add_teacher', 'add_teacher');
             Route::post('edit_teacher', 'edit_teacher');
             Route::delete('delete_teacher/{teacher_id}', 'delete_teacher');
+
         });
     });
 });
@@ -166,10 +155,23 @@ Route::group(['prefix' => 'file'], function () {
         Route::post('/delete', 'delete');
         Route::post('/uploadvideo', 'uploadvideo');
         Route::post('/updateVideo', 'updateVideo');
-        Route::post('/deletevideo', 'deletevideo');
+        Route::post('/deletevideo','deletevideo');
         Route::post('/uploadpdf',   'uploadpdf');
         Route::post('/updatepdf',  'updatepdf');
         Route::post('/deletepdf',  'deletepdf');
         Route::get('/getall', 'getall');
+        });
     });
-});
+
+    Route::group(['prefix' => 'forms'], function () {
+        Route::controller(FormController::class)->group(function () {
+            Route::get('index', 'index');
+
+            Route::group(['middleware' => 'auth:sanctum'], function () {
+                Route::post('create', 'create');
+                Route::post('edit', 'edit');
+                Route::delete('destroy/{form_id}', 'destroy');
+
+            });
+        });
+    });

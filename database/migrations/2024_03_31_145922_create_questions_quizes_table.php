@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('classifications', function (Blueprint $table) {
+        Schema::create('questions_quizes', function (Blueprint $table) {
             $table->id();
-            $table->string('class');
-            $table->binary('image_data')->default('default_image.jpg')->nullable();
-            $table->unsignedBigInteger('form_id')->references('id')->on('forms')->onDelete('cascade');
-            $table->timestamps();
+            $table->integer('questtion_id');
+            $table->integer('quiz_id');
         });
     }
 
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('classifications');
+        Schema::dropIfExists('questions_quizes');
     }
 };

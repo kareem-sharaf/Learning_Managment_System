@@ -23,5 +23,8 @@ class Unit extends Model
     {
         return $this->belongsTo(Subject::class);
     }
-
+    public function quizes()
+    {
+        return $this->belongsToMany(Quiz::class);
+    }
 }

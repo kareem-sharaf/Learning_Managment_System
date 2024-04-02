@@ -5,19 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Lesson extends Model
+class Form extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'title',
-       'image',
-       'video_id',
-       'file_id'
+        'FormName'
     ];
 
 
-    public function quizes()
-{
-    return $this->belongsToMany(Quiz::class);
-}
+    public function classes()
+    {
+        return $this->hasOne(Classification::class);
+    }
 }
