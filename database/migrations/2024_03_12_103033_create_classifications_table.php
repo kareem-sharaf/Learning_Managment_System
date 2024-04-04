@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('class');
             $table->binary('image_data')->default('default_image.jpg')->nullable();
-            $table->unsignedBigInteger('form_id')->references('id')->on('forms')->onDelete('cascade');
             $table->timestamps();
         });
     }
