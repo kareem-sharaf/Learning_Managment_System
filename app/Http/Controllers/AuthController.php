@@ -289,36 +289,55 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
-
         $currentTime = Carbon::now();
-        $previousRequestTime = $user->email_sent_at;
-
-        if ($previousRequestTime && $currentTime->diffInSeconds($previousRequestTime) < 60) {
-            return response()->json(
-                ['message' => 'Please wait at least 1 minute before requesting another verification code.'],
-                400
-            );
-        }
 
         $length = 7;
         $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $verificationCode = substr(str_shuffle($characters), 0, $length);
 
-        $user = User::updateOrCreate(
-            ['email' => $user->email],
-            [
-                'verificationCode' => $verificationCode,
-                'email_sent_at' => $currentTime,
-                'verified' => 0
-            ]
-        );
+        if ($user->verificationCode == null) {
+            $user = User::updateOrCreate(
+                ['email' => $user->email],
+                [
+                    'verificationCode' => $verificationCode,
+                    'email_sent_at' => $currentTime,
+                    'verified' => 0
+                ]
+            );
 
-        Mail::to($user->email)->send(new EmailVerification($verificationCode));
+            Mail::to($user->email)->send(new EmailVerification($verificationCode));
 
-        return response()->json(
-            ['message' => 'Verification code sent successfully'],
-            200
-        );
+            return response()->json(
+                ['message' => 'Verification code sent successfully'],
+                200
+            );
+        } else {
+
+            $previousRequestTime = $user->email_sent_at;
+
+            if ($previousRequestTime && $currentTime->diffInSeconds($previousRequestTime) < 60) {
+                return response()->json(
+                    ['message' => 'Please wait at least 1 minute before requesting another verification code.'],
+                    400
+                );
+            }
+
+            $user = User::updateOrCreate(
+                ['email' => $user->email],
+                [
+                    'verificationCode' => $verificationCode,
+                    'email_sent_at' => $currentTime,
+                    'verified' => 0
+                ]
+            );
+
+            Mail::to($user->email)->send(new EmailVerification($verificationCode));
+
+            return response()->json(
+                ['message' => 'Verification code sent successfully'],
+                200
+            );
+        }
     }
 
     //  set new password
