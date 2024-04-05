@@ -58,6 +58,7 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('resend_email', 'resend_email');
     });
 });
+
 //  stages routes
 Route::group(['prefix' => 'stage'], function () {
     Route::controller(StageController::class)->group(function () {
