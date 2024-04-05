@@ -43,16 +43,6 @@ Route::group(['prefix' => 'auth'], function () {
             Route::get('logout', 'logout');
         });
     });
-});
-
-//  userValidation routes
-Route::group(['prefix' => 'uservalidation'], function () {
-    Route::controller(UserValidationController::class)->group(function () {
-        Route::post('createUser', 'createUser');
-        Route::post('validateUser', 'validateUser');
-        Route::post('setupUser', 'setupUser');
-    });
-});
 
 
 //  stages routes
@@ -80,8 +70,13 @@ Route::group(['prefix' => 'year'], function () {
 //  role routes
 Route::group(['prefix' => 'role'], function () {
     Route::controller(RoleController::class)->group(function () {
-        Route::get('index', 'index');
-        Route::post('update', 'update');
+        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager', 'checkIfAdmin'], function () {
+            Route::get('index', 'index');
+            Route::get('index_web', 'index_web');
+            Route::post('store', 'store');
+            Route::post('update', 'update');
+            Route::post('destroy', 'destroy');
+        });
     });
 });
 

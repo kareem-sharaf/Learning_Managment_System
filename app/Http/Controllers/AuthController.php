@@ -37,20 +37,19 @@ class AuthController extends Controller
 
         $request->validate([
             'name' => 'required|string|min:4',
-            'password' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
-            'address_id' => 'required',
-            'birth_date' => 'required|date',
-            'gender' => 'required',
-            'image_id' => 'required|numeric'
+            'password' => [
+                'required',
+                'regex:/[A-Z]/',
+                'regex:/[0-9]/',
+                'min:8',
+            ],
+        ], [
+            'password.regex' => 'The password must be at least 8 characters long and contain at least one uppercase letter and one number.',
         ]);
         $user = new User([
             'name' => $request->name,
             'email' => $UserVerification->email,
-            'address_id' => $request->address_id,
-            'birth_date' => $request->birth_date,
-            'gender' => $request->gender,
             'verified' => 1,
-            'image_id' => $request->image_id,
             'password' => Hash::make($request->password),
             'role_id' => $UserVerification->role_id
         ]);
