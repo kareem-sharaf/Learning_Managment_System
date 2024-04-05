@@ -12,7 +12,7 @@ use App\Http\Controllers\LeasonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
-use App\Http\Controllers\UserValidationController;
+use App\Http\Controllers\UserVerificationController;
 use App\Http\Controllers\FormController;
 
 /*
@@ -35,15 +35,29 @@ Route::post('sendSMS', [SMSController::class, 'sendSMS']);
 
 Route::group(['prefix' => 'auth'], function () {
     Route::controller(AuthController::class)->group(function () {
-        Route::post('login', 'login');
+        Route::post('registerWeb', 'registerWeb');
         Route::post('register', 'register');
+        Route::post('loginWeb', 'loginWeb');
+        Route::post('login', 'login');
+        Route::post('reset', 'reset');
+        Route::post('resendEmail', 'resendEmail');
+        Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');
+
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
         });
     });
-
+    Route::controller(UserVerificationController::class)->group(function () {
+        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager', 'checkIfAdmin'], function () {
+            Route::post('createUserWeb', 'createUserWeb');
+        });
+        Route::post('createUser', 'createUser');
+        Route::post('verifyUser', 'verifyUser');
+        Route::post('resend_email', 'resend_email');
+    });
+});
 
 //  stages routes
 Route::group(['prefix' => 'stage'], function () {
