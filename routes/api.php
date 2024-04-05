@@ -56,7 +56,6 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('createUser', 'createUser');
         Route::post('verifyUser', 'verifyUser');
         Route::post('resend_email', 'resend_email');
-
     });
 });
 //  stages routes
@@ -84,8 +83,13 @@ Route::group(['prefix' => 'year'], function () {
 //  role routes
 Route::group(['prefix' => 'role'], function () {
     Route::controller(RoleController::class)->group(function () {
-        Route::get('index', 'index');
-        Route::post('update', 'update');
+        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager', 'checkIfAdmin'], function () {
+            Route::get('index', 'index');
+            Route::get('index_web', 'index_web');
+            Route::post('store', 'store');
+            Route::post('update', 'update');
+            Route::post('destroy', 'destroy');
+        });
     });
 });
 

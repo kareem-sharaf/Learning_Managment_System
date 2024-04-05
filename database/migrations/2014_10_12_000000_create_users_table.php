@@ -18,12 +18,12 @@ return new class extends Migration
             $table->timestamp('email_sent_at');
             $table->string('device_id')->unique()->nullable();
             $table->string('verificationCode')->nullable();
-            $table->integer('image_id');
-            $table->date('birth_date');
-            $table->boolean('gender');
+            $table->integer('image_id')->nullable();
+            $table->date('birth_date')->nullable();
+            $table->boolean('gender')->nullable();
             $table->boolean('verified')->default(0);
             $table->string('password')->nullable();
-            $table->foreignId('address_id')->constrained('addresses')->cascadeOnDelete();
+            $table->foreignId('address_id')->nullable()->constrained('addresses')->cascadeOnDelete();
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
             $table->foreignId('stage_id')->nullable()->constrained('stages')->cascadeOnDelete();
             $table->foreignId('year_id')->nullable()->constrained('years')->cascadeOnDelete();
