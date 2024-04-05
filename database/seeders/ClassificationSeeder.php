@@ -15,18 +15,15 @@ class ClassificationSeeder extends Seeder
     {
         Classification::create([
             'id' => 1,
-            'class' => 'educational',
-            'form_id' => 2
+            'class' => 'educational'
         ]);
         Classification::create([
             'id' => 2,
-            'class' => 'languages',
-            'form_id' => 2
+            'class' => 'languages'
         ]);
         Classification::create([
             'id' => 3,
-            'class' => 'programming',
-            'form_id' => 2
+            'class' => 'programming'
         ]);
     }
 }

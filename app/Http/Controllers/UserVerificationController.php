@@ -11,7 +11,7 @@ use App\Models\UserVerification;
 use App\Mail\EmailVerification;
 use App\Models\User;
 
-
+ 
 class UserVerificationController extends Controller
 {
 
@@ -113,7 +113,7 @@ class UserVerificationController extends Controller
         }
 
         if ($user && $user->verificationCode === $request->verificationCode) {
-            
+
             $user->verificationCode = null;
             $user->verified = 1;
             $user->save();
