@@ -16,8 +16,26 @@ use App\Http\Controllers\TeachersController;
 class SubjectController extends Controller
 {
 
-//**********************************************************************************************
+    //**********************************************************************************************
+    //show all subject in the class
   public function show_all_subjects(Request $request)
+  {
+      $request->validate([
+          'class_id' => 'required|integer'
+      ]);
+      $class_id = $request->class_id;
+      $subject = Subject::where('class_id', $class_id)
+      ->get();
+      $message = "this is the all subjects in the class.";
+
+      return response()->json([
+          'message' => $message,
+          'data' => $subject
+      ]);
+  }
+//**********************************************************************************************
+//show all subjects in the class education
+  public function all_subjects_in_year(Request $request)
     {
         $request->validate([
             'year_id' => 'required|integer'
@@ -35,6 +53,39 @@ class SubjectController extends Controller
     }
     //***********************************************************************************************************************\\
     public function search_to_subject(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required|string',
+            'year_id',
+            'name' => 'required|string'
+        ]);
+        $class_id = $request->class_id;
+        $year_id = $request->year_id;
+        $name = $request->name;
+        if($class_id==1){
+            $subject = subject::where('name', 'like', '%' . $name . '%')
+            ->whereHas('years', function($q) use ($year_id) {
+                $q->where('year_id', $year_id);
+            })->get();
+        }else{
+        $subject = subject::where('name', 'like', '%' . $name . '%')
+            ->where('class_id', $class_id)
+            ->get();}
+        if ($subject->isEmpty()) {
+            $message = "The subject doesn't exist.";
+            return response()->json([
+                'message' => $message,
+            ]);
+        }
+
+        $message = "This is the subject.";
+        return response()->json([
+            'message' => $message,
+            'data' => $subject,
+        ]);
+    }
+    //***********************************************************************************************************************\\
+    public function search_to_subject_in_year(Request $request)
     {
         $request->validate([
             'year_id' => 'required|string',

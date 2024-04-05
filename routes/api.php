@@ -8,12 +8,12 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
+use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LeasonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
-use App\Http\Controllers\UserValidationController;
-use App\Http\Controllers\FormController;
+use App\Http\Controllers\UserVerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,25 +35,30 @@ Route::post('sendSMS', [SMSController::class, 'sendSMS']);
 
 Route::group(['prefix' => 'auth'], function () {
     Route::controller(AuthController::class)->group(function () {
-        Route::post('login', 'login');
+        Route::post('registerWeb', 'registerWeb');
         Route::post('register', 'register');
+        Route::post('loginWeb', 'loginWeb');
+        Route::post('login', 'login');
+        Route::post('reset', 'reset');
+        Route::post('resendEmail', 'resendEmail');
+        Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');
+
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
         });
     });
-});
-
-//  userValidation routes
-Route::group(['prefix' => 'uservalidation'], function () {
-    Route::controller(UserValidationController::class)->group(function () {
+    Route::controller(UserVerificationController::class)->group(function () {
+        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager', 'checkIfAdmin'], function () {
+            Route::post('createUserWeb', 'createUserWeb');
+        });
         Route::post('createUser', 'createUser');
-        Route::post('validateUser', 'validateUser');
-        Route::post('setupUser', 'setupUser');
+        Route::post('verifyUser', 'verifyUser');
+        Route::post('resend_email', 'resend_email');
+
     });
 });
-
 
 //  stages routes
 Route::group(['prefix' => 'stage'], function () {
@@ -103,7 +108,9 @@ Route::group(['prefix' => 'ad'], function () {
 Route::group(['prefix' => 'subject'], function () {
     Route::controller(SubjectController::class)->group(function () {
         Route::post('show_all_subjects', 'show_all_subjects');
+        Route::post('all_subjects_in_year', 'all_subjects_in_year');
         Route::post('search_to_subject', 'search_to_subject');
+        Route::post('search_to_subject_in_year', 'search_to_subject_in_year');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('add_subject', 'add_subject');
@@ -163,15 +170,4 @@ Route::group(['prefix' => 'file'], function () {
         });
     });
 
-    Route::group(['prefix' => 'forms'], function () {
-        Route::controller(FormController::class)->group(function () {
-            Route::get('index', 'index');
 
-            Route::group(['middleware' => 'auth:sanctum'], function () {
-                Route::post('create', 'create');
-                Route::post('edit', 'edit');
-                Route::delete('destroy/{form_id}', 'destroy');
-
-            });
-        });
-    });
