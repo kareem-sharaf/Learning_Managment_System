@@ -11,7 +11,7 @@ use App\Models\UserVerification;
 use App\Mail\EmailVerification;
 use App\Models\User;
 
- 
+
 class UserVerificationController extends Controller
 {
 
@@ -21,16 +21,9 @@ class UserVerificationController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users|unique:user_verifications',
             'role_id' => 'required|numeric'
         ]);
-
-        $existingUserVer = UserVerification::where('email', $request->email)->first();
-        $existingUser = UserVerification::where('email', $request->email)->first();
-
-        if ($existingUser && $existingUserVer->verified == 1) {
-            return response()->json(['message' => 'Email is already taken'], 400);
-        }
 
         $length = 7;
         $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -63,14 +56,8 @@ class UserVerificationController extends Controller
     public function createUser(Request $request)
     {
         $request->validate([
-            'email' => 'required|email'
+            'email' => 'required|email|unique:users|unique:user_verifications'
         ]);
-
-        $existingUser = UserVerification::where('email', $request->email)->first();
-
-        if ($existingUser) {
-            return response()->json(['message' => 'Email is already taken'], 400);
-        }
 
         $length = 7;
         $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -133,13 +120,18 @@ class UserVerificationController extends Controller
         }
     }
 
-
     // resend email
     public function resend_email(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email|unique:user_verifications',
         ]);
+
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser) {
+            return response()->json(['message' => 'Email is already a user'], 400);
+        }
 
         $user = UserVerification::where('email', $request->email)->first();
         $currentTime = Carbon::now();
@@ -175,7 +167,7 @@ class UserVerificationController extends Controller
                 );
             }
 
-            $user = User::updateOrCreate(
+            $user = UserVerification::updateOrCreate(
                 ['email' => $user->email],
                 [
                     'verificationCode' => $verificationCode,
