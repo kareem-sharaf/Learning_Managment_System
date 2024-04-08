@@ -40,6 +40,8 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('loginWeb', 'loginWeb');
         Route::post('login', 'login');
         Route::post('reset', 'reset');
+        Route::post('check_user', 'check_user');
+        Route::post('check_code', 'check_code');
         Route::post('resendEmail', 'resendEmail');
         Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');

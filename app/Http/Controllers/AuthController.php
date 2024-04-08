@@ -14,6 +14,7 @@ use App\Models\Year;
 use App\Models\Address;
 use App\Models\Stage;
 use App\Mail\EmailVerification;
+use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
@@ -73,9 +74,19 @@ class AuthController extends Controller
         }
     }
 
+    public function encrupt(Request $request){
+        $key = 'majd123djam321maleh321helam456mm';
+        $iv = 'nottonwelbil0990';
+        $device_id=Crypt::encryptString($request->device_id, ['key' => $key, 'iv' => $iv]);
+        return $device_id;
+    }
+
     //  Create students (mobile);
     public function register(Request $request)
     {
+        $key = 'majd123djam321maleh321helam456mm';
+        $iv = 'nottonwelbil0990';
+
         $UserVerification = UserVerification::find($request->user_id);
 
         if ($UserVerification->role_id == 1 || $UserVerification->role_id == 2 || $UserVerification->role_id == 3) {
@@ -114,6 +125,8 @@ class AuthController extends Controller
             $stage_id = $year->stage_id;
         }
 
+        $device_id = Crypt::decryptString($request->device_id, ['key' => $key, 'iv' => $iv]);
+
         $user = new User([
             'name' => $request->name,
             'email' => $UserVerification->email,
@@ -121,7 +134,7 @@ class AuthController extends Controller
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'verified' => 1,
-            'device_id' => hash('sha512', $request->device_id),
+            'device_id' => $device_id,
             'image_id' => $request->image_id,
             'role_id' => $UserVerification->role_id,
             'year_id' => $request->year_id,
@@ -340,33 +353,95 @@ class AuthController extends Controller
         }
     }
 
+    //  check user and send code
+    public function check_user(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $length = 7;
+        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $verificationCode = substr(str_shuffle($characters), 0, $length);
+
+        Mail::to($user->email)->send(new EmailVerification($verificationCode));
+
+        $user->verificationCode = $verificationCode;
+        $user->save();
+
+        return response()->json(
+            ['message' => 'Verification code sent successfully'],
+            200
+        );
+    }
+
+    public function check_code(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'verificationCode' => 'string'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(
+                ['message' => 'User not found'],
+                404
+            );
+        }
+
+        if ($request->verificationCode !== $user->verificationCode) {
+            return response()->json(
+                ['message' => 'Invalid verification code'],
+                400
+            );
+        }
+
+        return response()->json(
+            ['message' => 'Verification code is valid'],
+            200
+        );
+    }
+
+
     //  set new password
     public function setPassword(Request $request)
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'verificationCode' => 'required|string',
             'newPassword' => 'required|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|min:8',
         ]);
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found.'], 404);
+            return response()->json(
+                ['message' => 'User not found.'],
+                404
+            );
         }
 
-        if ($user->role_id = 4) {
+        if ($user->role_id == 4 || $user->verificationCode == null) {
             return response()->json(
-                ['message' => 'unauthorized'],
+                ['message' => 'Unauthorized'],
                 400
             );
         }
 
         if (Hash::check($request->newPassword, $user->password)) {
-            return response()->json(['message' => 'New password must be different from old password.'], 400);
-        }
-
-        if ($request->verificationCode == $user->verificationCode) {
+            return response()->json(
+                ['message' => 'New password must be different from old password.'],
+                400
+            );
+        } else {
             $user->password = Hash::make($request->newPassword);
             $user->verificationCode = null;
             $user->save();
@@ -374,11 +449,6 @@ class AuthController extends Controller
             return response()->json(
                 ['message' => 'Password reset successfully'],
                 200
-            );
-        } else {
-            return response()->json(
-                ['message' => 'Invalid verification code'],
-                400
             );
         }
     }
