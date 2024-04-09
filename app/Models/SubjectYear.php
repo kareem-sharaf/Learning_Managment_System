@@ -10,17 +10,17 @@ class SubjectYear extends Model
     use HasFactory;
 
 
-    public function teachers()
-    {
-        return $this->belongsToMany(Teacher::class, 'teacher_subject_years');
-    }
+    // public function teachers()
+    // {
+    //     return $this->belongsToMany(Teacher::class, 'teacher_subject_years');
+    // }
 
-    public function subjects()
-    {
-        return $this->hasMany(Subject::class);
-    }
-    public function years()
-    {
-        return $this->hasMany(Year::class);
-    }
+    // public function subjects()
+    // {
+    //     return $this->hasMany(Subject::class);
+    // }
+    // public function years()
+    // {
+    //     return $this->hasMany(Year::class);
+    // }
 }

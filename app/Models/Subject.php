@@ -28,17 +28,18 @@ class Subject extends Model
 
     public function years()
     {
-        return $this->belongsToMany(Year::class,'subject_years');
+        return $this->belongsToMany(Year::class);
     }
 
     public function teachers()
     {
-        return $this->belongsToMany(Teacher::class, 'teacher_subject');
+        return $this->belongsToMany(Teacher::class, 'teacher_subject_years', 'subject_id', 'teacher_id')
+                    ->withPivot('year_id');
     }
-    public function subjectYears()
-    {
-        return $this->belongsToMany(SubjectYear::class,'teacher_subject_years');
-    }
+    // public function subjectYears()
+    // {
+    //     return $this->belongsToMany(SubjectYear::class,'teacher_subject_years');
+    // }
     public function units()
     {
         return $this->hasMany(Unit::class);
