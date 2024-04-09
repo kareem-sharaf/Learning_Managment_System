@@ -35,7 +35,10 @@ class Subject extends Model
     {
         return $this->belongsToMany(Teacher::class, 'teacher_subject');
     }
-
+    public function subjectYears()
+    {
+        return $this->belongsToMany(SubjectYear::class,'teacher_subject_years');
+    }
     public function units()
     {
         return $this->hasMany(Unit::class);

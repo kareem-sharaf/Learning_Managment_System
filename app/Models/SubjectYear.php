@@ -14,4 +14,13 @@ class SubjectYear extends Model
     {
         return $this->belongsToMany(Teacher::class, 'teacher_subject_years');
     }
+
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class);
+    }
+    public function years()
+    {
+        return $this->hasMany(Year::class);
+    }
 }
