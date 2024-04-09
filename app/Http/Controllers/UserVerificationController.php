@@ -25,52 +25,26 @@ class UserVerificationController extends Controller
             'role_id' => 'required|numeric'
         ]);
 
-        $length = 7;
-        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $verificationCode = substr(str_shuffle($characters), 0, $length);
+        $existingUser = User::where('email', $request->email)->first();
+        $existingUserVerification = UserVerification::where('email', $request->email)->where('verified', 1)->first();
 
-        if ($user->role_id == 1 || ($user->role_id == 2 && $request->role_id == 2)) {
-            $newUser = new UserVerification([
-                'email' => $request->email,
-                'role_id' => $request->role_id,
-                'verificationCode' => $verificationCode,
-                'email_sent_at' => Carbon::now()
-            ]);
-
-            if ($newUser->save()) {
-                Mail::to($newUser->email)->send(new EmailVerification($verificationCode));
-                return response()->json(
-                    [
-                        'message' => 'Successfully created user!',
-                        'status' => 'Waiting for verification'
-                    ],
-                    200
-                );
-            }
-        } else {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        if ($existingUser || $existingUserVerification) {
+            return response()->json(
+                ['message' => 'email is already taken!'],
+                422
+            );
         }
-    }
-
-    //  create users (mobile) and generate a random code for verfication
-    public function createUser(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email|unique:users|unique:user_verifications'
-        ]);
-
         $length = 7;
         $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $verificationCode = substr(str_shuffle($characters), 0, $length);
 
-        $user = new UserVerification([
-            'email' => $request->email,
-            'role_id' => 4,
-            'verificationCode' => $verificationCode,
-            'email_sent_at' => Carbon::now()
-        ]);
+        $userVer = UserVerification::where('email', $request->email)->first();
 
-        if ($user->save()) {
+        if ($userVer) {
+
+            $userVer->verificationCode = $verificationCode;
+            $userVer->email_sent_at = Carbon::now();
+            $userVer->save();
             Mail::to($user->email)->send(new EmailVerification($verificationCode));
             return response()->json(
                 [
@@ -79,6 +53,86 @@ class UserVerificationController extends Controller
                 ],
                 200
             );
+        } else {
+
+            if ($user->role_id == 1 || ($user->role_id == 2 && $request->role_id == 2)) {
+                $newUser = new UserVerification([
+                    'email' => $request->email,
+                    'role_id' => $request->role_id,
+                    'verificationCode' => $verificationCode,
+                    'email_sent_at' => Carbon::now()
+                ]);
+
+                if ($newUser->save()) {
+                    Mail::to($newUser->email)->send(new EmailVerification($verificationCode));
+                    return response()->json(
+                        [
+                            'message' => 'Successfully created user!',
+                            'status' => 'Waiting for verification'
+                        ],
+                        200
+                    );
+                }
+            } else {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+        }
+    }
+    //  create users (mobile) and generate a random code for verfication
+    public function createUser(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $existingUser = User::where('email', $request->email)->first();
+        $existingUserVerification = UserVerification::where('email', $request->email)->where('verified', 1)->first();
+
+        if ($existingUser || $existingUserVerification) {
+            return response()->json(
+                ['message' => 'email is already taken!'],
+                422
+            );
+        }
+
+        $length = 7;
+        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $verificationCode = substr(str_shuffle($characters), 0, $length);
+
+        $user = UserVerification::where('email', $request->email)->first();
+
+        if ($user) {
+
+            $user->verificationCode = $verificationCode;
+            $user->email_sent_at = Carbon::now();
+            $user->save();
+            Mail::to($user->email)->send(new EmailVerification($verificationCode));
+            return response()->json(
+                [
+                    'message' => 'Successfully created user!',
+                    'status' => 'Waiting for verification'
+                ],
+                200
+            );
+        } else {
+
+            $user = new UserVerification([
+                'email' => $request->email,
+                'role_id' => 4,
+                'verificationCode' => $verificationCode,
+                'email_sent_at' => Carbon::now()
+            ]);
+
+            if ($user->save()) {
+                Mail::to($user->email)->send(new EmailVerification($verificationCode));
+                return response()->json(
+                    [
+                        'message' => 'Successfully created user!',
+                        'status' => 'Waiting for verification'
+                    ],
+                    200
+                );
+            }
         }
     }
 
@@ -124,7 +178,7 @@ class UserVerificationController extends Controller
     public function resend_email(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:user_verifications',
+            'email' => 'required|email',
         ]);
 
         $existingUser = User::where('email', $request->email)->first();
@@ -146,7 +200,6 @@ class UserVerificationController extends Controller
                 [
                     'verificationCode' => $verificationCode,
                     'email_sent_at' => $currentTime,
-                    'verified' => 0
                 ]
             );
 

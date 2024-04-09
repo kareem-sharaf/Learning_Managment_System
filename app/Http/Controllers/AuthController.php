@@ -74,13 +74,6 @@ class AuthController extends Controller
         }
     }
 
-    public function encrupt(Request $request){
-        $key = 'majd123djam321maleh321helam456mm';
-        $iv = 'nottonwelbil0990';
-        $device_id=Crypt::encryptString($request->device_id, ['key' => $key, 'iv' => $iv]);
-        return $device_id;
-    }
-
     //  Create students (mobile);
     public function register(Request $request)
     {
@@ -88,6 +81,13 @@ class AuthController extends Controller
         $iv = 'nottonwelbil0990';
 
         $UserVerification = UserVerification::find($request->user_id);
+
+        if(!$UserVerification){
+            return response()->json(
+                ['message' => 'not found'],
+                404
+            );
+        }
 
         if ($UserVerification->role_id == 1 || $UserVerification->role_id == 2 || $UserVerification->role_id == 3) {
             return response()->json(
@@ -113,10 +113,6 @@ class AuthController extends Controller
             'year_id' => 'numeric'
         ]);
 
-        $length = 7;
-        $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $verificationCode = substr(str_shuffle($characters), 0, $length);
-
         $year_id = $request->year_id;
         $stage_id = null;
 
@@ -125,7 +121,7 @@ class AuthController extends Controller
             $stage_id = $year->stage_id;
         }
 
-        $device_id = Crypt::decryptString($request->device_id, ['key' => $key, 'iv' => $iv]);
+        $device_id = openssl_decrypt($request->device_id, 'AES-256-CBC', $key, 0, $iv);
 
         $user = new User([
             'name' => $request->name,
@@ -314,7 +310,6 @@ class AuthController extends Controller
                 [
                     'verificationCode' => $verificationCode,
                     'email_sent_at' => $currentTime,
-                    'verified' => 0
                 ]
             );
 
