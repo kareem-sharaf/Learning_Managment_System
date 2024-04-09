@@ -17,12 +17,12 @@ class Year extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'subject_years');
+        return $this->belongsToMany(Subject::class);
     }
 
 
     public function teachers()
     {
-        return $this->belongsToMany(Teacher::class, 'teacher_year');
+        return $this->belongsToMany(Teacher::class);
     }
 }

@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('teacher_subject_years', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('teacher_id')->constrained('teachers')->cascadeOnDelete();
-            $table->unsignedBigInteger('subject_year_id')->constrained('subject_year')->cascadeOnDelete();
+            $table->unsignedBigInteger('subject_id')->constrained('subjects')->cascadeOnDelete();
+            $table->unsignedBigInteger('year_id')->nullable()->constrained('years')->cascadeOnDelete();
         });
     }
 

@@ -6,6 +6,8 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\Year;
 use App\Models\Stage;
+use App\Models\SubjectYear;
+
 
 use App\Http\Requests\SubjectRequest;
 
@@ -16,7 +18,7 @@ use App\Http\Controllers\TeachersController;
 class SubjectController extends Controller
 {
 
-    //**********************************************************************************************
+    //**********************************************************************************************\/
     //show all subject in the class
   public function show_all_subjects(Request $request)
   {
@@ -41,7 +43,7 @@ class SubjectController extends Controller
             'year_id' => 'required|integer'
         ]);
         $year_id = $request->year_id;
-        $subject = Subject::whereHas('years', function($q) use ($year_id) {
+        $subject = Subject::whereHas('teachers', function($q) use ($year_id) {
             $q->where('year_id', $year_id);
         })->get();
         $message = "this is the all subjects";
@@ -53,142 +55,129 @@ class SubjectController extends Controller
     }
     //***********************************************************************************************************************\\
     public function search_to_subject(Request $request)
-    {
-        $request->validate([
-            'class_id' => 'required|string',
-            'year_id',
-            'name' => 'required|string'
-        ]);
-        $class_id = $request->class_id;
-        $year_id = $request->year_id;
-        $name = $request->name;
-        if($class_id==1){
-            $subject = subject::where('name', 'like', '%' . $name . '%')
-            ->whereHas('years', function($q) use ($year_id) {
+{
+    $request->validate([
+        'class_id' => 'required|string',
+        'year_id' => 'integer',
+        'name' => 'required|string',
+    ]);
+
+    $class_id = $request->class_id;
+    $year_id = $request->year_id;
+    $name = $request->name;
+
+    if ($class_id == 1) { // if the class is educational
+        $subjects = Subject::where('name', 'like', '%' . $name . '%')
+            ->whereHas('teachers', function ($q) use ($year_id) {
                 $q->where('year_id', $year_id);
             })->get();
-        }else{
-        $subject = subject::where('name', 'like', '%' . $name . '%')
+    } else {
+        $subjects = Subject::where('name', 'like', '%' . $name . '%')
             ->where('class_id', $class_id)
-            ->get();}
-        if ($subject->isEmpty()) {
-            $message = "The subject doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ]);
-        }
+            ->get();
+    }
 
-        $message = "This is the subject.";
+    if ($subjects->isEmpty()) {
+        $message = "subject does not exist.";
         return response()->json([
             'message' => $message,
-            'data' => $subject,
         ]);
     }
-    //***********************************************************************************************************************\\
-    public function search_to_subject_in_year(Request $request)
-    {
-        $request->validate([
-            'year_id' => 'required|string',
-            'name' => 'required|string'
-        ]);
-        $year_id = $request->year_id;
-        $name = $request->name;
-        $subject = subject::where('name', 'like', '%' . $name . '%')
-            ->whereHas('years', function($q) use ($year_id) {
-                $q->where('year_id', $year_id);
-            })->get();
-        if ($subject->isEmpty()) {
-            $message = "The subject doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ]);
-        }
 
-        $message = "This is the subject.";
-        return response()->json([
-            'message' => $message,
-            'data' => $subject,
-        ]);
-    }
+    return response()->json([
+        'message' => " this is the subjects .",
+        'data' => $subjects,
+    ]);
+}
+
     //***********************************************************************************************************************\\
     public function add_subject(Request $request)
-    {
-        $user = auth()->user();
-        $request->validate([
-            'name' => 'required',
-            'price' => 'required',
-            'description' => 'required',
-            // 'image_data' => 'required',
-            // 'video_id' => 'required',
-            // 'file_id' => 'required',
-            'years_content' => 'required',
-            'years_content.*.year_id' => 'required|integer',
-        ]);
+{
+    $user = auth()->user();
+    $request->validate([
+        'class_id' => 'required',
+        'name' => 'required',
+        'price' => 'required',
+        'description' => 'required',
+        'teachers_content' => 'required|array',
+        'teachers_content.*.teacher_id' => 'required|integer',
+        'years_content.*.year_id' => 'integer',
+    ]);
 
-        $subject = Subject::create([
-            'name' => $request->name,
-            'price' => $request->price,
-            'description' => $request->description,
-            //'image_data' => $request->image_data,
-            //'video_id' => $request->video_id,
-            //'file_id' => $request->file_id,
-        ]);
+    $subject = Subject::create([
+        'name' => $request->name,
+        'price' => $request->price,
+        'description' => $request->description,
+        'class_id' => $request->class_id,
+    ]);
 
-        foreach ($request->years_content as $item) {
-            $year = Year::find($item['year_id']);
+    if ($request->class_id == 1) {//if the class is educational
+        $yearsContent = $request->years_content;
+        $teachersContent = $request->teachers_content;
 
-            if (!$year) {
-                return response()->json([
-                    'message' => 'year with ID ' . $item['year_id'] . ' not found.'
-                ]);
+        foreach ($teachersContent as $teacher) {
+            foreach ($yearsContent as $year) {
+                $subject->teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
             }
-            $year->subjects()->attach($subject->id);
         }
-        $message = "Subject added successfully.";
-        return response()->json([
-            'message' => $message,
-            'data' => $subject
-        ]);
-
+    } else {
+        foreach ($request->teachers_content as $teacher) {
+            $subject->teachers()->attach($teacher['teacher_id']);
+        }
     }
+
+    return response()->json([
+        'message' => 'Subject added successfully.',
+        'data' => $subject,
+    ]);
+}
+
     //***********************************************************************************************************************\\
-public function edit_subject(Request $request)
+    public function edit_subject(Request $request)
     {
-        $user = auth()->user();
         $request->validate([
             'subject_id' => 'required',
+            'class_id' => 'required',
             'name' => 'required',
             'price' => 'required',
             'description' => 'required',
-            // 'image_data' => 'required',
-            // 'video_id' => 'required',
-            // 'file_id' => 'required',
-            'years_content' => 'required',
-            'years_content.*.year_id' => 'required|integer',
+            'teachers_content' => 'required|array',
+            'teachers_content.*.teacher_id' => 'required|integer',
+            'years_content.*.year_id' => 'integer',
         ]);
 
-        $subject = Subject::find($request->subject_id);
-        if (!$subject) {
-            return response()->json([
-                'message' => 'Subject not found.'
-            ]);
+        $subject_id = $request->subject_id;
+        $subject = Subject::find($subject_id);
+
+        $subject->name = $request->name;
+        $subject->price = $request->price;
+        $subject->description = $request->description;
+        $subject->class_id = $request->class_id;
+        $subject->save();
+
+
+        if ($request->class_id == 1) { // if the class is educational
+            $yearsContent = $request->years_content;
+            $teachersContent = $request->teachers_content;
+
+            $subject->teachers()->detach();
+
+            foreach ($teachersContent as $teacher) {
+                foreach ($yearsContent as $year) {
+                    $subject->teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
+                }
+            }
+        } else {
+            $subject->teachers()->detach();
+
+            foreach ($request->teachers_content as $teacher) {
+                $subject->teachers()->attach($teacher['teacher_id']);
+            }
         }
-        $subject->update([
-            'name' => $request->name,
-            'price	' => $request->price,
-            'description' => $request->description,
-            //'image_data	' => $request->image_data,
-            //'video_id	' => $request->video_id,
-            //'file_id	' => $request->file_id,
-        ]);
 
-        $subject->years()->detach();
-        $subject->years()->syncWithoutDetaching($request->years_content);
-
-        $message = "The subject edit successfully.";
         return response()->json([
-            'message' => $message,
-            'data' => $subject
+            'message' => 'subject updated successfully',
+            'data' => $subject,
         ]);
     }
     //***********************************************************************************************************************\\
@@ -203,7 +192,7 @@ public function edit_subject(Request $request)
             ]);
         }
 
-        $subject->years()->detach();
+        $subject->teachers()->detach();
         $subject->delete();
 
         $message = "The subject deleted successfully.";

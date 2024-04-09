@@ -15,8 +15,18 @@ class Teacher extends Model
     ];
 
 
-public function subjectYears()
+// public function subjectYears()
+// {
+//     return $this->belongsToMany(SubjectYear::class,'teacher_subject_years');
+// }
+
+public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'teacher_subject_years', 'teacher_id', 'subject_id')
+                    ->withPivot('year_id');
+    }
+public function years()
 {
-    return $this->belongsToMany(SubjectYear::class,'teacher_subject_years');
+    return $this->belongsToMany(Year::class);
 }
 }

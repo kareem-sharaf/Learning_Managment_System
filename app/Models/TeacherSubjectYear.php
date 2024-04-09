@@ -9,7 +9,8 @@ class TeacherSubjectYear extends Model
 {
     protected $fillable=[
         'teacher_id',
-        'subject_year_id'
+        'subject_id',
+        'year_id'
     ];
     use HasFactory;
 }
