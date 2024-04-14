@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use Alaouy\Youtube\Facades\Youtube;
+use App\Models\Files;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
-use App\Models\Leason;
+use App\Models\Leeson;
+use App\Models\Lesson;
+use App\Models\Video;
 
 
-class LeasonController extends Controller
+class LeesonController extends Controller
 {
+
+   
+   
     public function upload(Request $request)
     {
         $request->validate([
@@ -20,7 +27,7 @@ class LeasonController extends Controller
         $imagePath = $request->image->store('images', 'public');
         $imageFilename = basename($imagePath);
     
-        $image = new Leason();
+        $image = new Lesson();
         $image->title = $request->title;
         $image->image = $imagePath;
         $image->save();
@@ -32,7 +39,7 @@ class LeasonController extends Controller
     }
     /////////////////////////////////////////
     public function getall(){
-        $image=Leason::orderBy('id','desc')->get();
+        $image=Lesson::orderBy('id','desc')->get();
         return response()->json($image);
     }
     ///////////////////////////////////////////////////////
@@ -43,7 +50,7 @@ class LeasonController extends Controller
             'title' => 'required',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', 
         ]);
-        $image=Leason::findOrFail($request->id); 
+        $image=Lesson::findOrFail($request->id); 
     
         if ($request->hasFile('image')) {
             // Delete the old image file
@@ -65,7 +72,7 @@ class LeasonController extends Controller
     /////////////////////////////////////////////////////////////
     public function delete(Request $request){
     
-        $images=Leason::find($request->id);
+        $images=Lesson::find($request->id);
         $distination=public_path("storage\\".$images->image);
         if(File::exists($distination)){
             File::delete($distination);
@@ -82,14 +89,20 @@ class LeasonController extends Controller
     public function uploadvideo(Request $request)
     {
         $request->validate([
-            'title'=>'required',
+            'name'=>'required',
+            'unit_id'=>'required',
+            'leeson_id'=>'required',
             'video' => 'required|file|mimetypes:video/x-msvideo,video/x-flv,video/mp4,application/x-mpegURL,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-flv,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-matroska,video/webm|max:10240',
         ]);
         $videoPath = $request->video->store('videos', 'public');
         $videoFilename = basename($videoPath);
     
-        $video = new Leason();
-        $video->title = $request->title;
+        $video = new  Video();
+        $video->name = $request->name;
+        $video->unit_id = $request->unit_id;
+        $video->leeson_id = $request->leeson_id;
+
+
         $video->video = $videoPath;
         $video->save();
     
@@ -104,10 +117,10 @@ class LeasonController extends Controller
     
         $request->validate([
             'id'=>'required',
-            'title' => 'required',
+            'name' => 'required',
             'video' => 'file|mimetypes:video/x-msvideo,video/x-flv,video/mp4,application/x-mpegURL,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-matroska,video/webm|max:10240',
         ]);
-        $video=Leason::findOrFail($request->id); 
+        $video=Video::findOrFail($request->id); 
     
         if ($request->hasFile('video')) {
             // Delete the old video file
@@ -118,7 +131,7 @@ class LeasonController extends Controller
             $video->video = $videoPath;
         }
     
-        $video->title = $request->title;
+        $video->name = $request->name;
         $video->save();
     
         return response()->json([
@@ -129,12 +142,12 @@ class LeasonController extends Controller
     
     public function deletevideo(Request $request){
     
-        $vedio=Leason::find($request->id);
-        $distination=public_path("storage\\".$vedio->video);
+        $Video=Video::find($request->id);
+        $distination=public_path("storage\\".$Video->video);
         if(File::exists($distination)){
             File::delete($distination);
         } 
-        $r= $vedio->delete();
+        $r= $Video->delete();
         if($r){
             return response()->json(['success'=>true]);
     
@@ -146,16 +159,19 @@ class LeasonController extends Controller
     function uploadpdf(Request $request)
     {
         $request->validate([
-            'title' => 'required',
-            'pdf' => 'required|file|mimetypes:application/pdf|max:10240', // Change the field name from 'video' to 'pdf' and add the mimetypes rule for PDF files
+            'name' => 'required',
+            'file' => 'required|file|mimetypes:application/pdf|max:10240', // Change the field name from 'video' to 'pdf' and add the mimetypes rule for PDF files
+            'unit_id'=>'required',
+            'leeson_id'=>'required'
         ]);
     
-        $pdfPath = $request->pdf->store('pdfs', 'public');
-        $pdfFilename = basename($pdfPath);
+        $pdfPath = $request->file->store('pdfs', 'public');
     
-        $pdf = new Leason();
-        $pdf->title = $request->title;
-        $pdf->pdf = $pdfPath;
+        $pdf = new Files();
+        $pdf->name = $request->name;
+        $pdf->unit_id=$request->unit_id;
+        $pdf->leeson_id=$request->leeson_id;
+        $pdf->file = $pdfPath;
         $pdf->save();
     
         return response()->json([
@@ -168,21 +184,21 @@ class LeasonController extends Controller
     {
         $request->validate([
             'id'=>'required',
-            'title' => 'required',
-            'pdf' => 'file|mimetypes:application/pdf|max:10240',
+            'name' => 'required',
+            'file' => 'file|mimetypes:application/pdf|max:10240',
         ]);
-        $pdf = Leason::findOrFail($request->id); 
+        $pdf = Files::findOrFail($request->id); 
     
         if ($request->hasFile('pdf')) {
             // Delete the old PDF file
-            Storage::disk('public')->delete($pdf->pdf);
+            Storage::disk('public')->delete($pdf->file);
     
             // Store the new PDF file
-            $pdfPath = $request->pdf->store('pdfs', 'public');
-            $pdf->pdf = $pdfPath;
+            $pdfPath = $request->file->store('pdfs', 'public');
+            $pdf->file = $pdfPath;
         }
     
-        $pdf->title = $request->title;
+        $pdf->name = $request->name;
         $pdf->save();
     
         return response()->json([
@@ -192,11 +208,11 @@ class LeasonController extends Controller
     }
     function deletepdf(Request $request)
     {
-            $pdf = Leason::findOrFail($request->id); 
+            $pdf = Files::findOrFail($request->id); 
     
     
         // Delete the PDF file
-        Storage::disk('public')->delete($pdf->pdf);
+        Storage::disk('public')->delete($pdf->file);
     
         // Delete the PDF record
         $pdf->delete();
@@ -205,4 +221,5 @@ class LeasonController extends Controller
             'message' => 'PDF deleted successfully',
         ]);
     }
+    
 }

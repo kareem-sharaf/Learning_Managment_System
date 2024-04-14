@@ -6,10 +6,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "alaouy/youtube": "^2.2",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+        "michaelbelgium/laravel-youtube-api": "^2.4",
         "twilio/sdk": "^7.16"
     },
     "require-dev": {
