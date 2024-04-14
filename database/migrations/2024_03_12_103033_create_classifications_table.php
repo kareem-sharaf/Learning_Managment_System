@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teacher_year', function (Blueprint $table) {
+        Schema::create('classifications', function (Blueprint $table) {
             $table->id();
-            $table->integer('teacher_id');
-            $table->integer('year_id');
+            $table->string('class');
+            $table->binary('image_data')->default('default_image.jpg')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teacher_year');
+        Schema::dropIfExists('classifications');
     }
 };

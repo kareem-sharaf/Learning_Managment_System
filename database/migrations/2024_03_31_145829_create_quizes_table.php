@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subject_year', function (Blueprint $table) {
+        Schema::create('quizes', function (Blueprint $table) {
             $table->id();
-            $table->integer('year_id');
-            $table->integer('subject_id');
+            $table->string("name");
+            $table->integer("duration")->nullable();
+            $table->integer("total mark");
+            $table->boolean("public");
+            $table->timestamps();
         });
     }
 
@@ -23,6 +26,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subject_year');
+        Schema::dropIfExists('quizes');
     }
 };
+ 

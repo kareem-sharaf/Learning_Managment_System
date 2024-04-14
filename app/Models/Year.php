@@ -13,4 +13,16 @@ class Year extends Model
         'stage_id'
     ];
     public $timestamps=false;
+
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class);
+    }
+
+
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class);
+    }
 }

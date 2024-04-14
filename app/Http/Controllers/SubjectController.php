@@ -5,31 +5,45 @@ namespace App\Http\Controllers;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\Year;
+use App\Models\Stage;
+use App\Models\SubjectYear;
+
+
+use App\Http\Requests\SubjectRequest;
 
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\TeachersController;
 
 class SubjectController extends Controller
 {
 
+    //**********************************************************************************************\/
+    //show all subject in the class
+  public function show_all_subjects(Request $request)
+  {
+      $request->validate([
+          'class_id' => 'required|integer'
+      ]);
+      $class_id = $request->class_id;
+      $subject = Subject::where('class_id', $class_id)
+      ->get();
+      $message = "this is the all subjects in the class.";
 
-
-    public function show_all_subjects(Request $request)
+      return response()->json([
+          'message' => $message,
+          'data' => $subject
+      ]);
+  }
+//**********************************************************************************************
+//show all subjects in the class education
+  public function all_subjects_in_year(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'year_id' => 'required',
-            'stage_id' => 'required'
+        $request->validate([
+            'year_id' => 'required|integer'
         ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
-
-
-        $input= $request->all();
-        $year_id = $input['year_id'];
-        $stage_id = $input['stage_id'];
-        $subject = Subject::where('stage_id', $stage_id)->whereHas('years', function($q) use ($year_id) {
+        $year_id = $request->year_id;
+        $subject = Subject::whereHas('teachers', function($q) use ($year_id) {
             $q->where('year_id', $year_id);
         })->get();
         $message = "this is the all subjects";
@@ -39,201 +53,138 @@ class SubjectController extends Controller
             'data' => $subject
         ]);
     }
-
-
-
-
-
-
-
+    //***********************************************************************************************************************\\
     public function search_to_subject(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'year_id' => 'required',
-            'stage_id' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
+{
+    $request->validate([
+        'class_id' => 'required|string',
+        'year_id' => 'integer',
+        'name' => 'required|string',
+    ]);
 
-        $input = $request->all();
-        $year_id = $input['year_id'];
-        $subject = subject::where('name', 'like', '%' . $input['name'] . '%')
-            ->where('stage_id', $input['stage_id'])->whereHas('years', function($q) use ($year_id) {
+    $class_id = $request->class_id;
+    $year_id = $request->year_id;
+    $name = $request->name;
+
+    if ($class_id == 1) { // if the class is educational
+        $subjects = Subject::where('name', 'like', '%' . $name . '%')
+            ->whereHas('teachers', function ($q) use ($year_id) {
                 $q->where('year_id', $year_id);
             })->get();
-        if ($subject->isEmpty()) {
-            $message = "The subject doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ]);
-        }
+    } else {
+        $subjects = Subject::where('name', 'like', '%' . $name . '%')
+            ->where('class_id', $class_id)
+            ->get();
+    }
 
-        $message = "This is the subject.";
+    if ($subjects->isEmpty()) {
+        $message = "subject does not exist.";
         return response()->json([
             'message' => $message,
+        ]);
+    }
+
+    return response()->json([
+        'message' => " this is the subjects .",
+        'data' => $subjects,
+    ]);
+}
+
+    //***********************************************************************************************************************\\
+    public function add_subject(Request $request)
+{
+    $user = auth()->user();
+    $request->validate([
+        'class_id' => 'required',
+        'name' => 'required',
+        'price' => 'required',
+        'description' => 'required',
+        'teachers_content' => 'required|array',
+        'teachers_content.*.teacher_id' => 'required|integer',
+        'years_content.*.year_id' => 'integer',
+    ]);
+
+    $subject = Subject::create([
+        'name' => $request->name,
+        'price' => $request->price,
+        'description' => $request->description,
+        'class_id' => $request->class_id,
+    ]);
+
+    if ($request->class_id == 1) {//if the class is educational
+        $yearsContent = $request->years_content;
+        $teachersContent = $request->teachers_content;
+
+        foreach ($teachersContent as $teacher) {
+            foreach ($yearsContent as $year) {
+                $subject->teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
+            }
+        }
+    } else {
+        foreach ($request->teachers_content as $teacher) {
+            $subject->teachers()->attach($teacher['teacher_id']);
+        }
+    }
+
+    return response()->json([
+        'message' => 'Subject added successfully.',
+        'data' => $subject,
+    ]);
+}
+
+    //***********************************************************************************************************************\\
+    public function edit_subject(Request $request)
+    {
+        $request->validate([
+            'subject_id' => 'required',
+            'class_id' => 'required',
+            'name' => 'required',
+            'price' => 'required',
+            'description' => 'required',
+            'teachers_content' => 'required|array',
+            'teachers_content.*.teacher_id' => 'required|integer',
+            'years_content.*.year_id' => 'integer',
+        ]);
+
+        $subject_id = $request->subject_id;
+        $subject = Subject::find($subject_id);
+
+        $subject->name = $request->name;
+        $subject->price = $request->price;
+        $subject->description = $request->description;
+        $subject->class_id = $request->class_id;
+        $subject->save();
+
+
+        if ($request->class_id == 1) { // if the class is educational
+            $yearsContent = $request->years_content;
+            $teachersContent = $request->teachers_content;
+
+            $subject->teachers()->detach();
+
+            foreach ($teachersContent as $teacher) {
+                foreach ($yearsContent as $year) {
+                    $subject->teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
+                }
+            }
+        } else {
+            $subject->teachers()->detach();
+
+            foreach ($request->teachers_content as $teacher) {
+                $subject->teachers()->attach($teacher['teacher_id']);
+            }
+        }
+
+        return response()->json([
+            'message' => 'subject updated successfully',
             'data' => $subject,
         ]);
     }
-
-
-
-
-
-
-
-
-    public function add_subject(Request $request)
+    //***********************************************************************************************************************\\
+ public function delete_subject($subject_id)
     {
         $user = auth()->user();
-         if($user->role_id == 2){
-        $input = $request->all();
-        $validator_subject = Validator::make($input, [
-            'name' => 'required',
-            // 'image_data' => 'required',
-            'stage_id' => 'required',
-        ]);
-
-        $validator_teacher = Validator::make($input, [
-            'teachers_content' => 'required|array',
-            'teachers_content.*.teacher_id' => 'required|integer',
-        ]);
-        $validator_year = Validator::make($input, [
-            'years_content' => 'required|array',
-            'years_content.*.year_id' => 'required|integer',
-        ]);
-
-
-        if ($validator_subject->fails() || $validator_teacher->fails() || $validator_year->fails() ) {
-            return 'Error in validation.';
-        }
-
-
-
-        $subject = Subject::create([
-            'name' => $input['name'],
-            'stage_id' => $input['stage_id'],
-           // 'image_data	' => $input['image_data	']
-        ]);
-
-        foreach ($input['teachers_content'] as $item) {
-            $teacher = Teacher::find($item['teacher_id']);
-
-            if (!$teacher) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Teacher with ID ' . $item['teacher_id'] . ' not found.'
-                ]);
-            }
-
-            $teacher->subjects()->attach($subject->id);
-        }
-
-        foreach ($input['years_content'] as $item) {
-            $year = Year::where('stage_id',$input['stage_id'])->find($item['year_id']);
-
-            if (!$year) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'year with ID ' . $item['year_id'] . ' not found.'
-                ]);
-            }
-
-            $year->subjects()->attach($subject->id);
-        }
-
-        $message = "Subject added successfully.";
-        return response()->json([
-            'message' => $message,
-            'data' => $subject
-        ]);
-
-         } else {
-             $message = "You can't add the subject.";
-             return response()->json([
-                 'message' => $message
-             ]);
-         }
-    }
-
-
-
-
-
-    public function edit_subject(Request $request)
-    {
-        $user = auth()->user();
-        if($user->role_id == 2){
-        $input = $request->all();
-
-        $validator_subject = Validator::make($input, [
-            'subject_id'=>'required',
-            'name' => 'required',
-            // 'image' => 'required',
-            'stage_id' => 'required',
-        ]);
-
-        $validator_teacher = Validator::make($input, [
-            'teacher_content' => 'required|array',
-            'teacher_content.*.teacher_id' => 'required|integer',
-        ]);
-        $validator_year = Validator::make($input, [
-            'year_content' => 'required|array',
-            'year_content.*.year_id' => 'required|integer',
-        ]);
-        if ($validator_subject->fails() || $validator_teacher->fails() || $validator_year->fails()) {
-            return 'Error in validation.';
-        }
-
-
-
-        $subject = Subject::find($input['subject_id']);
-
-        if (!$subject) {
-            return response()->json([
-                'message' => 'Subject not found.'
-            ]);
-        }
-
-
-        $subject->update([
-            'name' => $input['name'],
-            // 'image' => $input['image'],
-            'stage_id' => $input['stage_id'],
-        ]);
-
-        $subject->teachers()->sync($input['teacher_content']);
-        $subject->years()->sync($input['year_content']);
-
-        $message = "The subject has been updated successfully.";
-        return response()->json([
-            'message' => $message,
-            'data' => $subject
-        ]);
-         } else {
-             $message = "You can't deite the subject.";
-             return response()->json([
-                 'message' => $message
-             ]);
-         }
-    }
-
-
-
-
-
-
-
-
-    public function delete_subject($subject_id)
-    {
-        $user = auth()->user();
-         if($user->role_id == 2){
-
-
         $subject = Subject::find($subject_id);
-
         if (!$subject) {
             $message = "The subject doesn't exist.";
             return response()->json([
@@ -242,19 +193,13 @@ class SubjectController extends Controller
         }
 
         $subject->teachers()->detach();
-        $subject->years()->detach();
-
         $subject->delete();
 
         $message = "The subject deleted successfully.";
         return response()->json([
             'message' => $message,
         ]);
-         } else {
-             $message = "You can't delete the subject.";
-             return response()->json([
-                 'message' => $message
-             ]);
-         }
+
     }
 }
+    //***********************************************************************************************************************\\

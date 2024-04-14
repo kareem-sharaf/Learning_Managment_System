@@ -45,47 +45,47 @@ class YearSeeder extends Seeder
         ]);
         Year::create([
             'id' => '7',
-            'year' => '1st',
+            'year' => '1st-mid',
             'stage_id' => '2'
         ]);
         Year::create([
             'id' => '8',
-            'year' => '2nd',
+            'year' => '2nd-mid',
             'stage_id' => '2'
         ]);
         Year::create([
             'id' => '9',
-            'year' => '3rd',
+            'year' => '3rd-mid',
             'stage_id' => '2'
         ]);
         Year::create([
             'id' => '10',
-            'year' => '1st',
+            'year' => '1st-sci',
             'stage_id' => '3'
         ]);
         Year::create([
             'id' => '11',
-            'year' => '2nd',
+            'year' => '2nd-sci',
             'stage_id' => '3'
         ]);
         Year::create([
             'id' => '12',
-            'year' => '3rd',
+            'year' => '3rd-sci',
             'stage_id' => '3'
         ]);
         Year::create([
             'id' => '13',
-            'year' => '1st',
+            'year' => '1st-lit',
             'stage_id' => '4'
         ]);
         Year::create([
             'id' => '14',
-            'year' => '2nd',
+            'year' => '2nd-lit',
             'stage_id' => '4'
         ]);
         Year::create([
             'id' => '15',
-            'year' => '3rd',
+            'year' => '3rd-lit',
             'stage_id' => '4'
         ]);
     }

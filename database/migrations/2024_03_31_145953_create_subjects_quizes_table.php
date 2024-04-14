@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teachers', function (Blueprint $table) {
+        Schema::create('subjects_quizes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->binary('image_data')->default('default_image.jpg')->nullable();
-            $table->string('description')->nullable();
-           $table->timestamps();
+            $table->integer('subject_id');
+            $table->integer('quiz_id');
+
         });
     }
 
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teachers');
+        Schema::dropIfExists('subjects_quizes');
     }
 };

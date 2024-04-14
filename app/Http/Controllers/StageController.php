@@ -98,13 +98,13 @@ class StageController extends Controller
 
         if ($newStage) {
             return response()->json(
-                ['error' => 'stage alredy exists!'],
+                ['message' => 'stage alredy exists!'],
                 404
             );
         }
         if ($stage->stage === $newStage) {
             return response()->json(
-                ['error' => 'nothing to update!'],
+                ['message' => 'nothing to update!'],
                 404
             );
         }

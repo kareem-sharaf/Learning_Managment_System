@@ -19,18 +19,23 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'father_name',
         'email',
+        'verified',
+        'email_sent_at',
         'password',
         'device_id',
+        'verificationCode',
         'birth_date',
-        'address',
-        'phone_number',
+        'gender',
+        'verified',
+        'address_id',
         'role_id',
         'stage_id',
         'year_id',
+        'image_id'
     ];
 
+    public $timestamps=false;
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -58,6 +63,6 @@ class User extends Authenticatable
 
     public function favorites()
     {
-        return $this->belongsToMany(Favorite::class);
+        return $this->belongsToMany(Favorite::class, 'favorite_user');
     }
 }
