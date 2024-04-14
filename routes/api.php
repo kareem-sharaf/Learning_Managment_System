@@ -8,12 +8,8 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
-<<<<<<< HEAD
-use App\Http\Controllers\LeesonController;
-=======
 use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LeasonController;
->>>>>>> fefbaad9742d2944ddba344703cebbf7303bd058
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;

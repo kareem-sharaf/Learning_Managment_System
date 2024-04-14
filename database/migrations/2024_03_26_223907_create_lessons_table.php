@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('name');
 
             $table->foreignId('unit_id')->constrained('units')->cascadeOnDelete();
-            $table->foreignId('file_id')->constrained('files')->cascadeOnDelete();
-            $table->foreignId('video_id')->constrained('videos')->cascadeOnDelete();
+            $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
+            $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
+
             $table->integer('price');
             $table->text('description');
 
