@@ -26,12 +26,8 @@ class Subject extends Model
         return $this->belongsTo(Stage::class);
     }
 
-    public function years()
-    {
-        return $this->belongsToMany(Year::class);
-    }
 
-    public function teachers()
+    public function years_teachers()
     {
         return $this->belongsToMany(Teacher::class, 'teacher_subject_years', 'subject_id', 'teacher_id')
                     ->withPivot('year_id');
