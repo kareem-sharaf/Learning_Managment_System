@@ -43,7 +43,7 @@ class SubjectController extends Controller
             'year_id' => 'required|integer'
         ]);
         $year_id = $request->year_id;
-        $subject = Subject::whereHas('teachers', function($q) use ($year_id) {
+        $subject = Subject::whereHas('years_teachers', function($q) use ($year_id) {
             $q->where('year_id', $year_id);
         })->get();
         $message = "this is the all subjects";
@@ -57,7 +57,7 @@ class SubjectController extends Controller
     public function search_to_subject(Request $request)
 {
     $request->validate([
-        'class_id' => 'required|string',
+        'class_id' => 'integer',
         'year_id' => 'integer',
         'name' => 'required|string',
     ]);
@@ -68,12 +68,13 @@ class SubjectController extends Controller
 
     if ($class_id == 1) { // if the class is educational
         $subjects = Subject::where('name', 'like', '%' . $name . '%')
-            ->whereHas('teachers', function ($q) use ($year_id) {
+            ->whereHas('years_teachers', function ($q) use ($year_id) {
                 $q->where('year_id', $year_id);
             })->get();
     } else {
         $subjects = Subject::where('name', 'like', '%' . $name . '%')
-            ->where('class_id', $class_id)
+           // ->where('class_id', $class_id)//serach in one class
+           ->where('class_id', '!=', 1)//search in all classes without educational
             ->get();
     }
 
@@ -117,12 +118,12 @@ class SubjectController extends Controller
 
         foreach ($teachersContent as $teacher) {
             foreach ($yearsContent as $year) {
-                $subject->teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
+                $subject->years_teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
             }
         }
     } else {
         foreach ($request->teachers_content as $teacher) {
-            $subject->teachers()->attach($teacher['teacher_id']);
+            $subject->years_teachers()->attach($teacher['teacher_id']);
         }
     }
 
@@ -160,18 +161,18 @@ class SubjectController extends Controller
             $yearsContent = $request->years_content;
             $teachersContent = $request->teachers_content;
 
-            $subject->teachers()->detach();
+            $subject->years_teachers()->detach();
 
             foreach ($teachersContent as $teacher) {
                 foreach ($yearsContent as $year) {
-                    $subject->teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
+                    $subject->years_teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
                 }
             }
         } else {
-            $subject->teachers()->detach();
+            $subject->years_teachers()->detach();
 
             foreach ($request->teachers_content as $teacher) {
-                $subject->teachers()->attach($teacher['teacher_id']);
+                $subject->years_teachers()->attach($teacher['teacher_id']);
             }
         }
 
@@ -192,7 +193,7 @@ class SubjectController extends Controller
             ]);
         }
 
-        $subject->teachers()->detach();
+        $subject->years_teachers()->detach();
         $subject->delete();
 
         $message = "The subject deleted successfully.";
