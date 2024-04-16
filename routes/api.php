@@ -8,8 +8,10 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LeasonController;
+use App\Http\Controllers\LeesonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
@@ -174,5 +176,6 @@ Route::group(['prefix' => 'file'], function () {
         Route::get('/getall', 'getall');
         });
     });
+    Route::post('/message',[ChatController::class,'message']);
 
 

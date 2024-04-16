@@ -125,16 +125,8 @@ class AuthController extends Controller
 
         $user = new User([
             'name' => $request->name,
-<<<<<<< HEAD
-            'father_name' => $request->father_name,
-            'phone_number' => $request->phone_number,
-            'password' => Hash::make ($request->password),
-            'email' => $request->email,
-            'address' => $request->address,
-=======
             'email' => $UserVerification->email,
             'address_id' => $request->address_id,
->>>>>>> fefbaad9742d2944ddba344703cebbf7303bd058
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'verified' => 1,
