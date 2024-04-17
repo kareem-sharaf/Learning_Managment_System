@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->binary('image_data')->default('default_image.jpg')->nullable();
             $table->string('description')->nullable();
+            $table->unsignedBigInteger('class_id')->references('id')->on('classifications')->cascadeOnDelete();
            $table->timestamps();
         });
     }

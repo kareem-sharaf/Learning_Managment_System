@@ -8,8 +8,8 @@ use App\Models\Year;
 use App\Models\Stage;
 use App\Models\SubjectYear;
 
-
-use App\Http\Requests\SubjectRequest;
+ use App\Http\Responses\ApiSuccessResponse;
+ use App\Http\Responses\ApiErrorResponse;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -28,12 +28,12 @@ class SubjectController extends Controller
       $class_id = $request->class_id;
       $subject = Subject::where('class_id', $class_id)
       ->get();
-      $message = "this is the all subjects in the class.";
+      return new ApiSuccessResponse(
+        'this is the all subjects in the class.',
+        $subject,
+       201,
 
-      return response()->json([
-          'message' => $message,
-          'data' => $subject
-      ]);
+    );
   }
 //**********************************************************************************************
 //show all subjects in the class education
@@ -50,8 +50,7 @@ class SubjectController extends Controller
 
         return response()->json([
             'message' => $message,
-            'data' => $subject
-        ]);
+            'data' => $subject]);
     }
     //***********************************************************************************************************************\\
     public function search_to_subject(Request $request)
@@ -79,10 +78,11 @@ class SubjectController extends Controller
     }
 
     if ($subjects->isEmpty()) {
-        $message = "subject does not exist.";
-        return response()->json([
-            'message' => $message,
-        ]);
+        return new ApiErrorResponse(
+        'subject does not exist.',
+       404,
+        );
+
     }
 
     return response()->json([
@@ -100,6 +100,9 @@ class SubjectController extends Controller
         'name' => 'required',
         'price' => 'required',
         'description' => 'required',
+        'image_data' ,
+        'video_id' => 'integer',
+        'file_id' => 'integer',
         'teachers_content' => 'required|array',
         'teachers_content.*.teacher_id' => 'required|integer',
         'years_content.*.year_id' => 'integer',
@@ -109,6 +112,9 @@ class SubjectController extends Controller
         'name' => $request->name,
         'price' => $request->price,
         'description' => $request->description,
+        'image_data' => $request->image_data,
+        'video_id' => $request->video_id,
+        'file_id' => $request->file_id,
         'class_id' => $request->class_id,
     ]);
 
@@ -142,6 +148,9 @@ class SubjectController extends Controller
             'name' => 'required',
             'price' => 'required',
             'description' => 'required',
+            'image_data' ,
+            'video_id' => 'integer',
+            'file_id' => 'integer',
             'teachers_content' => 'required|array',
             'teachers_content.*.teacher_id' => 'required|integer',
             'years_content.*.year_id' => 'integer',
@@ -154,6 +163,9 @@ class SubjectController extends Controller
         $subject->price = $request->price;
         $subject->description = $request->description;
         $subject->class_id = $request->class_id;
+        $subject->image_data = $request->image_data;
+        $subject->video_id = $request->video_id;
+        $subject->file_id = $request->file_id;
         $subject->save();
 
 

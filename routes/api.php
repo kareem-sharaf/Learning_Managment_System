@@ -146,8 +146,9 @@ Route::group(['prefix' => 'unit'], function () {
 Route::group(['prefix' => 'teacher'], function () {
     Route::controller(TeachersController::class)->group(function () {
         Route::get('show_one_teacher/{teacher_id}', 'show_one_teacher');
-        Route::post('show_all_teachers', 'show_all_teachers');
+        Route::get('show_all_teachers', 'show_all_teachers');
 
+        Route::get('show_class_teachers/{class_id}', 'show_class_teachers');
         Route::post('search_to_teacher', 'search_to_teacher');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
