@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->binary('image_data')->default('default_image.jpg')->nullable();
             $table->string('description')->nullable();
             $table->unsignedBigInteger('class_id')->references('id')->on('classifications')->cascadeOnDelete();
+            $table->binary('image_data')->default('default_image.jpg')->nullable();
            $table->timestamps();
         });
     }

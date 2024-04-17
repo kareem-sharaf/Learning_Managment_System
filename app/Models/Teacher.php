@@ -30,7 +30,11 @@ public function years()
 {
     return $this->belongsToMany(Year::class);
 }
-
+public function subjects_teachers()
+    {
+        return $this->belongsToMany(Teacher::class, 'teacher_subject_years', 'subject_id', 'teacher_id')
+                    ->withPivot('year_id');
+    }
 
 public function class()
 {

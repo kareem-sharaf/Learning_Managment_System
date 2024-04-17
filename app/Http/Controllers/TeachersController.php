@@ -6,8 +6,8 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\Stage;
 use App\Models\Year;
-use App\Models\SubjectYear;
 use App\Models\TeacherSubjectYear;
+use App\Models\SubjectYear;
 
 
 use Illuminate\Http\Request;
@@ -73,48 +73,18 @@ class TeachersController extends Controller
     {
         $user = auth()->user();
         $input = $request->all();
-        $validator_teacher = Validator::make($input, [
+        $request->validate([
+            'class_id'=>'required|integer',
             'name' => 'required',
             // 'image_data' => 'required',
             'description' => 'required',
-            'content' => 'required|array',
-            'content.*.year_id' => 'required|integer',
-            'content.*.subject_id' => 'required|integer'
-        ]);
-        if ($validator_teacher->fails()) {
-            return 'Error in validation.';
-        }
-
+            ]);
         $teacher = Teacher::create([
-            'name' => $input['name'],
-            // 'naimage_datame' => $input['image_data'],
-            'description' => $input['description']
+            'class_id' => $request->class_id,
+            'name' => $request->name,
+            'image_data' => $request->image_data,
+            'description' => $request->description,
         ]);
-
-        foreach ($input['content'] as $item) {
-            $year = Year::find($item['year_id']);
-   if (!$year) {
-       return response()->json([
-           'message' => 'Year with ID ' . $item['year_id'] . ' not found.'
-       ]);
-   } else {
-       $subject = Subject::find($item['subject_id']);
-       if (!$subject) {
-           return response()->json([
-               'message' => 'Subject with ID ' . $item['subject_id'] . ' not found.'
-           ]);
-       } else {
-           $subjectYear = SubjectYear::where('year_id', $year->id)->where('subject_id', $subject->id)->first();
-           if ($subjectYear) {
-               $teacher->subjectYears()->attach($subjectYear->id);
-           } else {
-               return response()->json([
-                   'message' => 'Subject Year not found.'
-               ]);
-           }
-       }
-   }
-        }
         $message = "teacher added successfully.";
         return response()->json([
             'message' => $message,
@@ -126,63 +96,22 @@ class TeachersController extends Controller
     {
         $user = auth()->user();
         $input = $request->all();
-
-
-        $validator_teacher = Validator::make($input, [
-            'teacher_id' => 'required|integer',
+        $request->validate([
+            'teacher_id'=>'required|integer',
+            'class_id'=>'required|integer',
             'name' => 'required',
             // 'image_data' => 'required',
             'description' => 'required',
-            'content' => 'required|array',
-            'content.*.year_id' => 'required|integer',
-            'content.*.subject_id' => 'required|integer'
-        ]);
-        if ($validator_teacher->fails()) {
-            return 'Error in validation.';
-        }
-
-        $teacher = Teacher::find($input['teacher_id']);
-
-        if (!$teacher) {
-            return response()->json([
-                'message' => 'teacher not found.'
             ]);
-        }
+            $teacher_id = $request->teacher_id;
+            $teacher = Teacher::find($teacher_id);
 
-
-        $teacher->update([
-            'name' => $input['name'],
-            // 'image' => $input['image'],
-            'description' => $input['description']
-        ]);
-
-        $teacher->subjectYears()->detach(); // قم بفصل جميع الروابط الحالية
-
-        foreach ($input['content'] as $item) {
-            $year = Year::find($item['year_id']);
-   if (!$year) {
-       return response()->json([
-           'message' => 'Year with ID ' . $item['year_id'] . ' not found.'
-       ]);
-   } else {
-       $subject = Subject::find($item['subject_id']);
-       if (!$subject) {
-           return response()->json([
-               'message' => 'Subject with ID ' . $item['subject_id'] . ' not found.'
-           ]);
-       }else{
-        $subjectYear = SubjectYear::where('year_id', $year->id)->where('subject_id', $subject->id)->first();
-        if ($subjectYear) {
-            $teacher->subjectYears()->attach($subjectYear->id);
-        } else {
-            return response()->json([
-                'message' => 'Subject Year not found.'
-            ]);
-        }
-       }
-    }
-}
-    $message = "The teacher update successfully.";
+            $teacher->class_id = $request->class_id;
+            $teacher->name = $request->name;
+            $teacher->image_data = $request->image_data;
+            $teacher->description = $request->description;
+            $teacher->save();
+    $message = "The teacher updated successfully.";
     return response()->json([
         'message' => $message,
         'data' => $teacher
@@ -200,7 +129,7 @@ class TeachersController extends Controller
             ]);
         }
 
-        $teacher->subjectYears()->detach();
+        $teacher->subjects()->detach();
         $teacher->delete();
 
         $message = "The teacher deleted successfully.";
