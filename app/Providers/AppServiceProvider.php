@@ -21,7 +21,13 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-    {
-        //
-    }
+{
+    // Response::macro('api', function($data){
+    //     return Response::json([
+    //         'status' => true,
+    //         'data' => $data,
+    //     ]);
+    // });
+}
+
 }

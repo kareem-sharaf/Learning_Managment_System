@@ -38,9 +38,9 @@ class TeachersController extends Controller
         ]);
     }
     //********************************************************************************************** */
-    public function show_year_teachers($year_id)
+    public function show_class_teachers($class_id)
     {
-        $teachers = Year::find($year_id)->teachers()->get();
+        $teachers = Teacher::where('class_id',$class_id)->get();
         $message = "this is the teachers.";
         return response()->json([
             'message' => $message,
@@ -50,26 +50,18 @@ class TeachersController extends Controller
     //********************************************************************************************** */
     public function search_to_teacher(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'year_id' => 'required'
+        $request->validate([
+            'name' => 'required|string'
         ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
         $input = $request->all();
         $teacher = Teacher::where('name', 'like', '%' . $input['name'] . '%')
-                    ->whereHas('years', function ($query) use ($input) {
-                        $query->where('year_id', $input['year_id']);
-                    })->get();
-
-        if (is_null($teacher)) {
+                            ->get();
+        if ($teacher->isEmpty()) {
             $message = "The teacher doesn't exist.";
             return response()->json([
                 'message' => $message,
             ]);
         }
-
         $message = "This is the teacher.";
         return response()->json([
             'message' => $message,

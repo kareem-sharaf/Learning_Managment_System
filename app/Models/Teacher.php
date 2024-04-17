@@ -11,7 +11,8 @@ class Teacher extends Model
     protected $fillable = [
         'name',
         'image_data',
-        'description'
+        'description',
+        'class_id'
     ];
 
 
@@ -29,4 +30,11 @@ public function years()
 {
     return $this->belongsToMany(Year::class);
 }
+
+
+public function class()
+{
+    return $this->belongsTo(Classification::class);
+}
+
 }
