@@ -112,15 +112,14 @@ Route::group(['prefix' => 'ad'], function () {
 
 Route::group(['prefix' => 'subject'], function () {
     Route::controller(SubjectController::class)->group(function () {
-        Route::post('show_all_subjects', 'show_all_subjects');
-        Route::post('all_subjects_in_year', 'all_subjects_in_year');
-        Route::post('search_to_subject', 'search_to_subject');
-        Route::post('search_to_subject_in_year', 'search_to_subject_in_year');
+        Route::get('show_all_subjects', 'show_all_subjects');
+        Route::get('all_subjects_in_year', 'all_subjects_in_year');
+        Route::get('search_to_subject', 'search_to_subject');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('add_subject', 'add_subject');
             Route::post('edit_subject', 'edit_subject');
-            Route::delete('delete_subject/{subject_id}', 'delete_subject');
+            Route::get('delete_subject/{subject_id}', 'delete_subject');
 
         });
     });

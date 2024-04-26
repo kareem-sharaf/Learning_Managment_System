@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
             $table->text("text");
-            $table->char("answer");
+            $table->text("answers");
+            $table->char("correct_answer");
             $table->integer("mark");
-            $table->unsignedBigInteger('subject_year_id')->constrained('subject_year')->cascadeOnDelete();
+            $table->unsignedBigInteger('subject_id')->constrained('subject')->cascadeOnDelete();
             $table->timestamps();
         });
     }

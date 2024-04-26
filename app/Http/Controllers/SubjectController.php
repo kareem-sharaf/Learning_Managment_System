@@ -22,32 +22,24 @@ class SubjectController extends Controller
     //show all subject in the class
   public function show_all_subjects(Request $request)
   {
-      $request->validate([
-          'class_id' => 'required|integer'
-      ]);
-      $class_id = $request->class_id;
+      $class_id = $request->query('class_id');
       $subject = Subject::where('class_id', $class_id)
       ->get();
       return new ApiSuccessResponse(
         'this is the all subjects in the class.',
         $subject,
        201,
-
     );
   }
 //**********************************************************************************************
 //show all subjects in the class education
   public function all_subjects_in_year(Request $request)
     {
-        $request->validate([
-            'year_id' => 'required|integer'
-        ]);
-        $year_id = $request->year_id;
+        $year_id = $request->query('year_id');
         $subject = Subject::whereHas('years_teachers', function($q) use ($year_id) {
             $q->where('year_id', $year_id);
         })->get();
         $message = "this is the all subjects";
-
         return response()->json([
             'message' => $message,
             'data' => $subject]);
@@ -61,9 +53,9 @@ class SubjectController extends Controller
         'name' => 'required|string',
     ]);
 
-    $class_id = $request->class_id;
-    $year_id = $request->year_id;
-    $name = $request->name;
+    $class_id = $request->query('class_id');
+    $year_id = $request->query('year_id');
+    $name = $request->query('name');
 
     if ($class_id == 1) { // if the class is educational
         $subjects = Subject::where('name', 'like', '%' . $name . '%')
