@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer("duration")->nullable();
             $table->integer("total mark");
             $table->boolean("public");
+            $table->json("questions_content");
+            $table->integer("subject_id");
             $table->timestamps();
         });
     }
@@ -29,4 +31,3 @@ return new class extends Migration
         Schema::dropIfExists('quizes');
     }
 };
- 

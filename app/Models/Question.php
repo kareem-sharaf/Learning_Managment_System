@@ -10,9 +10,10 @@ class Question extends Model
     use HasFactory;
     protected $fillable=[
         'text',
-        'answer',
+        'answers',
         'mark',
-        'subject_year_id',
+        'correct_answer',
+        'subject_id',
     ];
 
 
