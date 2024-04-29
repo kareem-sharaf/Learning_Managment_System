@@ -55,7 +55,7 @@ class UserVerificationController extends Controller
             );
         } else {
 
-            if ($user->role_id == 1 || ($user->role_id == 2 && $request->role_id == 2)) {
+            if ($user->role_id == 1 || ($user->role_id == 2 && ($request->role_id == 2 || $request->role_id == 3))) {
                 $newUser = new UserVerification([
                     'email' => $request->email,
                     'role_id' => $request->role_id,

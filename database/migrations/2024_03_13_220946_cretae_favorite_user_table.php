@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('favorite_user', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('fav_id')->constrained('favorites')->cascadeOnDelete();
-            $table->unsignedBigInteger('user_id')->constrained('users')->cascadeOnDelete();
+            $table->unsignedBigInteger('favorite_id');
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
+
+            $table->foreign('favorite_id')->references('id')->on('favorites')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('favorite_user');
     }
 };

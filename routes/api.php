@@ -9,8 +9,8 @@ use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
 use App\Http\Controllers\ChatController;
-use App\Http\Controllers\ClassificationController;
-use App\Http\Controllers\LeasonController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LeesonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
@@ -34,7 +34,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('sendSMS', [SMSController::class, 'sendSMS']);
 
-
+//  auth routes
 Route::group(['prefix' => 'auth'], function () {
     Route::controller(AuthController::class)->group(function () {
         Route::post('registerWeb', 'registerWeb');
@@ -61,7 +61,22 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('createUser', 'createUser');
         Route::post('verifyUser', 'verifyUser');
         Route::post('resend_email', 'resend_email');
+    });
+});
 
+//  category routes
+Route::group(['prefix' => 'category'], function () {
+    Route::controller(CategoryController::class)->group(function () {
+        Route::get('index', 'index');
+        Route::post('store', 'store');
+        Route::post('search', 'search');
+        Route::post('update', 'update');
+        Route::get('showSoftDeleted', 'showSoftDeleted');
+        Route::post('forceDelete', 'forceDelete');
+        Route::post('destroy', 'destroy');
+        Route::group(['middleware' => 'auth:sanctum'], function () {
+            Route::post('show', 'show');
+        });
     });
 });
 
@@ -120,7 +135,6 @@ Route::group(['prefix' => 'subject'], function () {
             Route::post('add_subject', 'add_subject');
             Route::post('edit_subject', 'edit_subject');
             Route::get('delete_subject/{subject_id}', 'delete_subject');
-
         });
     });
 });
@@ -136,7 +150,6 @@ Route::group(['prefix' => 'unit'], function () {
             Route::post('add_unit', 'add_unit');
             Route::post('edit_unit/{unit_id}', 'edit_unit');
             Route::delete('delete_unit/{unit_id}', 'delete_unit');
-
         });
     });
 });
@@ -156,26 +169,23 @@ Route::group(['prefix' => 'teacher'], function () {
             Route::post('add_teacher', 'add_teacher');
             Route::post('edit_teacher', 'edit_teacher');
             Route::delete('delete_teacher/{teacher_id}', 'delete_teacher');
-
         });
     });
 });
 Route::group(['prefix' => 'file'], function () {
-    Route::controller(LeesonController::class)->group(function () {
+    Route::controller(LessonController::class)->group(function () {
         Route::post('/upload', 'upload');
         Route::post('/update', 'update');
         Route::post('/delete', 'delete');
         Route::post('/uploadvideo', 'uploadvideo');
         Route::post('/updateVideo', 'updateVideo');
-        Route::post('/deletevideo','deletevideo');
+        Route::post('/deletevideo', 'deletevideo');
         Route::post('/uploadpdf',   'uploadpdf');
         Route::post('/updatepdf',  'updatepdf');
         Route::post('/deletepdf',  'deletepdf');
         Route::post('/hh',  'hh');
 
         Route::get('/getall', 'getall');
-        });
     });
-    Route::post('/message',[ChatController::class,'message']);
-
-
+});
+Route::post('/message', [ChatController::class, 'message']);

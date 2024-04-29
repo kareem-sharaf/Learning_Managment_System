@@ -4,26 +4,26 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Classification;
+use App\Models\Category;
 
-class ClassificationSeeder extends Seeder
+class CategorySeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Classification::create([
+        Category::create([
             'id' => 1,
-            'class' => 'educational'
+            'category' => 'educational'
         ]);
-        Classification::create([
+        Category::create([
             'id' => 2,
-            'class' => 'languages'
+            'category' => 'languages'
         ]);
-        Classification::create([
+        Category::create([
             'id' => 3,
-            'class' => 'programming'
+            'category' => 'programming'
         ]);
     }
 }

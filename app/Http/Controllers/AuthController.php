@@ -373,7 +373,6 @@ class AuthController extends Controller
         );
     }
 
-
     //  set new password
     public function setPassword(Request $request)
     {

@@ -63,6 +63,21 @@ class User extends Authenticatable
 
     public function favorites()
     {
-        return $this->belongsToMany(Favorite::class, 'favorite_user');
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoriteCourses()
+    {
+        return $this->morphedByMany(Course::class, 'favoritable', 'favorites');
+    }
+
+    public function favoriteTeachers()
+    {
+        return $this->morphedByMany(Teacher::class, 'favoritable', 'favorites');
+    }
+
+    public function favoriteSubjects()
+    {
+        return $this->morphedByMany(Subject::class, 'favoritable', 'favorites');
     }
 }
