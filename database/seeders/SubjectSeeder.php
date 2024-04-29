@@ -18,31 +18,27 @@ class SubjectSeeder extends Seeder
             'name' => 'physics',
             'description' => 'asdf',
             'category_id' => '2',
-            'year_id' => '7'
-
         ]);
+
         Subject::create([
             'id' => '2',
             'name' => 'chemistry',
             'description' => '2asdf',
             'category_id' => '3',
-            'year_id' => '7'
-
         ]);
+
         Subject::create([
             'id' => '3',
             'name' => 'programming',
             'description' => '2ffs',
             'category_id' => '3',
-            'year_id' => '11'
-
         ]);
+
         Subject::create([
             'id' => '4',
             'name' => 'maths',
             'description' => '2sdf',
             'category_id' => '1',
-            'year_id' => '3'
 
         ]);
     }
