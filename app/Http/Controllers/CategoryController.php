@@ -33,6 +33,35 @@ class CategoryController extends Controller
     }
 
     //  show the subjects of a specific category
+    public function show(Request $request)
+    {
+        $category = Category::where('category', $request->category)->first();
+
+        if (!$category) {
+            return response()->json(
+                ['message' => 'Category not found!'],
+                404
+            );
+        }
+
+        $subjects = $category->subjects;
+        if (!$subjects) {
+            return response()->json(
+                ['message' => 'No subjects found in this Category!'],
+                404
+            );
+        }
+
+        return response()->json(
+            [
+                'message' => 'Subjects of this category:',
+                'subjects' => $subjects
+            ],
+            200
+        );
+    }
+
+    //  search in categories
     public function search(Request $request)
     {
         $request->validate([
@@ -57,6 +86,7 @@ class CategoryController extends Controller
     //  store new category
     public function store(Request $request)
     {
+        $user = Auth::user();
         $request->validate([
             'category' => 'required|string|unique:categories',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
@@ -84,6 +114,7 @@ class CategoryController extends Controller
     // update category
     public function update(Request $request)
     {
+        $user = Auth::user();
         $request->validate([
             'category' => 'required|string|exists:categories',
             'new_category' => 'string|unique:categories,categories',
@@ -132,6 +163,7 @@ class CategoryController extends Controller
     //  show soft deleted categories
     public function showSoftDeleted()
     {
+        $user = Auth::user();
         $softDeletedCategories = Category::onlyTrashed()->get();
 
         if ($softDeletedCategories->isEmpty()) {
@@ -150,6 +182,7 @@ class CategoryController extends Controller
     //  soft delete category
     public function destroy(Request $request)
     {
+        $user = Auth::user();
         $category = Category::where('category', $request->category)->first();
 
         if (!$category) {
@@ -170,6 +203,7 @@ class CategoryController extends Controller
     //  force delete category
     public function forceDelete(Request $request)
     {
+        $user = Auth::user();
         $request->validate([
             'category' => 'required|string|exists:categories',
         ]);

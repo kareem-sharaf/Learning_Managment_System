@@ -68,14 +68,18 @@ Route::group(['prefix' => 'auth'], function () {
 Route::group(['prefix' => 'category'], function () {
     Route::controller(CategoryController::class)->group(function () {
         Route::get('index', 'index');
-        Route::post('store', 'store');
         Route::post('search', 'search');
-        Route::post('update', 'update');
+        Route::post('show', 'show');
         Route::get('showSoftDeleted', 'showSoftDeleted');
-        Route::post('forceDelete', 'forceDelete');
-        Route::post('destroy', 'destroy');
-        Route::group(['middleware' => 'auth:sanctum'], function () {
-            Route::post('show', 'show');
+        Route::group([
+            'middleware' => 'checkIfAdmin', 'checkIfManager',
+            'auth:sanctum'
+        ], function () {
+            Route::post('store', 'store');
+            Route::post('update', 'update');
+            Route::post('forceDelete', 'forceDelete');
+            Route::post('destroy', 'destroy');
+
         });
     });
 });
