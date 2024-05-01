@@ -68,7 +68,7 @@ Route::group(['prefix' => 'auth'], function () {
 Route::group(['prefix' => 'category'], function () {
     Route::controller(CategoryController::class)->group(function () {
         Route::get('index', 'index');
-        Route::post('search', 'search');
+        Route::get('search', 'search');
         Route::post('show', 'show');
         Route::get('showSoftDeleted', 'showSoftDeleted');
         Route::group([

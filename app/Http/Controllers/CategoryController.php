@@ -64,24 +64,29 @@ class CategoryController extends Controller
     //  search in categories
     public function search(Request $request)
     {
-        $request->validate([
-            'category' => 'required|string'
-        ]);
+        $categoryName = $request->query('category');
 
-        $categories = Category::where('category', 'like', '%' . $request->category . '%')
-            ->get();
+        $categories = Category::query();
 
-        if ($categories->isNotEmpty()) {
+        if ($categoryName) {
+            $categories->where('category', 'like', '%' . $categoryName . '%');
+        }
+
+        $result = $categories->get();
+
+        if ($result->isNotEmpty()) {
             return response()->json(
-                ['message' => $categories],
+                ['message' => $result],
                 200
             );
         }
+
         return response()->json(
-            ['message' => 'Category not found!'],
+            ['message' => 'No categories found!'],
             404
         );
     }
+
 
     //  store new category
     public function store(Request $request)
