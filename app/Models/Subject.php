@@ -45,8 +45,5 @@ class Subject extends Model
     {
         return $this->belongsTo(classification::class);
     }
-    public function quizes()
-    {
-        return $this->belongsToMany(Quiz::class);
-    }
+    
 }

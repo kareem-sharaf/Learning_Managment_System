@@ -8,7 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Lesson extends Model
 {
     use HasFactory;
-    public function unit()
+
+    protected $fillable = [
+        'name',
+        'teacher_id',
+       'video_id',
+       'image',
+       'file_id'
+       ,'price'];
+
+
+
+       public function unit()
     {
         return $this->belongsTo(Unit::class);
     }
@@ -21,11 +32,4 @@ class Lesson extends Model
         return $this->belongsTo(Files::class);
     }
 
-    protected $fillable = [
-        'name',
-        'teacher_id',
-       'video_id',
-       'image',
-       'file_id'
-       ,'price'];
 }
