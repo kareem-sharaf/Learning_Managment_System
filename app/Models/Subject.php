@@ -15,8 +15,7 @@ class Subject extends Model
         'price',
         'video_id',
         'file_id',
-        'class_id',
-        'year_id'
+        'class_id'
     ];
 
 
@@ -42,18 +41,9 @@ class Subject extends Model
         return $this->hasMany(Unit::class);
     }
 
-    public function category()
+    public function class()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(classification::class);
     }
-
-    public function year()
-    {
-        return $this->belongsTo(Year::class);
-    }
-
-    public function quizes()
-    {
-        return $this->belongsToMany(Quiz::class);
-    }
+    
 }

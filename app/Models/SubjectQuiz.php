@@ -12,4 +12,9 @@ class SubjectQuiz extends Model
         'subject_id',
         'quiz_id'
     ];
+
+    public function quizes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
 }

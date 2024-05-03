@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer("total mark");
             $table->boolean("public");
             $table->json("questions_content");
-            $table->integer("subject_id");
+            $table->unsignedBigInteger('subject_id')->constrained('subject')->cascadeOnDelete();
             $table->timestamps();
         });
     }

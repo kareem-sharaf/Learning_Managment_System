@@ -12,4 +12,9 @@ class UnitQuiz extends Model
         'unit_id',
         'quiz_id'
     ];
+
+    public function quizes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
 }
