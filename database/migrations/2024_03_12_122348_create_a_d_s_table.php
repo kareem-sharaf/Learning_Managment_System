@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('description');
-            $table->binary('image_data')->default(0);
+            $table->string('image_url');
             $table->boolean('isExpired')->default(0);
             $table->foreignId('stage_id')->nullable()->constrained('stages')->cascadeOnDelete();
             $table->foreignId('year_id')->nullable()->constrained('years')->cascadeOnDelete();

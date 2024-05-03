@@ -11,7 +11,6 @@ use App\Http\Controllers\ADController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LessonController;
-use App\Http\Controllers\LeesonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\UnitsController;
@@ -71,15 +70,11 @@ Route::group(['prefix' => 'category'], function () {
         Route::get('search', 'search');
         Route::post('show', 'show');
         Route::get('showSoftDeleted', 'showSoftDeleted');
-        Route::group([
-            'middleware' => 'checkIfAdmin', 'checkIfManager',
-            'auth:sanctum'
-        ], function () {
+        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager', 'checkIfAdmin'], function () {
             Route::post('store', 'store');
             Route::post('update', 'update');
             Route::post('forceDelete', 'forceDelete');
             Route::post('destroy', 'destroy');
-
         });
     });
 });
@@ -120,10 +115,12 @@ Route::group(['prefix' => 'ad'], function () {
         Route::get('index', 'index');
         Route::get('showNewest', 'showNewest');
         Route::post('show', 'show');
-        Route::post('store', 'store');
-        Route::post('update', 'update');
-        Route::post('setExpired', 'setExpired');
-        Route::post('destroy', 'destroy');
+        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager', 'checkIfAdmin'], function () {
+            Route::post('store', 'store');
+            Route::post('update', 'update');
+            Route::post('setExpired', 'setExpired');
+            Route::post('destroy', 'destroy');
+        });
     });
 });
 

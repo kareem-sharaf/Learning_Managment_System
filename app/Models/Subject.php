@@ -36,6 +36,7 @@ class Subject extends Model
     // {
     //     return $this->belongsToMany(SubjectYear::class,'teacher_subject_years');
     // }
+
     public function units()
     {
         return $this->hasMany(Unit::class);
@@ -49,5 +50,10 @@ class Subject extends Model
     {
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
                     ->withPivot('year_id');
+    }
+
+    public function teachers()
+    {
+        return $this->belongsToMany(User::class, 'subject_teacher')->where('role_id', 3);
     }
 }

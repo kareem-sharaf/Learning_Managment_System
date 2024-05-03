@@ -35,7 +35,7 @@ class User extends Authenticatable
         'image_id'
     ];
 
-    public $timestamps=false;
+    public $timestamps = false;
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -61,24 +61,25 @@ class User extends Authenticatable
     //     return $this->hasMany(Course::class);
     // }
 
-    public function favorites()
+    public function subjects()
     {
-        return $this->hasMany(Favorite::class);
+        return $this->belongsToMany(Subject::class, 'subject_teacher')->where('role_id', 3);
     }
 
-    public function favoriteCourses()
+    public function favoriteCategories()
     {
-        return $this->morphedByMany(Course::class, 'favoritable', 'favorites');
-    }
-
-    public function favoriteTeachers()
-    {
-        return $this->morphedByMany(Teacher::class, 'favoritable', 'favorites');
+        return $this->belongsToMany(Category::class, 'favorite_categories', 'user_id', 'category_id');
     }
 
     public function favoriteSubjects()
     {
-        return $this->morphedByMany(Subject::class, 'favoritable', 'favorites');
+        return $this->belongsToMany(Subject::class, 'favorite_subjects', 'user_id', 'subject_id');
+    }
+
+    public function favoriteTeachers()
+    {
+        return $this->belongsToMany(User::class, 'favorite_teachers', 'user_id', 'teacher_id')
+            ->where('role_id', 3);
     }
     public function subjects_users()
     {

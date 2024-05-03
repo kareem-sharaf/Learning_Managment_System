@@ -36,9 +36,14 @@ public function subjects_teachers()
                     ->withPivot('year_id');
     }
 
-public function class()
+public function category()
 {
-    return $this->belongsTo(Classification::class);
+    return $this->belongsTo(Category::class);
+}
+
+public function favorites()
+{
+    return $this->morphMany(Favorite::class, 'favoritable');
 }
 
 }

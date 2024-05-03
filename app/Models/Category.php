@@ -24,6 +24,11 @@ class Category extends Model
 
     public function teachers()
     {
-        return $this->hasMany(Teacher::class);
+        return $this->hasMany(User::class, 'role_id', 3);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'favorite_categories', 'category_id', 'user_id');
     }
 }
