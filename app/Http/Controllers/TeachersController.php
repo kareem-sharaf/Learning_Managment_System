@@ -20,7 +20,7 @@ class TeachersController extends Controller
 //********************************************************************************************** */
     public function show_all_teachers()
     {
-        $teacher = Teacher::get();
+        $teacher = User::where('role_id','3')->get();
         $message = "this is the all teachers.";
         return response()->json([
             'message' => $message,
@@ -76,7 +76,7 @@ class TeachersController extends Controller
         $request->validate([
             'class_id'=>'required|integer',
             'name' => 'required',
-            // 'image_data' => 'required',
+             'image_data' => 'required',
             'description' => 'required',
             ]);
         $teacher = Teacher::create([

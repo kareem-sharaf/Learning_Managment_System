@@ -80,4 +80,9 @@ class User extends Authenticatable
     {
         return $this->morphedByMany(Subject::class, 'favoritable', 'favorites');
     }
+    public function subjects_users()
+    {
+        return $this->belongsToMany(User::class, 'user_subject_years', 'subject_id', 'user_id')
+                    ->withPivot('year_id');
+    }
 }

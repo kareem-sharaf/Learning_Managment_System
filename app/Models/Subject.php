@@ -15,7 +15,7 @@ class Subject extends Model
         'price',
         'video_id',
         'file_id',
-        'class_id'
+        'category_id'
     ];
 
 
@@ -41,9 +41,13 @@ class Subject extends Model
         return $this->hasMany(Unit::class);
     }
 
-    public function class()
+    public function category()
     {
-        return $this->belongsTo(classification::class);
+        return $this->belongsTo(Category::class);
     }
-    
+    public function years_users()
+    {
+        return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
+                    ->withPivot('year_id');
+    }
 }
