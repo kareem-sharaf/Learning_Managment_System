@@ -133,7 +133,9 @@ Route::group(['prefix' => 'subject'], function () {
     Route::controller(SubjectController::class)->group(function () {
         Route::get('show_all_subjects', 'show_all_subjects');
         Route::get('all_subjects_in_year', 'all_subjects_in_year');
-        Route::get('search_to_subject', 'search_to_subject');
+        Route::get('show_one_subject', 'show_one_subject');
+        Route::get('index', 'index');
+        Route::get('search', 'search');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('add_subject', 'add_subject');
