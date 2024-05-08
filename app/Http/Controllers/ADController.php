@@ -57,7 +57,13 @@ class ADController extends Controller
 
         AD::create($adData);
 
-        return response()->json(['message' => 'AD added successfully'], 200);
+        return response()->json(
+            [
+                'message' => 'AD added successfully',
+                'ad:' => $adData
+            ],
+            200
+        );
     }
 
     //  show specific ad details
@@ -162,7 +168,13 @@ class ADController extends Controller
 
         $ad->save();
 
-        return response()->json(['message' => 'Ad updated successfully'], 200);
+        return response()->json(
+            [
+                'message' => 'Ad updated successfully',
+                'ad:' => $ad
+            ],
+            200
+        );
     }
 
     //  set the ad to be expired
