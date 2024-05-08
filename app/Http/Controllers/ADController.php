@@ -55,12 +55,14 @@ class ADController extends Controller
 
         $adData['image_url'] = $imageUrl;
 
-        AD::create($adData);
+        $ad = AD::create($adData);
+
+        $ad = AD::find($ad->id);
 
         return response()->json(
             [
                 'message' => 'AD added successfully',
-                'ad:' => $adData
+                'ad:' => $ad
             ],
             200
         );
