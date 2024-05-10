@@ -115,7 +115,7 @@ class SubjectController extends Controller
 
                 $subject->users = User::whereIn('id', function($query) use ($subject) {
                     $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $subject->id);
-                })->get('name');
+                })->get(['id', 'name']);
             }
 
             $categoriesWithSubjects[] = $categoryData;
