@@ -81,7 +81,7 @@ class SubjectController extends Controller
     public function index(Request $request)
     {
         $year_id = $request->query('year_id');
-        $categories = Category::all('id','category');
+        $categories = Category::all();
 
         $categoriesWithSubjects = [];
 
@@ -93,8 +93,7 @@ class SubjectController extends Controller
             ];
 
             if ($category->id == 1 && $year_id) {
-                $categoryData['subjects'] = Subject::select('id','name')
-                ->where('category_id', $category->id)
+                $categoryData['subjects'] = Subject::where('category_id', $category->id)
                 ->whereHas('years_users', function($query) use ($year_id) {
                     $query->where('teacher_subject_years.year_id', $year_id);
                 })
@@ -102,8 +101,7 @@ class SubjectController extends Controller
             }else if($category->id == 1 && !$year_id){
                 $categoryData['years'] = Year::get();
             } else {
-                $categoryData['subjects'] = Subject::select('id','name')
-                    ->where('category_id', $category->id)
+                $categoryData['subjects'] = Subject::where('category_id', $category->id)
                     // ->whereNotIn('category_id', [1])
                     ->get();
             }
@@ -115,7 +113,7 @@ class SubjectController extends Controller
 
                 $subject->users = User::whereIn('id', function($query) use ($subject) {
                     $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $subject->id);
-                })->get(['id', 'name']);
+                })->get();
             }
 
             $categoriesWithSubjects[] = $categoryData;
@@ -153,7 +151,8 @@ class SubjectController extends Controller
 
     return response()->json([
         'message' => "These are the items.",
-        'data' => $items,
+        'categories' => $categories,
+        'subjects' =>$subjects,
     ]);
 }
 //************************************************************************************************************** */
