@@ -121,8 +121,8 @@ class CategoryController extends Controller
     {
         $user = Auth::user();
         $request->validate([
-            'category' => 'required|string|exists:categories',
-            'new_category' => 'string|unique:categories,categories',
+            'category' => 'required|string|exists:categories,category',
+            'new_category' => 'string|unique:categories,category',
             'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240'
         ]);
 
