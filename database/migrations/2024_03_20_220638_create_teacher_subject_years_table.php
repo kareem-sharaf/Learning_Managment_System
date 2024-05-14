@@ -16,6 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->unsignedBigInteger('year_id')->nullable()->constrained('years')->cascadeOnDelete();
+            $table->timestamps();
+
         });
     }
 

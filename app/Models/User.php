@@ -63,7 +63,7 @@ class User extends Authenticatable
 
     public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'subject_teacher')->where('role_id', 3);
+        return $this->belongsToMany(Subject::class, 'teacher_subject_years', 'user_id', 'subject_id');
     }
 
     public function favoriteCategories()
@@ -83,7 +83,7 @@ class User extends Authenticatable
     }
     public function subjects_users()
     {
-        return $this->belongsToMany(User::class, 'user_subject_years', 'subject_id', 'user_id')
-                    ->withPivot('year_id');
+        return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
+                    ->withPivot('subject_id');
     }
 }

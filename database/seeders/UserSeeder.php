@@ -64,5 +64,25 @@ class UserSeeder extends Seeder
             'gender' => 0,
             'role_id' => 3,
         ]);
+        User::create([
+            'name' => "samer",
+            'email' => "user4@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('password'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 3,
+        ]);
+        User::create([
+            'name' => "jojo",
+            'email' => "user5@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('password'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 3,
+        ]);
     }
 }

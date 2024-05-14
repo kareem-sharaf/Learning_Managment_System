@@ -12,7 +12,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\SubjectController;
-use App\Http\Controllers\TeachersController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitsController;
 use App\Http\Controllers\UserVerificationController;
 
@@ -160,12 +160,11 @@ Route::group(['prefix' => 'unit'], function () {
 
 
 
-Route::group(['prefix' => 'teacher'], function () {
-    Route::controller(TeachersController::class)->group(function () {
-        Route::get('show_one_teacher/{teacher_id}', 'show_one_teacher');
+Route::group(['prefix' => 'profile'], function () {
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('show_one_user/{user_id}', 'show_one_user');
         Route::get('show_all_teachers', 'show_all_teachers');
-
-        Route::get('show_class_teachers/{class_id}', 'show_class_teachers');
+        Route::get('show_subject_teachers', 'show_subject_teachers');
         Route::post('search_to_teacher', 'search_to_teacher');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
