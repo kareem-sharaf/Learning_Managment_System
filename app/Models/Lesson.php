@@ -14,18 +14,22 @@ class Lesson extends Model
     }
     public function video()
     {
-        return $this->belongsTo(Video::class);
+        return $this->hasMany(Video::class);
     }
     public function file()
     {
-        return $this->belongsTo(Files::class);
+        return $this->hasMany(Files::class);
     }
-
+    public function quizes()
+{
+    return $this->belongsToMany(Quiz::class);
+}
     protected $fillable = [
         'name',
-        'teacher_id',
-       'video_id',
+        'description',
+        'unit_id',
+       'video',
        'image',
-       'file_id'
+       'file'
        ,'price'];
 }

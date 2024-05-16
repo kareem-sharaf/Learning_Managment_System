@@ -14,212 +14,131 @@ use App\Models\Video;
 
 class LeesonController extends Controller
 {
-
-   
-   
-    public function upload(Request $request)
+    public function add_lesson(Request $request)
     {
         $request->validate([
-            'title' => 'required',
+            'name'=>'required|string|max:255',
+            'unit_id'=>'required',
+            'price'=>'required|numeric|min:0',
+            'description'=>'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', 
+            'file' => 'required|file|mimetypes:application/pdf|max:10240',
+            'video' => 'required|file|mimetypes:video/x-msvideo,video/x-flv,video/mp4,application/x-mpegURL,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-flv,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-matroska,video/webm|max:10240',
         ]);
-    
+     
         $imagePath = $request->image->store('images', 'public');
         $imageFilename = basename($imagePath);
     
-        $image = new Lesson();
-        $image->title = $request->title;
-        $image->image = $imagePath;
-        $image->save();
-    
-        return response()->json([
-            'message' => 'Image uploaded successfully',
-            'image' => $image,
-        ]);
-    }
-    /////////////////////////////////////////
-    public function getall(){
-        $image=Lesson::orderBy('id','desc')->get();
-        return response()->json($image);
-    }
-    ///////////////////////////////////////////////////////
-    public function update(Request $request)
-    {
-        $request->validate([
-            'id'=>'required',
-            'title' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', 
-        ]);
-        $image=Lesson::findOrFail($request->id); 
-    
-        if ($request->hasFile('image')) {
-            // Delete the old image file
-            Storage::disk('public')->delete($image->image);
-    
-            // Store the new image file
-            $imagePath = $request->image->store('images', 'public');
-            $image->image = $imagePath;
-        }
-    
-        $image->title = $request->title;
-        $image->save();
-    
-        return response()->json([
-            'message' => 'Image updated successfully',
-            'image' => $image,
-        ]);
-    }
-    /////////////////////////////////////////////////////////////
-    public function delete(Request $request){
-    
-        $images=Lesson::find($request->id);
-        $distination=public_path("storage\\".$images->image);
-        if(File::exists($distination)){
-            File::delete($distination);
-        } 
-        $r= $images->delete();
-        if($r){
-            return response()->json(['success'=>true]);
-    
-        }else{
-            return response()->json(['success'=>false]);
-        }
-    }
-    //////////////////////////////////////
-    public function uploadvideo(Request $request)
-    {
-        $request->validate([
-            'name'=>'required',
-            'unit_id'=>'required',
-            'leeson_id'=>'required',
-            'video' => 'required|file|mimetypes:video/x-msvideo,video/x-flv,video/mp4,application/x-mpegURL,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-flv,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-matroska,video/webm|max:10240',
-        ]);
         $videoPath = $request->video->store('videos', 'public');
         $videoFilename = basename($videoPath);
     
-        $video = new  Video();
-        $video->name = $request->name;
-        $video->unit_id = $request->unit_id;
-        $video->leeson_id = $request->leeson_id;
-
-
-        $video->video = $videoPath;
-        $video->save();
-    
-        return response()->json([
-            'message' => 'Video uploaded successfully',
-            'video' => $video,
-        ]);
-    }
-    public function updateVideo(Request $request)
-    {
-       
-    
-        $request->validate([
-            'id'=>'required',
-            'name' => 'required',
-            'video' => 'file|mimetypes:video/x-msvideo,video/x-flv,video/mp4,application/x-mpegURL,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-matroska,video/webm|max:10240',
-        ]);
-        $video=Video::findOrFail($request->id); 
-    
-        if ($request->hasFile('video')) {
-            // Delete the old video file
-            Storage::disk('public')->delete($video->video);
-    
-            // Store the new video file
-            $videoPath = $request->video->store('videos', 'public');
-            $video->video = $videoPath;
-        }
-    
-        $video->name = $request->name;
-        $video->save();
-    
-        return response()->json([
-            'message' => 'Video updated successfully',
-            'video' => $video,
-        ]);
-    }
-    
-    public function deletevideo(Request $request){
-    
-        $Video=Video::find($request->id);
-        $distination=public_path("storage\\".$Video->video);
-        if(File::exists($distination)){
-            File::delete($distination);
-        } 
-        $r= $Video->delete();
-        if($r){
-            return response()->json(['success'=>true]);
-    
-        }else{
-            return response()->json(['success'=>false]);
-        }
-    }
-    /////////////////////////////////////////////////////////////////////
-    function uploadpdf(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'file' => 'required|file|mimetypes:application/pdf|max:10240', // Change the field name from 'video' to 'pdf' and add the mimetypes rule for PDF files
-            'unit_id'=>'required',
-            'leeson_id'=>'required'
-        ]);
-    
         $pdfPath = $request->file->store('pdfs', 'public');
     
-        $pdf = new Files();
-        $pdf->name = $request->name;
-        $pdf->unit_id=$request->unit_id;
-        $pdf->leeson_id=$request->leeson_id;
-        $pdf->file = $pdfPath;
-        $pdf->save();
-    
+
+
+          $lesson=new Lesson();
+          $lesson->name=$request->name;
+          $lesson->price=$request->price;
+          $lesson->description=$request->description;
+          $lesson->unit_id=$request->unit_id;
+          $lesson->file=$pdfPath;
+          $lesson->video = $videoPath;
+          $lesson->image = $imagePath;
+         if( $lesson->save()){
+            return response()->json([
+                'message' => 'Lesson created successfully',
+                'data' => $lesson,
+                'status'=>200,
+            ]);}
+         else{
+            return response()->json([
+                'message' => 'Lesson not created',
+                'status'=>400,
+            ]);
+         }
+
+    }
+
+    public function update_lesson(Request $request)
+{
+    $request->validate([
+        'name'=>'required|string|max:255',
+        'unit_id'=>'required',
+        'price'=>'required|numeric|min:0',
+        'description'=>'required|string|max:255',
+        'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240', 
+        'file' => 'file|mimetypes:application/pdf|max:10240',
+        'video' => 'file|mimetypes:video/x-msvideo,video/x-flv,video/mp4,application/x-mpegURL,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-flv,video/MP2T,video/3gpp,video/quicktime,video/x-ms-wmv,video/x-ms-asf,video/x-matroska,video/webm|max:10240',
+    ]);
+     $id=$request->id;
+    $lesson = Lesson::findOrFail($id);
+
+    $imagePath = $request->image ? $request->image->store('images', 'public') : $lesson->image;
+    $imageFilename = basename($imagePath);
+
+    $videoPath = $request->video ? $request->video->store('videos', 'public') : $lesson->video;
+    $videoFilename = basename($videoPath);
+
+    $pdfPath = $request->file ? $request->file->store('pdfs', 'public') : $lesson->file;
+
+    $lesson->name = $request->name;
+    $lesson->price = $request->price;
+    $lesson->description = $request->description;
+    $lesson->unit_id = $request->unit_id;
+    $lesson->file = $pdfPath;
+    $lesson->video = $videoPath;
+    $lesson->image = $imagePath;
+
+    if ($lesson->save()) {
         return response()->json([
-            'message' => 'PDF uploaded successfully',
-            'pdf' => $pdf,
+            'message' => 'Lesson updated successfully',
+            'data' => $lesson,
+            'status' => 200,
+        ]);
+    } else {
+        return response()->json([
+            'message' => 'Lesson not updated',
+            'status' => 400,
         ]);
     }
-    ////////////////////////////////////////////////
-    function updatepdf(Request $request)
-    {
-        $request->validate([
-            'id'=>'required',
-            'name' => 'required',
-            'file' => 'file|mimetypes:application/pdf|max:10240',
-        ]);
-        $pdf = Files::findOrFail($request->id); 
+}
+public function delete_lesson(Request $request)
+{
     
-        if ($request->hasFile('pdf')) {
-            // Delete the old PDF file
-            Storage::disk('public')->delete($pdf->file);
-    
-            // Store the new PDF file
-            $pdfPath = $request->file->store('pdfs', 'public');
-            $pdf->file = $pdfPath;
-        }
-    
-        $pdf->name = $request->name;
-        $pdf->save();
-    
+    $id = $request->id;
+    $lesson = Lesson::findOrFail($id);
+
+    // Delete the image, video, and PDF files
+    Storage::delete([
+        $lesson->image,
+        $lesson->video,
+        $lesson->file,
+    ]);
+
+    // Delete the lesson
+    if ($lesson->delete()) {
         return response()->json([
-            'message' => 'PDF updated successfully',
-            'pdf' => $pdf,
+            'message' => 'Lesson deleted successfully',
+            'status' => 200,
+        ]);
+    } else {
+        return response()->json([
+            'message' => 'Lesson not deleted',
+            'status' => 400,
         ]);
     }
-    function deletepdf(Request $request)
-    {
-            $pdf = Files::findOrFail($request->id); 
-    
-    
-        // Delete the PDF file
-        Storage::disk('public')->delete($pdf->file);
-    
-        // Delete the PDF record
-        $pdf->delete();
-    
-        return response()->json([
-            'message' => 'PDF deleted successfully',
-        ]);
-    }
-    
+} 
+public function get_all_lessons()
+{
+    // Retrieve all lessons from the database
+    $lessons = Lesson::all();
+
+    // Return a JSON response with all lessons
+    return response()->json([
+        'message' => 'All lessons retrieved successfully',
+        'data' => $lessons,
+        'status' => 200,
+    ]);
+}
+
 }

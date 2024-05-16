@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
 
-            $table->foreignId('unit_id')->constrained('units')->cascadeOnDelete();
-            $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
-            $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
-
+            $table->unsignedBigInteger('unit_id')->constrained('units')->cascadeOnDelete();
+        
             $table->integer('price');
             $table->text('description');
+            $table->string('image')->nullable();
+            $table->string('file')->nullable();
+            $table->string('video')->nullable();
 
-
-
+            
             $table->timestamps();
         });
     }

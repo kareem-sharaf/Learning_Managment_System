@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('video');
            
-            $table->foreignId('unit_id')->constrained('units')->cascadeOnDelete();
 
             $table->timestamps();
         });

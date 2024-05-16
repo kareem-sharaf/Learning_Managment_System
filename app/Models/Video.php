@@ -14,7 +14,7 @@ class Video extends Model
     }
     public function leason()
     {
-        return $this->belongsTo(Leason::class);
+        return $this->belongsTo(Lesson::class);
     }
     protected $fillable =[
         'name',

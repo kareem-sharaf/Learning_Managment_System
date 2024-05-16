@@ -162,18 +162,12 @@ Route::group(['prefix' => 'teacher'], function () {
 });
 Route::group(['prefix' => 'file'], function () {
     Route::controller(LeesonController::class)->group(function () {
-        Route::post('/upload', 'upload');
-        Route::post('/update', 'update');
-        Route::post('/delete', 'delete');
-        Route::post('/uploadvideo', 'uploadvideo');
-        Route::post('/updateVideo', 'updateVideo');
-        Route::post('/deletevideo','deletevideo');
-        Route::post('/uploadpdf',   'uploadpdf');
-        Route::post('/updatepdf',  'updatepdf');
-        Route::post('/deletepdf',  'deletepdf');
-        Route::post('/hh',  'hh');
+        Route::post('/add_lesson', 'add_lesson');
+        Route::post('/update_lesson', 'update_lesson');
+        Route::post('/delete_lesson', 'delete_lesson');
+        Route::post('/get_all_lessons', 'get_all_lessons');
 
-        Route::get('/getall', 'getall');
+       
         });
     });
     Route::post('/message',[ChatController::class,'message']);
