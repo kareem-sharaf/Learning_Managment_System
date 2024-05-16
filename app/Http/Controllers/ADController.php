@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\AD;
 use App\Models\Year;
@@ -34,16 +35,12 @@ class ADController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'image_data' => 'required',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'year_id' => 'exists:years'
         ]);
 
-        $year = Year::where('id', $request->year_id)
-            ->first();
-        $stage = null;
-        if ($year) {
-            $stage = Stage::where('id', $year->stage_id)
-                ->first();
-        }
+        $year = Year::find($request->year_id);
+        $stage = $year ? Stage::find($year->stage_id) : null;
 
         $adData = [
             'title' => $request->title,
@@ -52,16 +49,21 @@ class ADController extends Controller
             'stage_id' => $stage ? $stage->id : null,
         ];
 
-        $image = $request->file('image');
-        if ($image) {
-            $imageData = base64_encode(file_get_contents($image->path()));
-            $adData['image_data'] = $imageData;
-        }
+        $imagePath = $request->file('image')->store('ad_images', 'public');
+
+        $imageUrl = Storage::url($imagePath);
+
+        $adData['image_url'] = $imageUrl;
 
         $ad = AD::create($adData);
 
+        $ad = AD::find($ad->id);
+
         return response()->json(
-            ['message' => 'AD added successfully'],
+            [
+                'message' => 'AD added successfully',
+                'ad:' => $ad
+            ],
             200
         );
     }
@@ -126,55 +128,53 @@ class ADController extends Controller
             'ad_id' => 'required|exists:a_d_s,id|numeric',
             'title' => 'string|max:255',
             'description' => 'string',
-            'image_data' => 'image',
+            'image' => 'image', // Change validation rule for image
             'year' => 'string'
         ]);
 
-        $year = Year::where('year', $request->year)
-            ->first();
+        $ad = AD::findOrFail($request->ad_id);
 
-        $ad = AD::where('id', $request->ad_id)
-            ->first();
-
-        if (
-            $request->filled('title') &&
-            $ad->title !== $request->title
-        ) {
+        if ($request->filled('title') && $ad->title !== $request->title) {
             $ad->title = $request->title;
         }
 
-        if (
-            $request->filled('description') &&
-            $ad->description !== $request->description
-        ) {
+        if ($request->filled('description') && $ad->description !== $request->description) {
             $ad->description = $request->description;
         }
 
-        if (
-            $request->filled('year') &&
-            $ad->year_id !== $year->id
-        ) {
-            $ad->year_id = $year->id;
-            $ad->stage_id = $year->stage_id;
+        if ($request->filled('year')) {
+            $year = Year::where('year', $request->year)->first();
+            if ($year && $ad->year_id !== $year->id) {
+                $ad->year_id = $year->id;
+                $ad->stage_id = $year->stage_id;
+            }
         }
 
-        if ($request->hasFile('image_data')) {
-            $image = $request->file('image_data');
-            $imageData = base64_encode(file_get_contents($image->path()));
-            $ad->image_data = $imageData;
+        if ($request->hasFile('image')) {
+            // Delete old image
+            if ($ad->image_url) {
+                $oldImagePath = str_replace('/storage', 'public', $ad->image_url);
+                if (Storage::exists($oldImagePath)) {
+                    Storage::delete($oldImagePath);
+                }
+            }
+
+            // Store new image
+            $imagePath = $request->file('image')->store('ad_images', 'public');
+            $ad->image_url = Storage::url($imagePath);
         }
 
         if (!$ad->isDirty()) {
-            return response()->json(
-                ['error' => 'Nothing to update'],
-                400
-            );
+            return response()->json(['error' => 'Nothing to update'], 400);
         }
 
         $ad->save();
 
         return response()->json(
-            ['message' => 'Ad updated successfully'],
+            [
+                'message' => 'Ad updated successfully',
+                'ad:' => $ad
+            ],
             200
         );
     }
@@ -182,6 +182,8 @@ class ADController extends Controller
     //  set the ad to be expired
     public function setExpired(Request $request)
     {
+        $user = Auth::user();
+
         $ad = AD::where('id', $request->ad_id)
             ->first();
         if ($ad && $ad->isExpired == 0) {
@@ -201,6 +203,8 @@ class ADController extends Controller
     // delete an ad
     public function destroy(Request $request)
     {
+        $user = Auth::user();
+
         $ad = AD::where('id', $request->ad_id)
             ->first();
         if ($ad) {

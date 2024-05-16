@@ -15,28 +15,55 @@ class SubjectSeeder extends Seeder
     {
         Subject::create([
             'id' => '1',
-            'name' => 'physics',
+            'name' => 'English',
             'description' => 'asdf',
-            'class_id' => '2'
-
+            'category_id' => '2',
         ]);
+
         Subject::create([
             'id' => '2',
-            'name' => 'chemistry',
+            'name' => 'c++',
             'description' => '2asdf',
-            'class_id' => '3'
+            'category_id' => '3',
         ]);
+
         Subject::create([
             'id' => '3',
-            'name' => 'programming',
+            'name' => 'python',
             'description' => '2ffs',
-            'class_id' => '3'
+            'category_id' => '3',
         ]);
+
         Subject::create([
             'id' => '4',
             'name' => 'maths',
             'description' => '2sdf',
-            'class_id' => '1'
+            'category_id' => '1',
+        ]);
+
+        Subject::create([
+            'id' => '5',
+            'name' => 'physics',
+            'description' => '2sdf',
+            'category_id' => '1',
+        ]);
+        Subject::create([
+            'id' => '6',
+            'name' => 'chemistry',
+            'description' => '2sdf',
+            'category_id' => '1',
+        ]);
+        Subject::create([
+            'id' => '7',
+            'name' => 'java',
+            'description' => '2sdf',
+            'category_id' => '3',
+        ]);
+        Subject::create([
+            'id' => '8',
+            'name' => 'Arabic',
+            'description' => '2sdf',
+            'category_id' => '2',
         ]);
     }
 }

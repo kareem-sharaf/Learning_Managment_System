@@ -11,7 +11,7 @@ class AD extends Model
     protected $fillable=[
         'title',
         'description',
-        'image_data',
+        'image_url',
         'year_id',
         'stage_id',
         'isExpired'

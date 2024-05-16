@@ -7,12 +7,11 @@ use App\Models\Files;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
-use App\Models\Leeson;
 use App\Models\Lesson;
 use App\Models\Video;
 
 
-class LeesonController extends Controller
+class LessonController extends Controller
 {
     public function add_lesson(Request $request)
     {

@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('favorite_user', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('fav_id')->constrained('favorites')->cascadeOnDelete();
-            $table->unsignedBigInteger('user_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('favorite_user_id')->constrained('users')->onDelete('cascade');
         });
     }
 
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('favorite_user');
     }
 };

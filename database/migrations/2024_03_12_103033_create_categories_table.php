@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('questions_quizes', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->integer('questtion_id');
-            $table->integer('quiz_id');
+            $table->string('category')->unique();
+            $table->string('image_url')->nullable();
+            $table->softDeletes();
         });
     }
 
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions_quizes');
+        Schema::dropIfExists('categories');
     }
 };

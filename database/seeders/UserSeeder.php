@@ -23,7 +23,6 @@ class UserSeeder extends Seeder
             'birth_date' => "2002/3/29",
             'gender' => 1,
             'role_id' => 1,
-            'verified' => 1
         ]);
         User::create([
             'name' => "kareem sharaf",
@@ -34,11 +33,9 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/24",
             'gender' => 0,
             'role_id' => 2,
-            'verified' => 1
-
         ]);
         User::create([
-            'name' => "malek al-imam",
+            'name' => "malek",
             'email' => "user1@example.com",
             'address_id' => 1,
             'image_id' => 1,
@@ -46,8 +43,46 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 3,
-            'verified' => 1
-
+        ]);
+        User::create([
+            'name' => "ahmad",
+            'email' => "user2@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('password'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 3,
+        ]);
+        User::create([
+            'name' => "khaled",
+            'email' => "user3@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('password'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 3,
+        ]);
+        User::create([
+            'name' => "samer",
+            'email' => "user4@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('password'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 3,
+        ]);
+        User::create([
+            'name' => "jojo",
+            'email' => "user5@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('password'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 3,
         ]);
     }
 }

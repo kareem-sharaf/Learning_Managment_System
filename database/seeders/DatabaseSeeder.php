@@ -20,8 +20,9 @@ class DatabaseSeeder extends Seeder
             AddressSeeder::class,
             UserSeeder::class,
             SubjectSeeder::class,
-            ClassificationSeeder::class,
-            TeacherSeeder::class
-        ]);
+            CategorySeeder::class,
+            Teacher_subject_yearSeeder::class
+                ]);
     }
 }
+

@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Models\Favorite;
+use App\Models\Category;
 
 class FavoriteController extends Controller
 {
@@ -27,5 +30,54 @@ class FavoriteController extends Controller
                 ['message' => 'You do not have favorites']
             );
         }
+    }
+
+    public function store(Request $request)
+    {
+
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $request->validate([
+            'favoritable_type' => 'required|in:App\Models\Teacher,App\Models\Subject,App\Models\Category',
+            'category' => 'string|exists:categories',
+            'teacher' => 'string|exists:teachers',
+            'subject' => 'string|exists:subjects'
+        ]);
+
+        if ($request->has('category')) {
+            $category = Category::where('category', $request->category)
+                ->first();
+            if (!$category) {
+                return response()->json(
+                    ['message' => 'Category not found!'],
+                    404
+                );
+            }
+
+            $favoritable_id = $category->id;
+        }elseif($request->has('teacher')){
+            $category = Category::where('category', $request->category)
+            ->first();
+        if (!$category) {
+            return response()->json(
+                ['message' => 'Category not found!'],
+                404
+            );
+        }
+
+        $favoritable_id = $category->id;
+        }
+        $favorite = new Favorite([
+            'favoritable_id' => $favoritable_id,
+            'favoritable_type' => $request->favoritable_type,
+        ]);
+
+        $user_id->favorites()->save($favorite);
+
+        return response()->json([
+            'message' => 'Favorite stored successfully',
+            'favorite' => $favorite
+        ], 201);
     }
 }

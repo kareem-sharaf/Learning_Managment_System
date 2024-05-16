@@ -7,125 +7,218 @@ use App\Models\Teacher;
 use App\Models\Year;
 use App\Models\Stage;
 use App\Models\SubjectYear;
+use App\Models\User;
+use App\Models\TeacherSubjectYear;
+use App\Models\Category;
 
-
-use App\Http\Requests\SubjectRequest;
+ use App\Http\Responses\ApiSuccessResponse;
+ use App\Http\Responses\ApiErrorResponse;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\TeachersController;
+use Illuminate\Support\Facades\DB;
 
 class SubjectController extends Controller
 {
 
     //**********************************************************************************************\/
-    //show all subject in the class
+    /*show all subjects in the category and in case the category is educational we will
+     need year_id and if we don't have year_id we will show the years.*/
   public function show_all_subjects(Request $request)
   {
-      $request->validate([
-          'class_id' => 'required|integer'
-      ]);
-      $class_id = $request->class_id;
-      $subject = Subject::where('class_id', $class_id)
+      $category_id = $request->query('category_id');
+      $year_id = $request->query('year_id');
+      $subject=null;
+      $year=null;
+      if($category_id==1 && $year_id){
+        $subject = Subject::whereHas('years_users', function($q) use ($year_id) {
+            $q->where('teacher_subject_years.year_id', $year_id);
+        })->get();
+      }else if($category_id==1 && !$year_id){
+        $year = Year::get();
+      } else {
+        $subject = Subject::where('category_id', $category_id)
       ->get();
-      $message = "this is the all subjects in the class.";
-
+      }
+    $message='this is the all subjects in the category.';
+    return response()->json([
+        'message' => $message,
+        'data' => $subject,
+        'year' => $year,
+    ]);
+  }
+    //*********************************************************************************************** */
+    /*user can choose the year and show the subjects. */
+    public function all_subjects_in_year(Request $request)
+  {
+      $year_id = $request->query('year_id');
+        $subject = Subject::whereHas('years_users', function($q) use ($year_id) {
+            $q->where('teacher_subject_years.year_id', $year_id);
+        })->get();
+    $message='this is the all subjects in the year.';
+    return response()->json([
+        'message' => $message,
+        'data' => $subject,
+    ]);
+  }
+    //*********************************************************************************************** */
+    /*user can choose the subject and show the details. */
+    public function show_one_subject(Request $request)
+  {
+      $subject_id = $request->query('subject_id');
+      $subject = Subject::where('id',$subject_id)->get();
+      $message='this is the subjects details.';
       return response()->json([
-          'message' => $message,
-          'data' => $subject
+         'message' => $message,
+         'data' => $subject,
       ]);
   }
-//**********************************************************************************************
-//show all subjects in the class education
-  public function all_subjects_in_year(Request $request)
+    //*********************************************************************************************** */
+    /*show all categories and subjects and teachers.
+    we show the all categories and subjects and teachers(role_id = 3)
+    if category is educational if the user has year_id we show the subjects in the year else we show the years.*/
+    public function index(Request $request)
     {
-        $request->validate([
-            'year_id' => 'required|integer'
-        ]);
-        $year_id = $request->year_id;
-        $subject = Subject::whereHas('years_teachers', function($q) use ($year_id) {
-            $q->where('year_id', $year_id);
-        })->get();
-        $message = "this is the all subjects";
+        $year_id = $request->query('year_id');
+        $categories = Category::all();
 
+        $categoriesWithSubjects = [];
+
+        foreach ($categories as $category) {
+            $categoryData = [
+                'category' => $category,
+                'subjects' => [],
+                'years' => []
+            ];
+
+            if ($category->id == 1 && $year_id) {
+                $categoryData['subjects'] = Subject::where('category_id', $category->id)
+                ->whereHas('years_users', function($query) use ($year_id) {
+                    $query->where('teacher_subject_years.year_id', $year_id);
+                })
+                ->get();
+            }else if($category->id == 1 && !$year_id){
+                $categoryData['years'] = Year::get();
+            } else {
+                $categoryData['subjects'] = Subject::where('category_id', $category->id)
+                    // ->whereNotIn('category_id', [1])
+                    ->get();
+            }
+
+            foreach ($categoryData['subjects'] as $subject) {
+                $subject->users = Subject::whereHas('years_users', function($query) use ($subject) {
+                    $query->where('subject_id', $subject->id);
+                })->get();
+
+                $subject->users = User::whereIn('id', function($query) use ($subject) {
+                    $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $subject->id);
+                })->get();
+            }
+
+            $categoriesWithSubjects[] = $categoryData;
+        }
+
+        $message = "this is the all data";
         return response()->json([
             'message' => $message,
-            'data' => $subject
+            'data' => $categoriesWithSubjects
         ]);
     }
+
     //***********************************************************************************************************************\\
-    public function search_to_subject(Request $request)
+    /*search in subjects and category .
+    in case the user has year_id will see just one result else he see all subjects.*/
+    public function search(Request $request)
 {
-    $request->validate([
-        'class_id' => 'integer',
-        'year_id' => 'integer',
-        'name' => 'required|string',
-    ]);
+    $year_id = $request->query('year_id');
+    $name = $request->query('name');
 
-    $class_id = $request->class_id;
-    $year_id = $request->year_id;
-    $name = $request->name;
-
-    if ($class_id == 1) { // if the class is educational
+    $categories = Category::where('category', 'like', '%' . $name . '%')
+        ->get();
+    if($year_id){
+        $subjects = Subject::whereHas('years_users', function($q) use ($year_id) {
+            $q->where('teacher_subject_years.year_id', $year_id);
+        })->where('name', 'like', '%' . $name . '%')->get();
+    }else{
         $subjects = Subject::where('name', 'like', '%' . $name . '%')
-            ->whereHas('years_teachers', function ($q) use ($year_id) {
-                $q->where('year_id', $year_id);
-            })->get();
-    } else {
-        $subjects = Subject::where('name', 'like', '%' . $name . '%')
-           // ->where('class_id', $class_id)//serach in one class
-           ->where('class_id', '!=', 1)//search in all classes without educational
-            ->get();
+        ->get();
     }
-
-    if ($subjects->isEmpty()) {
-        $message = "subject does not exist.";
-        return response()->json([
-            'message' => $message,
-        ]);
-    }
+    $items = [
+        'categories' => $categories,
+        'subjects' => $subjects
+    ];
 
     return response()->json([
-        'message' => " this is the subjects .",
-        'data' => $subjects,
+        'message' => "These are the items.",
+        'categories' => $categories,
+        'subjects' =>$subjects,
     ]);
 }
-
-    //***********************************************************************************************************************\\
+//************************************************************************************************************** */
     public function add_subject(Request $request)
 {
     $user = auth()->user();
     $request->validate([
-        'class_id' => 'required',
+        'category_id' => 'required',
         'name' => 'required',
         'price' => 'required',
         'description' => 'required',
-        'teachers_content' => 'required|array',
-        'teachers_content.*.teacher_id' => 'required|integer',
+        'image_data' ,
+        'video_id' => 'integer',
+        'file_id' => 'integer',
+        'users_content' => 'required|array',
+        'users_content.*.user_id' => 'required|integer',
         'years_content.*.year_id' => 'integer',
     ]);
+     // Check if required fields are missing
+     if (!$request->filled('category_id') || !$request->filled('users_content') || !$request->filled('users_content.0.user_id')) {
+        return response()->json(['message' => 'Missing required fields.'], 400);
+    }
 
+    // Check if category exists
+    $category = Category::find($request->input('category_id'));
+    if (!$category) {
+        return response()->json(['message' => 'Category not found.'], 404);
+    }
     $subject = Subject::create([
         'name' => $request->name,
         'price' => $request->price,
         'description' => $request->description,
-        'class_id' => $request->class_id,
+        'image_data' => $request->image_data,
+        'video_id' => $request->video_id,
+        'file_id' => $request->file_id,
+        'category_id' => $request->category_id,
     ]);
 
-    if ($request->class_id == 1) {//if the class is educational
-        $yearsContent = $request->years_content;
-        $teachersContent = $request->teachers_content;
 
-        foreach ($teachersContent as $teacher) {
-            foreach ($yearsContent as $year) {
-                $subject->years_teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
+        if ($request->category_id == 1) { // If the category is educational
+            $yearsContent = $request->years_content;
+            $usersContent = $request->users_content;
+
+            foreach ($usersContent as $user) {
+                foreach ($yearsContent as $year) {
+                    $existingUser = User::find($user['user_id']);
+                    if (!$existingUser) {
+                    return response()->json(['message' => 'User not found.'], 404);
+                        }
+
+                    $existingYear = Year::find($year['year_id']);
+                    if (!$existingYear) {
+                    return response()->json(['message' => 'Year not found.'], 404);
+                        }
+                    $subject->years_users()->attach($user['user_id'], ['year_id' => $year['year_id']]);
+                }
+            }
+        }else {
+            foreach ($request->users_content as $user) {
+                $existingUser = User::find($user['user_id']);
+                if (!$existingUser) {
+                return response()->json(['message' => 'User not found.'], 404);
+                    }
+                $subject->years_users()->attach($user['user_id']);
             }
         }
-    } else {
-        foreach ($request->teachers_content as $teacher) {
-            $subject->years_teachers()->attach($teacher['teacher_id']);
-        }
-    }
 
     return response()->json([
         'message' => 'Subject added successfully.',
@@ -138,12 +231,15 @@ class SubjectController extends Controller
     {
         $request->validate([
             'subject_id' => 'required',
-            'class_id' => 'required',
+            'category_id' => 'required',
             'name' => 'required',
             'price' => 'required',
             'description' => 'required',
-            'teachers_content' => 'required|array',
-            'teachers_content.*.teacher_id' => 'required|integer',
+            'image_data' ,
+            'video_id' => 'integer',
+            'file_id' => 'integer',
+            'users_content' => 'required|array',
+            'users_content.*.user_id' => 'required|integer',
             'years_content.*.year_id' => 'integer',
         ]);
 
@@ -153,26 +249,40 @@ class SubjectController extends Controller
         $subject->name = $request->name;
         $subject->price = $request->price;
         $subject->description = $request->description;
-        $subject->class_id = $request->class_id;
+        $subject->category_id = $request->category_id;
+        $subject->image_data = $request->image_data;
+        $subject->video_id = $request->video_id;
+        $subject->file_id = $request->file_id;
         $subject->save();
 
 
-        if ($request->class_id == 1) { // if the class is educational
+        if ($request->category_id == 1) { // if the category is educational
             $yearsContent = $request->years_content;
-            $teachersContent = $request->teachers_content;
+            $usersContent = $request->users_content;
 
-            $subject->years_teachers()->detach();
+            $subject->years_users()->detach();
 
-            foreach ($teachersContent as $teacher) {
+            foreach ($usersContent as $user) {
                 foreach ($yearsContent as $year) {
-                    $subject->years_teachers()->attach($teacher['teacher_id'], ['year_id' => $year['year_id']]);
+                    $existingUser = User::find($user['user_id']);
+                    if (!$existingUser) {
+                    return response()->json(['message' => 'User not found.'], 404);
+                        }
+
+                    $existingYear = Year::find($year['year_id']);
+                    if (!$existingYear) {
+                    return response()->json(['message' => 'Year not found.'], 404);
+                        }
+                    $subject->years_users()->attach($user['user_id'], ['year_id' => $year['year_id']]);
                 }
             }
-        } else {
-            $subject->years_teachers()->detach();
-
-            foreach ($request->teachers_content as $teacher) {
-                $subject->years_teachers()->attach($teacher['teacher_id']);
+        }else {
+            foreach ($request->users_content as $user) {
+                $existingUser = User::find($user['user_id']);
+                if (!$existingUser) {
+                return response()->json(['message' => 'User not found.'], 404);
+                    }
+                $subject->years_users()->attach($user['user_id']);
             }
         }
 
@@ -193,7 +303,7 @@ class SubjectController extends Controller
             ]);
         }
 
-        $subject->years_teachers()->detach();
+        $subject->years_users()->detach();
         $subject->delete();
 
         $message = "The subject deleted successfully.";

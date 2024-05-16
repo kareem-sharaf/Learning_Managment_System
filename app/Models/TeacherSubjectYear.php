@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class TeacherSubjectYear extends Model
 {
     protected $fillable=[
-        'teacher_id',
+        'user_id',
         'subject_id',
         'year_id'
     ];

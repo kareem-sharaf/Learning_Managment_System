@@ -13,13 +13,15 @@ class Quiz extends Model
         'name',
         'duration',
         'total mark',
-        'public'
+        'public',
+        'questions_content',
+        'subject_id'
     ];
 
 
 public function questions()
 {
-    return $this->belongsToMany(Question::class);
+    return $this->hasMany(Question::class);
 }
 
 public function lessons()

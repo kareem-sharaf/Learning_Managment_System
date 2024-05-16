@@ -14,7 +14,6 @@ use App\Models\Year;
 use App\Models\Address;
 use App\Models\Stage;
 use App\Mail\EmailVerification;
-use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
@@ -25,13 +24,6 @@ class AuthController extends Controller
         if ($UserVerification->role_id == 4) {
             return response()->json(
                 ['message' => 'unauthorized'],
-                401
-            );
-        }
-
-        if ($UserVerification->verified == 0) {
-            return response()->json(
-                ['message' => 'not verified'],
                 401
             );
         }
@@ -50,7 +42,6 @@ class AuthController extends Controller
         $user = new User([
             'name' => $request->name,
             'email' => $UserVerification->email,
-            'verified' => 1,
             'password' => Hash::make($request->password),
             'role_id' => $UserVerification->role_id
         ]);
@@ -96,16 +87,9 @@ class AuthController extends Controller
             );
         }
 
-        if ($UserVerification->verified == 0) {
-            return response()->json(
-                ['message' => 'not verified'],
-                401
-            );
-        }
-
         $request->validate([
             'name' => 'required|string',
-            'address_id' => 'required|numeric',
+            'address_id' => 'required|numeric|unique:users',
             'birth_date' => 'required|date',
             'gender' => 'required',
             'device_id' => 'required|string',
@@ -129,7 +113,6 @@ class AuthController extends Controller
             'address_id' => $request->address_id,
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
-            'verified' => 1,
             'device_id' => $device_id,
             'image_id' => $request->image_id,
             'role_id' => $UserVerification->role_id,
@@ -181,11 +164,13 @@ class AuthController extends Controller
 
             $user->device_id = $request->device_id;
             $user->verificationCode = null;
-            $user->verified = 1;
             $user->save();
         } else {
 
-            $hashedDeviceId = hash('sha512', $request->device_id);
+            $key = 'majd123djam321maleh321helam456mm';
+            $iv = 'nottonwelbil0990';
+
+            $hashedDeviceId = openssl_decrypt($request->device_id, 'AES-256-CBC', $key, 0, $iv);
             $user = User::where('device_id', $hashedDeviceId)->first();
 
 
@@ -198,10 +183,6 @@ class AuthController extends Controller
                     ['message' => 'unauthorized'],
                     400
                 );
-            }
-
-            if ($user->verified == 0) {
-                return response()->json(['message' => 'User not verified.'], 401);
             }
         }
 
@@ -228,13 +209,6 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
-
-        if ($user->verified == 0) {
-            return response()->json(
-                ['message' => 'not verified'],
-                401
-            );
-        }
 
         if (!$user || $user['role'] == 4 || !Hash::check($request->password, $user->password)) {
             return response()->json(
@@ -266,19 +240,11 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if ($user->verified == 0) {
-            return response()->json(
-                ['message' => 'not verified'],
-                401
-            );
-        }
-
         $length = 7;
         $characters = '00112233445566778899abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $verificationCode = substr(str_shuffle($characters), 0, $length);
 
         $user->verificationCode = $verificationCode;
-        $user->verified = 0;
         $user->device_id = null;
         $user->save();
 
@@ -335,7 +301,6 @@ class AuthController extends Controller
                 [
                     'verificationCode' => $verificationCode,
                     'email_sent_at' => $currentTime,
-                    'verified' => 0
                 ]
             );
 
@@ -400,12 +365,13 @@ class AuthController extends Controller
             );
         }
 
+        $user->verificationCode = null;
+        $user->save();
         return response()->json(
             ['message' => 'Verification code is valid'],
             200
         );
     }
-
 
     //  set new password
     public function setPassword(Request $request)
