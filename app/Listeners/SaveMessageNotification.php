@@ -18,7 +18,7 @@ class SaveMessageNotification implements ShouldQueue
     public function handle(Message $event)
     {
         $messageModel = new MessageModel();
-        $messageModel->username = $event->username;
+        $messageModel->user_id = $event->user_id;
         $messageModel->message = $event->message;
         $messageModel->save();
     }

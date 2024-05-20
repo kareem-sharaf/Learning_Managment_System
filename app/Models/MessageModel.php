@@ -7,9 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class MessageModel extends Model
 {
+    public function User()
+    {
+        return $this->hasMany(User::class);
+    }
     use HasFactory;
     protected $fillable = [
-        'username',
+        'user_id',
         'message',
     ];
 }

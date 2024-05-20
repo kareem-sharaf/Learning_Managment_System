@@ -13,13 +13,13 @@ use Illuminate\Queue\SerializesModels;
 class Message implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-    public  $username;
+    public  $user_id;
     public  $message;
     public function __construct(
-$username,$message       )
+$user_id,$message       )
     {
 $this->message=$message;
-$this->username=$username;
+$this->user_id=$user_id;
     }
 
     /**
