@@ -21,7 +21,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SubjectSeeder::class,
             CategorySeeder::class,
-            Teacher_subject_yearSeeder::class
+            Teacher_subject_yearSeeder::class,
+            UnitsSeeder::class,
+            LessinsSeeder::class,
                 ]);
     }
 }

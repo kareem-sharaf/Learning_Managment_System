@@ -10,6 +10,8 @@ use App\Models\SubjectYear;
 use App\Models\User;
 use App\Models\TeacherSubjectYear;
 use App\Models\Category;
+use App\Models\Lesson;
+use App\Models\Unit;
 
  use App\Http\Responses\ApiSuccessResponse;
  use App\Http\Responses\ApiErrorResponse;
@@ -127,20 +129,39 @@ class SubjectController extends Controller
     }
 
     //***********************************************************************************************************************\\
-    /*search in subjects and category .
-    in case the user has year_id will see just one result else he see all subjects.*/
+    /*search in subjects,category,teachers,unit and lessons.
+    in case the user has year_id will see just one subject in his year else he see all subjects.*/
     public function search(Request $request)
 {
     $year_id = $request->query('year_id');
     $name = $request->query('name');
+    if($name){
 
     $categories = Category::where('category', 'like', '%' . $name . '%')
         ->get();
-    if($year_id){
-        $subjects = Subject::whereHas('years_users', function($q) use ($year_id) {
-            $q->where('teacher_subject_years.year_id', $year_id);
-        })->where('name', 'like', '%' . $name . '%')->get();
-    }else{
+
+    $teachers = User::where('name', 'like', '%' . $name . '%')
+    ->where('role_id',3)
+        ->get();
+
+    $units = Unit::where('name', 'like', '%' . $name . '%')
+            ->get();
+
+    $lessons = Lesson::where('name', 'like', '%' . $name . '%')
+            ->get();
+
+        if($year_id){
+            $subjects = Subject::where('name', 'like', '%' . $name . '%')
+                ->where('category_id', 1)
+                ->whereHas('years_users', function($q) use ($year_id) {
+                    $q->where('teacher_subject_years.year_id', $year_id);
+                })
+                ->orWhere(function($query) use ($name) {
+                    $query->where('name', 'like', '%' . $name . '%')
+                          ->where('category_id', '!=', 1);
+                })
+                ->get();
+        }else{
         $subjects = Subject::where('name', 'like', '%' . $name . '%')
         ->get();
     }
@@ -152,9 +173,14 @@ class SubjectController extends Controller
     return response()->json([
         'message' => "These are the items.",
         'categories' => $categories,
+        'teachers' =>$teachers,
+        'units' =>$units,
+        'lessons' =>$lessons,
         'subjects' =>$subjects,
     ]);
 }
+}
+
 //************************************************************************************************************** */
     public function add_subject(Request $request)
 {
