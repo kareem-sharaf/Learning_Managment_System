@@ -138,6 +138,8 @@ Route::group(['prefix' => 'subject'], function () {
             Route::post('add_subject', 'add_subject');
             Route::post('edit_subject', 'edit_subject');
             Route::get('delete_subject/{subject_id}', 'delete_subject');
+            Route::get('buy_subject', 'buy_subject');
+
         });
     });
 });
@@ -162,9 +164,11 @@ Route::group(['prefix' => 'unit'], function () {
 
 Route::group(['prefix' => 'profile'], function () {
     Route::controller(ProfileController::class)->group(function () {
-        Route::get('show_one_user/{user_id}', 'show_one_user');
+        Route::get('show_one_teacher/{user_id}', 'show_one_teacher');
+        Route::get('show_one_student/{user_id}', 'show_one_student');
         Route::get('show_all_teachers', 'show_all_teachers');
         Route::get('show_subject_teachers', 'show_subject_teachers');
+        Route::get('teachers_in_category/{category_id}', 'teachers_in_category');
         Route::post('search_to_teacher', 'search_to_teacher');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -181,7 +185,7 @@ Route::group(['prefix' => 'file'], function () {
         Route::post('/delete_lesson', 'delete_lesson');
         Route::get('/get_all_lessons', 'get_all_lessons');
 
-       
+
         });
     });
 
