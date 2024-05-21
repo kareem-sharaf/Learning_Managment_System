@@ -12,11 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subjects', function (Blueprint $table) {
-            $table->id('id');
+            $table->id();
             $table->string('name');
             $table->string('description');
             $table->integer('price')->default(0);
-            $table->unsignedBigInteger('category_id')->references('id')->on('categories')->cascadeOnDelete();            $table->binary('image_data')->default('default_image.jpg')->nullable();
+            $table->unsignedBigInteger('category_id')->references('id')->on('categories')->cascadeOnDelete();
+            $table->binary('image_data')->default('default_image.jpg')->nullable();
             $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
             $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
             $table->timestamps();

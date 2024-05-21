@@ -12,6 +12,7 @@ use App\Models\TeacherSubjectYear;
 use App\Models\Category;
 use App\Models\Lesson;
 use App\Models\Unit;
+use App\Models\Subscription;
 
  use App\Http\Responses\ApiSuccessResponse;
  use App\Http\Responses\ApiErrorResponse;
@@ -165,10 +166,16 @@ class SubjectController extends Controller
         $subjects = Subject::where('name', 'like', '%' . $name . '%')
         ->get();
     }
-    $items = [
-        'categories' => $categories,
-        'subjects' => $subjects
-    ];
+
+    foreach ($subjects as $item) {
+        $item->users = Subject::whereHas('years_users', function($query) use ($item) {
+            $query->where('subject_id', $item->id);
+        })->get();
+
+        $item->users = User::whereIn('id', function($query) use ($item) {
+            $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $item->id);
+        })->get();
+    }
 
     return response()->json([
         'message' => "These are the items.",
@@ -338,5 +345,32 @@ class SubjectController extends Controller
         ]);
 
     }
-}
+
     //***********************************************************************************************************************\\
+    public function buy_subject(Request $request)
+    {
+        $user_id = $request->query('user_id');
+        $subject_id = $request->query('subject_id');
+
+        $subject = Subject::find($subject_id);
+        $user = User::find($user_id);
+
+        if($subject || $user['role'] == 4)
+        $subscription = Subscription::create([
+            'user_id' => $request->user_id,
+            'subject_id' => $request->subject_id,
+            'status' => 'wait',
+
+        ]);
+
+
+        $message = "The request added successfully.";
+        return response()->json([
+            'message' => $message,
+        ]);
+
+    }
+
+
+
+}
