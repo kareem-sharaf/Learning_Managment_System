@@ -128,7 +128,7 @@ class ADController extends Controller
             'ad_id' => 'required|exists:a_d_s,id|numeric',
             'title' => 'string|max:255',
             'description' => 'string',
-            'image' => 'image', // Change validation rule for image
+            'image' => 'image',
             'year' => 'string'
         ]);
 

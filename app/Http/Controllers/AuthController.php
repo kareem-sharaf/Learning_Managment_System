@@ -149,8 +149,6 @@ class AuthController extends Controller
             'verificationCode' => 'string|sometimes'
         ]);
 
-        $user = null;
-
         if ($request->has('verificationCode')) {
             $user = User::where('verificationCode', $request->verificationCode)->first();
 

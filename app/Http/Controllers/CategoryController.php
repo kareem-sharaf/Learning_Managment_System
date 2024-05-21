@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Subject;
-use App\Models\Year;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
@@ -86,7 +84,6 @@ class CategoryController extends Controller
             404
         );
     }
-
 
     //  store new category
     public function store(Request $request)

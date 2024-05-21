@@ -34,14 +34,13 @@ class FavoriteController extends Controller
 
     public function store(Request $request)
     {
-
         $user = Auth::user();
         $user_id = $user->id;
 
         $request->validate([
             'favoritable_type' => 'required|in:App\Models\Teacher,App\Models\Subject,App\Models\Category',
             'category' => 'string|exists:categories',
-            'teacher' => 'string|exists:teachers',
+            'teacher' => 'string|exists:users',
             'subject' => 'string|exists:subjects'
         ]);
 
@@ -57,16 +56,16 @@ class FavoriteController extends Controller
 
             $favoritable_id = $category->id;
         }elseif($request->has('teacher')){
-            $category = Category::where('category', $request->category)
+            $teacher = User::where('name', $request->teacher)
             ->first();
-        if (!$category) {
-            return response()->json(
-                ['message' => 'Category not found!'],
-                404
-            );
-        }
+            if (!$teacher) {
+                return response()->json(
+                    ['message' => 'Teacher not found!'],
+                    404
+                );
+            }
 
-        $favoritable_id = $category->id;
+        $favoritable_id = $teacher->id;
         }
         $favorite = new Favorite([
             'favoritable_id' => $favoritable_id,
