@@ -129,7 +129,52 @@ class SubjectController extends Controller
             'data' => $categoriesWithSubjects
         ]);
     }
+//****************************************************************************************************************** */
+public function search_in_subjects(Request $request)
+{
+    $year_id = $request->query('year_id');
+    $name = $request->query('name');
 
+    $subjects= null;
+    if($name){
+
+        if($year_id){
+            $subjects = Subject::where('name', 'like', '%' . $name . '%')
+                ->where('category_id', 1)
+                ->whereHas('years_users', function($q) use ($year_id) {
+                    $q->where('teacher_subject_years.year_id', $year_id);
+                })
+                ->orWhere(function($query) use ($name) {
+                    $query->where('name', 'like', '%' . $name . '%')
+                          ->where('category_id', '!=', 1);
+                })
+                ->get();
+        }else{
+        $subjects = Subject::where('name', 'like', '%' . $name . '%')
+        ->get();
+    }
+
+    foreach ($subjects as $item) {
+        $item->users = Subject::whereHas('years_users', function($query) use ($item) {
+            $query->where('subject_id', $item->id);
+        })->get();
+
+        $item->users = User::whereIn('id', function($query) use ($item) {
+            $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $item->id);
+        })->get();
+    }
+
+    return response()->json([
+        'message' => "These are the items.",
+        'subjects' =>$subjects,
+    ]);
+}else{
+    return response()->json([
+        'message' => "These are the items.",
+        'subjects' =>$subjects,
+    ]);
+}
+}
     //***********************************************************************************************************************\\
     /*search in subjects,category,teachers,unit and lessons.
     in case the user has year_id will see just one subject in his year else he see all subjects.*/
@@ -137,6 +182,11 @@ class SubjectController extends Controller
 {
     $year_id = $request->query('year_id');
     $name = $request->query('name');
+    $categories= null;
+    $teachers= null;
+    $units= null;
+    $lessons= null;
+    $subjects= null;
     if($name){
 
     $categories = Category::where('category', 'like', '%' . $name . '%')
@@ -178,6 +228,15 @@ class SubjectController extends Controller
         })->get();
     }
 
+    return response()->json([
+        'message' => "These are the items.",
+        'categories' => $categories,
+        'teachers' =>$teachers,
+        'units' =>$units,
+        'lessons' =>$lessons,
+        'subjects' =>$subjects,
+    ]);
+}else{
     return response()->json([
         'message' => "These are the items.",
         'categories' => $categories,

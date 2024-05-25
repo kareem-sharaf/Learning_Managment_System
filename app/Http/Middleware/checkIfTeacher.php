@@ -6,7 +6,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-
+use Illuminate\Auth\Middleware\checkIfTeacher as Middleware;
+use Illuminate\Http\JsonResponse;
 class checkIfTeacher
 {
     /**
@@ -18,9 +19,13 @@ class checkIfTeacher
     {
         $user = Auth::user();
 
-        if (Auth::check() && ($user->role == 1 || $user->role == 2 || $user->role == 3)) {
+        if (Auth::check() && ($user->role_id == 1 || $user->role_id == 2 || $user->role_id == 3)) {
             return $next($request);
         }
+
         return response()->json(['error' => 'Unauthorized'], 403);
+
     }
+
+
 }
