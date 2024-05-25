@@ -16,8 +16,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-
-
+    
 //********************************************************************************************** */
     public function show_all_teachers()
     {

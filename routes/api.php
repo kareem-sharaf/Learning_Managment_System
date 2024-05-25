@@ -15,6 +15,8 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitsController;
 use App\Http\Controllers\UserVerificationController;
+use App\Http\Controllers\SubscriptionController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -134,15 +136,37 @@ Route::group(['prefix' => 'subject'], function () {
         Route::get('index', 'index');
         Route::get('search', 'search');
 
-        Route::group(['middleware' => 'auth:sanctum'], function () {
-            Route::post('add_subject', 'add_subject');
-            Route::post('edit_subject', 'edit_subject');
-            Route::get('delete_subject/{subject_id}', 'delete_subject');
-            Route::get('buy_subject', 'buy_subject');
-
-        });
+    Route::group(['middleware' => 'auth:sanctum',checkIfManager,checkIfAdmin], function () {
+        Route::post('add_subject', 'add_subject');
+        Route::post('edit_subject', 'edit_subject');
+        Route::get('delete_subject/{subject_id}', 'delete_subject');
     });
 });
+});
+
+
+
+
+Route::group(['prefix' => 'subscription'], function () {
+    Route::controller(SubscriptionController::class)->group(function () {
+    Route::group(['middleware' => 'auth:sanctum', checkIfStudent], function () {
+        Route::get('buy_subject', 'buy_subject');
+        Route::get('delete_request', 'delete_request');
+        Route::get('show_all_requests_for_student', 'show_all_requests_for_student');
+        Route::get('show_one_request_for_student', 'show_one_request_for_student');
+    });
+    Route::group(['middleware' => 'auth:sanctum', checkIfTeacher], function () {
+        Route::get('show_all_requests_for_teacher', 'show_all_requests_for_teacher');
+        Route::get('show_one_request_for_teacher', 'show_one_request_for_teacher');
+        Route::post('edit_request', 'edit_request');
+        Route::get('delete_request', 'delete_request');
+
+    });
+});
+});
+
+
+
 
 
 
@@ -171,11 +195,9 @@ Route::group(['prefix' => 'profile'], function () {
         Route::get('teachers_in_category/{category_id}', 'teachers_in_category');
         Route::post('search_to_teacher', 'search_to_teacher');
 
-        Route::group(['middleware' => 'auth:sanctum'], function () {
-            Route::post('add_teacher', 'add_teacher');
-            Route::post('edit_teacher', 'edit_teacher');
-            Route::delete('delete_teacher/{teacher_id}', 'delete_teacher');
+        Route::group(['middleware' => 'auth:sanctum', checkIfManager,checkIfAdmin], function () {
         });
+
     });
 });
 Route::group(['prefix' => 'file'], function () {

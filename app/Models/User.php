@@ -56,11 +56,11 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // public function courses()
-    // {
-    //     return $this->hasMany(Course::class);
-    // }
-
+   
+    public function subjects2()
+    {
+        return $this->belongsToMany(Subject::class,'subscriptions');
+    }
     public function subjects()
     {
         return $this->belongsToMany(Subject::class, 'teacher_subject_years', 'user_id', 'subject_id');
@@ -86,4 +86,6 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
                     ->withPivot('subject_id');
     }
+
+
 }

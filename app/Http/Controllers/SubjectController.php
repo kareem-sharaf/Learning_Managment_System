@@ -16,6 +16,7 @@ use App\Models\Subscription;
 
  use App\Http\Responses\ApiSuccessResponse;
  use App\Http\Responses\ApiErrorResponse;
+ use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -191,7 +192,9 @@ class SubjectController extends Controller
 //************************************************************************************************************** */
     public function add_subject(Request $request)
 {
-    $user = auth()->user();
+    $user = Auth::user();
+    $user_id = $user->id;
+
     $request->validate([
         'category_id' => 'required',
         'name' => 'required',
@@ -262,6 +265,7 @@ class SubjectController extends Controller
     //***********************************************************************************************************************\\
     public function edit_subject(Request $request)
     {
+        $user = auth()->user();
         $request->validate([
             'subject_id' => 'required',
             'category_id' => 'required',
@@ -347,30 +351,5 @@ class SubjectController extends Controller
     }
 
     //***********************************************************************************************************************\\
-    public function buy_subject(Request $request)
-    {
-        $user_id = $request->query('user_id');
-        $subject_id = $request->query('subject_id');
-
-        $subject = Subject::find($subject_id);
-        $user = User::find($user_id);
-
-        if($subject || $user['role'] == 4)
-        $subscription = Subscription::create([
-            'user_id' => $request->user_id,
-            'subject_id' => $request->subject_id,
-            'status' => 'wait',
-
-        ]);
-
-
-        $message = "The request added successfully.";
-        return response()->json([
-            'message' => $message,
-        ]);
-
-    }
-
-
 
 }

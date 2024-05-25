@@ -20,7 +20,10 @@ class Subject extends Model
 
 
     // public $timestamps=false;
-
+    public function users()
+    {
+        return $this->belongsToMany(User::class,'subscriptions');
+    }
     public function stage()
     {
         return $this->belongsTo(Stage::class);
@@ -41,7 +44,7 @@ class Subject extends Model
                     ->withPivot('year_id');
     }
 
- 
+
 
 
 }
