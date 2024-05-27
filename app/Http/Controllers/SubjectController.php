@@ -130,12 +130,13 @@ class SubjectController extends Controller
         ]);
     }
 //****************************************************************************************************************** */
+//search just in subjects.
 public function search_in_subjects(Request $request)
 {
     $year_id = $request->query('year_id');
     $name = $request->query('name');
 
-    $subjects= null;
+    $subjects= [];
     if($name){
 
         if($year_id){
@@ -177,16 +178,16 @@ public function search_in_subjects(Request $request)
 }
     //***********************************************************************************************************************\\
     /*search in subjects,category,teachers,unit and lessons.
-    in case the user has year_id will see just one subject in his year else he see all subjects.*/
+    in case the user has year_id will see just one subject in his year else he will see all subjects.*/
     public function search(Request $request)
 {
     $year_id = $request->query('year_id');
     $name = $request->query('name');
-    $categories= null;
-    $teachers= null;
-    $units= null;
-    $lessons= null;
-    $subjects= null;
+    $categories= [];
+    $teachers= [];
+    $units= [];
+    $lessons= [];
+    $subjects= [];
     if($name){
 
     $categories = Category::where('category', 'like', '%' . $name . '%')

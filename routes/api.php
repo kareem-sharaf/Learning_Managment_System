@@ -126,7 +126,7 @@ Route::group(['prefix' => 'ad'], function () {
 });
 
 
-
+//************************************************************************************************************************** */
 
 Route::group(['prefix' => 'subject'], function () {
     Route::controller(SubjectController::class)->group(function () {
@@ -137,8 +137,6 @@ Route::group(['prefix' => 'subject'], function () {
         Route::get('search', 'search');
         Route::get('search_in_subjects', 'search_in_subjects');
 
-
-
     Route::middleware('auth:sanctum')->group(function () {
         Route::group(['middleware' => 'checkIfTeacher:sanctum' ] , function(){
             Route::post('add_subject', 'add_subject');
@@ -146,9 +144,13 @@ Route::group(['prefix' => 'subject'], function () {
             Route::get('delete_subject/{subject_id}', 'delete_subject');
            });
     });
+});
+});
 
-});
-});
+
+
+
+
 
 
 
