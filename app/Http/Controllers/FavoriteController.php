@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Subject;
 use App\Models\Favorite;
 use App\Models\Category;
 
@@ -38,41 +39,48 @@ class FavoriteController extends Controller
         $user_id = $user->id;
 
         $request->validate([
-            'favoritable_type' => 'required|in:App\Models\Teacher,App\Models\Subject,App\Models\Category',
-            'category' => 'string|exists:categories',
-            'teacher' => 'string|exists:users',
-            'subject' => 'string|exists:subjects'
+            'category' => 'string|exists:categories,category',
+            'teacher' => 'string|exists:users,name',
+            'subject' => 'string|exists:subjects,name'
         ]);
+
+        $favoritable_type = '';
+        $favoritable_id = '';
 
         if ($request->has('category')) {
-            $category = Category::where('category', $request->category)
-                ->first();
+            $category = Category::where('category', $request->category)->first();
             if (!$category) {
-                return response()->json(
-                    ['message' => 'Category not found!'],
-                    404
-                );
+                return response()->json(['message' => 'Category not found!'], 404);
             }
-
+            $favoritable_type = 'category';
             $favoritable_id = $category->id;
-        }elseif($request->has('teacher')){
-            $teacher = User::where('name', $request->teacher)
-            ->first();
+            $favoritable_name = $category->category;
+        } elseif ($request->has('teacher')) {
+            $teacher = User::where('name', $request->teacher)->where('role_id', 3)->first();
             if (!$teacher) {
-                return response()->json(
-                    ['message' => 'Teacher not found!'],
-                    404
-                );
+                return response()->json(['message' => 'Teacher not found!'], 404);
             }
-
-        $favoritable_id = $teacher->id;
+            $favoritable_type = 'teacher';
+            $favoritable_id = $teacher->id;
+            $favoritable_name = $teacher->name;
+        } elseif ($request->has('subject')) {
+            $subject = Subject::where('name', $request->subject)->first();
+            if (!$subject) {
+                return response()->json(['message' => 'Subject not found!'], 404);
+            }
+            $favoritable_type = 'subject';
+            $favoritable_id = $subject->id;
+            $favoritable_name = $subject->name;
         }
+
         $favorite = new Favorite([
             'favoritable_id' => $favoritable_id,
-            'favoritable_type' => $request->favoritable_type,
+            'favoritable_type' => $favoritable_type,
+            'favoritable_name' => $favoritable_name
         ]);
 
-        $user_id->favorites()->save($favorite);
+        $user->favorites()->save($favorite);
+        $favorite->users()->attach($user->id);
 
         return response()->json([
             'message' => 'Favorite stored successfully',

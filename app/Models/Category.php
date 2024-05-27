@@ -31,4 +31,9 @@ class Category extends Model
     {
         return $this->belongsToMany(User::class, 'favorite_categories', 'category_id', 'user_id');
     }
+
+    public function favorites()
+    {
+        return $this->morphMany(Favorite::class, 'favoritable');
+    }
 }

@@ -111,6 +111,7 @@ class UserSeeder extends Seeder
             'image_id' => 1,
             'password' => Hash::make('password'),
             'birth_date' => "2003/5/11",
+            'device_id' => 'mmm9',
             'gender' => 0,
             'role_id' => 4,
         ]);

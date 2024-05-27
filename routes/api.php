@@ -10,6 +10,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\ProfileController;
@@ -124,7 +125,18 @@ Route::group(['prefix' => 'ad'], function () {
     });
 });
 
-
+//  stages routes
+Route::group(['prefix' => 'fav'], function () {
+    Route::controller(FavoriteController::class)->group(function () {
+        Route::get('index', 'index');
+        Route::get('show', 'show');
+        Route::group(['middleware' => 'auth:sanctum', 'checkIfStudent'], function () {
+            Route::post('store', 'store');
+            Route::post('search', 'search');
+            Route::post('destroy', 'destroy');
+        });
+    });
+});
 
 Route::group(['prefix' => 'subject'], function () {
     Route::controller(SubjectController::class)->group(function () {
@@ -139,7 +151,6 @@ Route::group(['prefix' => 'subject'], function () {
             Route::post('edit_subject', 'edit_subject');
             Route::get('delete_subject/{subject_id}', 'delete_subject');
             Route::get('buy_subject', 'buy_subject');
-
         });
     });
 });
@@ -184,9 +195,7 @@ Route::group(['prefix' => 'file'], function () {
         Route::post('/update_lesson', 'update_lesson');
         Route::post('/delete_lesson', 'delete_lesson');
         Route::get('/get_all_lessons', 'get_all_lessons');
-
-
-        });
     });
+});
 
 Route::post('/message', [ChatController::class, 'message']);
