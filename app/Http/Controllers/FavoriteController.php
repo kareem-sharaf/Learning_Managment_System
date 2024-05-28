@@ -79,7 +79,7 @@ class FavoriteController extends Controller
             'favoritable_name' => $favoritable_name
         ]);
 
-        $user->favorites()->save($favorite);
+        $user_id->favorites()->save($favorite);
         $favorite->users()->attach($user->id);
 
         return response()->json([
