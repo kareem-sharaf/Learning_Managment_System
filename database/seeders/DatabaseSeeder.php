@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             Teacher_subject_yearSeeder::class,
             UnitsSeeder::class,
-            LessinsSeeder::class,
+            LessonsSeeder::class,
                 ]);
     }
 }

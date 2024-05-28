@@ -9,14 +9,15 @@ class Favorite extends Model
 {
     protected $fillable = [
         'favoritable_id',
-        'favoritable_type'
+        'favoritable_type',
+        'favoritable_name'
     ];
 
     public $timestamps = false;
 
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class, 'role_id', 4);
     }
 
     public function favoritable()

@@ -56,31 +56,33 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-   
+
     public function subjects2()
     {
         return $this->belongsToMany(Subject::class,'subscriptions');
     }
+
+    // public function courses()
+    // {
+    //     return $this->hasMany(Course::class);
+    // }
+
+    public function favorites()
+    {
+        return $this->morphToMany(Favorite::class, 'favoritable');
+    }
+
+    public function favoritess()
+    {
+        return $this->belongsToMany(Favorite::class);
+    }
+
+
     public function subjects()
     {
         return $this->belongsToMany(Subject::class, 'teacher_subject_years', 'user_id', 'subject_id');
     }
 
-    public function favoriteCategories()
-    {
-        return $this->belongsToMany(Category::class, 'favorite_categories', 'user_id', 'category_id');
-    }
-
-    public function favoriteSubjects()
-    {
-        return $this->belongsToMany(Subject::class, 'favorite_subjects', 'user_id', 'subject_id');
-    }
-
-    public function favoriteTeachers()
-    {
-        return $this->belongsToMany(User::class, 'favorite_teachers', 'user_id', 'teacher_id')
-            ->where('role_id', 3);
-    }
     public function subjects_users()
     {
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
