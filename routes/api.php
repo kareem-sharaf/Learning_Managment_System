@@ -19,6 +19,7 @@ use App\Http\Controllers\UserVerificationController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Middleware\checkIfTeacher;
 use App\Http\Controllers\CommentsController;
+use App\Http\Controllers\Video1;
 /*
 |--------------------------------------------------------------------------
 | API Routes
