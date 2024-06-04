@@ -18,6 +18,7 @@ use App\Http\Controllers\UnitsController;
 use App\Http\Controllers\UserVerificationController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Middleware\checkIfTeacher;
+use App\Http\Controllers\CommentsController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -232,10 +233,10 @@ Route::group(['prefix' => 'file'], function () {
 });
 Route::group(['prefix' => 'comment'], function () {
     Route::controller(CommentsController::class)->group(function () {
-        Route::post('/add_lesson', 'add_lesson');
-        Route::post('/update_lesson', 'update_lesson');
-        Route::post('/delete_lesson', 'delete_lesson');
-        Route::get('/get_all_lessons', 'get_all_lessons');
+        Route::post('/store', 'store');
+        Route::post('/update', 'update');
+        Route::post('/destroy', 'destroy');
+       
     });
 });
 
