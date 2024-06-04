@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;use App\Models\Video;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Video;
 use App\Models\Subject;
 use App\Models\Unit;
 use App\Models\Lesson;
-use Illuminate\Http\Request;
+
 class Video1 extends Controller
 {
     public function store(Request $request)
@@ -73,7 +74,6 @@ class Video1 extends Controller
             return response()->json(['error' => 'Video not found'], 404);
         }
 
-        // delete the video file from storage
         Storage::delete($video->video);
 
         $video->delete();
