@@ -225,7 +225,7 @@ Route::group(['prefix' => 'profile'], function () {
 
     });
 });
-Route::group(['prefix' => 'file'], function () {
+Route::group(['prefix' => 'lessons'], function () {
     Route::controller(LessonController::class)->group(function () {
         Route::post('/add_lesson', 'add_lesson');
         Route::post('/update_lesson', 'update_lesson');
