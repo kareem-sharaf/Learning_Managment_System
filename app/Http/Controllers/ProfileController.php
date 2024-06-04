@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-    
+
 //********************************************************************************************** */
     public function show_all_teachers()
     {
@@ -44,42 +44,57 @@ class ProfileController extends Controller
         ]);
     }
     //********************************************************************************************** */
-    public function show_one_teacher($user_id)
-    {
-        $user = User::where('id', $user_id)->first();
-        $courses=null;
-        if($user && $user->role_id == 3){
-            $courses = Subject::whereHas('years_users', function($q) use ($user_id) {
-                $q->where('user_id', $user_id);
-            })->get();
-        }
+    public function show_one_teacher(Request $request)
+{
+    $user_id = $request->query('user_id');
+
+    $user = User::where('id', $user_id)->first();
+    $courses = [];
+
+    if($user && $user->role_id == 3){
+        $courses = Subject::whereHas('years_users', function($q) use ($user_id) {
+            $q->where('user_id', $user_id);
+        })->get();
         $message = "this is the user.";
+
         return response()->json([
             'message' => $message,
             'data' => $user,
-            'courses'=>$courses,
+            'courses' => $courses,
         ]);
-    }
-    //********************************************************************************************** */
-    public function show_one_student($user_id)
-    {
-        $user = User::where('id', $user_id)->first();
-        $courses=null;
-        if($user && $user->role_id == 4){
+    } else {
+        $message = "Invalid user role or user not found.";
+
         return response()->json([
-            'message' => 'this is the user',
-            'data' => $user,
-            // 'courses'=>$courses,
-        ]);
-        }else{
+            'message' => $message
+        ], 404);
+    }
+}
+    //********************************************************************************************** */
+    public function show_one_student(Request $request)
+    {
+        $user_id = $request->query('user_id');
+
+        $user = User::where('id', $user_id)->first();
+        $courses=[];
+        if($user && $user->role_id == 4){
+            $message = "this is the user.";
+
             return response()->json([
-                'message' => "this is the user.",
-                'data' => [],
+                'message' => $message,
+                'data' => $user,
+                'courses' => $courses,
             ]);
+        } else {
+            $message = "Invalid user role or user not found.";
+
+            return response()->json([
+                'message' => $message
+            ], 404);
         }
     }
     //********************************************************************************************** */
-    public function show_subject_teachers($subject_id)
+    public function show_teachers_in_subject(Request $request)
     {
         $subject_id = $request->query('subject_id');
 
@@ -93,4 +108,26 @@ class ProfileController extends Controller
         ]);
     }
 //****************************************************************************************************** */
+public function search_in_teacher(Request $request)
+    {
+
+        $name = $request->query('name');
+
+        $teachers= [];
+        if($name){
+        $teachers = User::where('name', 'like', '%' . $name . '%')
+                    ->where('role_id', 3)->get();
+        return response()->json([
+            'message' => "These are the teachers.",
+            'teachers' =>$teachers,
+        ]);
+    }else{
+        return response()->json([
+            'message' => "These are the teachers.",
+            'teachers' =>$teachers,
+        ]);
+    }
+    }
+    //****************************************************************************************************** */
+
 }

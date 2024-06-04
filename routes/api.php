@@ -196,12 +196,12 @@ Route::group(['prefix' => 'unit'], function () {
 
 Route::group(['prefix' => 'profile'], function () {
     Route::controller(ProfileController::class)->group(function () {
-        Route::get('show_one_teacher/{user_id}', 'show_one_teacher');
-        Route::get('show_one_student/{user_id}', 'show_one_student');
+        Route::get('show_one_teacher', 'show_one_teacher');
+        Route::get('show_one_student', 'show_one_student');
         Route::get('show_all_teachers', 'show_all_teachers');
-        Route::get('show_subject_teachers', 'show_subject_teachers');
+        Route::get('show_teachers_in_subject', 'show_teachers_in_subject');
         Route::get('teachers_in_category/{category_id}', 'teachers_in_category');
-        Route::post('search_to_teacher', 'search_to_teacher');
+        Route::get('search_in_teacher', 'search_in_teacher');
 
         Route::group(['middleware' => 'auth:sanctum', 'checkIfManager','checkIfAdmin'], function () {
         });
