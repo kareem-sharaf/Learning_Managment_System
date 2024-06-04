@@ -15,6 +15,8 @@ class CommentsController extends Controller
         'content' => 'required|string|max:255',
         'user_id' => 'required|integer|exists:users,id',
         'subject_id' => 'nullable|integer|exists:subjects,id',
+        'lesson_id' => 'nullable|integer|exists:lessons,id',
+
         'unit_id' => 'nullable|integer|exists:units,id',
     ]);
 
@@ -30,6 +32,8 @@ public function update(Request $request, Comment $comment)
         'user_id' => 'sometimes|required|integer|exists:users,id',
         'subject_id' => 'sometimes|nullable|integer|exists:subjects,id',
         'unit_id' => 'sometimes|nullable|integer|exists:units,id',
+        'lesson_id' => 'nullable|integer|exists:lessons,id',
+
     ]);
 
     $comment->update($validatedData);
@@ -43,4 +47,19 @@ public function destroy(Comment $comment)
 
     return response()->json(null, 204);
 }
+public function getComments(Request $request)
+    {
+        $validatedData = $request->validate([
+            'lesson_id' => 'required|exists:users,id',
+            
+        ]);
+        $lesson = Lesson::find($validatedData['lesson_id']);
+        if (!$lesson) {
+            return response()->json(['error' => 'Lesson not found'], 404);
+        }
+
+        $comments = $lesson->comments;
+
+        return response()->json($comments);
+    }
 }

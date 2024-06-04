@@ -11,7 +11,10 @@ class Lesson extends Model
 
   
 
-
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
        public function unit()
     {
         return $this->belongsTo(Unit::class);
