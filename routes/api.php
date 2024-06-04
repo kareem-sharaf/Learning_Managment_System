@@ -230,5 +230,13 @@ Route::group(['prefix' => 'file'], function () {
         Route::get('/get_all_lessons', 'get_all_lessons');
     });
 });
+Route::group(['prefix' => 'comment'], function () {
+    Route::controller(CommentsController::class)->group(function () {
+        Route::post('/add_lesson', 'add_lesson');
+        Route::post('/update_lesson', 'update_lesson');
+        Route::post('/delete_lesson', 'delete_lesson');
+        Route::get('/get_all_lessons', 'get_all_lessons');
+    });
+});
 
 Route::post('/message', [ChatController::class, 'message']);
