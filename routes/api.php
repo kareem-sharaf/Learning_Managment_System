@@ -20,6 +20,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Middleware\checkIfTeacher;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\Video1;
+use App\Http\Controllers\files;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -240,5 +241,20 @@ Route::group(['prefix' => 'comment'], function () {
        
     });
 });
-
+Route::group(['prefix' => 'video'], function () {
+    Route::controller(Video1::class)->group(function () {
+        Route::post('/store', 'store');
+        Route::post('/update', 'update');
+        Route::post('/destroy', 'destroy');
+       
+    });
+});
+Route::group(['prefix' => 'files'], function () {
+    Route::controller(files::class)->group(function () {
+        Route::post('/store', 'store');
+        Route::post('/update', 'update');
+        Route::post('/destroy', 'destroy');
+       
+    });
+});
 Route::post('/message', [ChatController::class, 'message']);
