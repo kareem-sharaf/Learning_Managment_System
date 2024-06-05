@@ -26,8 +26,18 @@ class CommentsController extends Controller
     return response()->json($comment, 201);
 }
 
-public function update(Request $request, Comment $comment)
+public function update(Request $request)
 {
+    $validatedData = $request->validate([
+        'id' => 'equired|integer|exists:comments,id'
+    ]);
+
+    $comment = Comment::find($validatedData['id']);
+
+    if (!$comment) {
+        return response()->json(['error' => 'Comment not found'], 404);
+    }
+
     $validatedData = $request->validate([
         'content' => 'sometimes|required|string|max:255',
         'user_id' => 'sometimes|required|integer|exists:users,id',

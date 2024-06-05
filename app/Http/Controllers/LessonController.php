@@ -67,6 +67,8 @@ class LessonController extends Controller
 
     public function update_lesson(Request $request)
 {
+
+    
     $request->validate([
         'name'=>'required|string|max:255',
         'unit_id'=>'required',
@@ -110,7 +112,7 @@ public function delete_lesson(Request $request)
     $id = $request->id;
     $lesson = Lesson::findOrFail($id);
 
-    // Delete the image, video, and PDF files
+  
     Storage::delete([
         $lesson->image,
        

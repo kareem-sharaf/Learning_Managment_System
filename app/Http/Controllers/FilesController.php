@@ -32,9 +32,13 @@ class FilesController extends Controller
 
     return response()->json($file, 201);
 }
-public function update(Request $request, $id)
+public function update(Request $request)
 {
-    $file = Files::find($id);
+    $validatedData = $request->validate([
+        'id' => 'required|integer|exists:files,id'
+    ]);
+
+    $file = Files::find($validatedData['id']);
 
     if (!$file) {
         return response()->json(['error' => 'File not found'], 404);
@@ -65,18 +69,20 @@ public function update(Request $request, $id)
     return response()->json($file, 200);
 }
 
-public function destroy($id)
+public function destroy(Request $request)
 {
-    $id = $request->id;
+    $validatedData = $request->validate([
+        'id' => 'required|integer|exists:files,id'
+    ]);
 
-    $file = Files::find($id);
+    $file = Files::find($validatedData['id']);
 
     if (!$file) {
         return response()->json(['error' => 'File not found'], 404);
     }
 
     Storage::delete($file->content);
-    
+
     $file->delete();
 
     return response()->json(['message' => 'File deleted successfully'], 200);

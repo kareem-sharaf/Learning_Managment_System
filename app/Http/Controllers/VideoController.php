@@ -41,9 +41,12 @@ class VideoController extends Controller
 
 public function update(Request $request)
     {
-        $id = $request->id;
-        $video = Video::find($id);
-
+        $validatedData = $request->validate([
+            'id' => 'required|integer|exists:videos,id'
+        ]);
+    
+        $video = Video::find($validatedData['id']);
+    
         if (!$video) {
             return response()->json(['error' => 'Video not found'], 404);
         }
@@ -75,9 +78,13 @@ public function update(Request $request)
 
     public function destroy(Request $request)
     {
-        $id = $request->id;
+        
+        $validatedData = $request->validate([
+            'id' => 'required|integer|exists:videos,id'
+        ]);
     
-        $video = Video::find($id);
+        $video = Video::find($validatedData['id']);
+    
     
         if (!$video) {
             return response()->json(['error' => 'Video not found'], 404);
