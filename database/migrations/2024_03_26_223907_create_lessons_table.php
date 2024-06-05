@@ -14,16 +14,12 @@ return new class extends Migration
         Schema::create('lessons', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-
             $table->unsignedBigInteger('unit_id')->constrained('units')->cascadeOnDelete();
-        
             $table->integer('price');
             $table->text('description');
+            $table->unsignedBigInteger('file_id')->nullable()->constrained('files')->cascadeOnDelete();
+            $table->unsignedBigInteger('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
             $table->string('image')->nullable();
-            $table->string('file')->nullable();
-            $table->string('video')->nullable();
-
-            
             $table->timestamps();
         });
     }

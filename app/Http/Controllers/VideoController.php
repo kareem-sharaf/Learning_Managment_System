@@ -15,7 +15,7 @@ class VideoController extends Controller
 {
     $validatedData = $request->validate([
         'name' => 'required|string|max:255',
-        'video' => 'required|file|mimes:mp4|max:10240', // 10MB max file size
+        'video' => 'required|file|mimes:mp4|max:10240', 
         'subject_id' => 'required|integer|exists:subjects,id',
         'unit_id' => 'required|integer|exists:units,id',
         'lesson_id' => 'required|integer|exists:lessons,id',
