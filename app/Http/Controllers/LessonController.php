@@ -130,6 +130,24 @@ public function delete_lesson(Request $request)
     }
 } 
 
+public function getLessonsByUnitId(Request $request)
+{
+    $unitId = $request->unit_id;
 
+    $lessons = Lesson::where('unit_id', $unitId)->get();
+
+    if ($lessons) {
+        return response()->json([
+            'message' => 'Lessons retrieved successfully',
+            'data' => $lessons,
+            'tatus' => 200,
+        ]);
+    } else {
+        return response()->json([
+            'message' => 'No lessons found for this unit',
+            'status' => 404,
+        ]);
+    }
+}
 
 }

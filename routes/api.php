@@ -20,7 +20,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Middleware\checkIfTeacher;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\VideoController;
-use App\Http\Controllers\files;
+use App\Http\Controllers\FilesController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -219,18 +219,18 @@ Route::group(['prefix' => 'profile'], function () {
         Route::get('show_teachers_in_subject', 'show_teachers_in_subject');
         Route::get('teachers_in_category/{category_id}', 'teachers_in_category');
         Route::get('search_in_teacher', 'search_in_teacher');
-
         Route::group(['middleware' => 'auth:sanctum', 'checkIfManager','checkIfAdmin'], function () {
+            
         });
 
     });
 });
 Route::group(['prefix' => 'lessons'], function () {
     Route::controller(LessonController::class)->group(function () {
-        Route::post('/add_lesson', 'add_lesson');
-        Route::post('/update_lesson', 'update_lesson');
-        Route::post('/delete_lesson', 'delete_lesson');
-        Route::get('/get_all_lessons', 'get_all_lessons');
+        Route::post('/add', 'add_lesson');
+        Route::post('/update', 'update_lesson');
+        Route::post('/delete', 'delete_lesson');
+        Route::get('/get', 'getLessonsByUnitId');
     });
 });
 Route::group(['prefix' => 'comment'], function () {
@@ -250,7 +250,7 @@ Route::group(['prefix' => 'video'], function () {
     });
 });
 Route::group(['prefix' => 'files'], function () {
-    Route::controller(files::class)->group(function () {
+    Route::controller(FilesController::class)->group(function () {
         Route::post('/store', 'store');
         Route::post('/update', 'update');
         Route::post('/destroy', 'destroy');

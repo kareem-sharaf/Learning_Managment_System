@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Files;
+use Illuminate\Support\Facades\Storage;
 
-class files extends Controller
+class FilesController extends Controller
 {
     public function store(Request $request)
 {
@@ -16,7 +18,7 @@ class files extends Controller
         'lesson_id' => 'required|integer|exists:lessons,id',
     ]);
 
-    $file = new File();
+    $file = new Files();
     $file->name = $validatedData['name'];
     $file->subject_id = $validatedData['subject_id'];
     $file->unit_id = $validatedData['unit_id'];
@@ -32,7 +34,7 @@ class files extends Controller
 }
 public function update(Request $request, $id)
 {
-    $file = File::find($id);
+    $file = Files::find($id);
 
     if (!$file) {
         return response()->json(['error' => 'File not found'], 404);
@@ -65,14 +67,16 @@ public function update(Request $request, $id)
 
 public function destroy($id)
 {
-    $file = File::find($id);
+    $id = $request->id;
+
+    $file = Files::find($id);
 
     if (!$file) {
         return response()->json(['error' => 'File not found'], 404);
     }
 
     Storage::delete($file->content);
-
+    
     $file->delete();
 
     return response()->json(['message' => 'File deleted successfully'], 200);
