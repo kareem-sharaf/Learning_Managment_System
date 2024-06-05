@@ -9,7 +9,7 @@ use App\Models\Subject;
 use App\Models\Unit;
 use App\Models\Lesson;
 
-class Video1 extends Controller
+class VideoController extends Controller
 {
     public function store(Request $request)
 {

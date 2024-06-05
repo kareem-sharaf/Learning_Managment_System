@@ -19,7 +19,7 @@ use App\Http\Controllers\UserVerificationController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Middleware\checkIfTeacher;
 use App\Http\Controllers\CommentsController;
-use App\Http\Controllers\Video1;
+use App\Http\Controllers\VideoController;
 use App\Http\Controllers\files;
 /*
 |--------------------------------------------------------------------------
@@ -242,7 +242,7 @@ Route::group(['prefix' => 'comment'], function () {
     });
 });
 Route::group(['prefix' => 'video'], function () {
-    Route::controller(Video1::class)->group(function () {
+    Route::controller(VideoController::class)->group(function () {
         Route::post('/store', 'store');
         Route::post('/update', 'update');
         Route::post('/destroy', 'destroy');
