@@ -16,14 +16,14 @@ return new class extends Migration
             $table->string('name');
 
             $table->unsignedBigInteger('unit_id')->constrained('units')->cascadeOnDelete();
-        
-            $table->integer('price');
+
+            $table->float('price');
             $table->text('description');
             $table->string('image')->nullable();
             $table->string('file')->nullable();
             $table->string('video')->nullable();
 
-            
+
             $table->timestamps();
         });
     }

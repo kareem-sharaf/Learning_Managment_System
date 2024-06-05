@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->integer('price')->default(0);
-            $table->binary('image_data')->default('default_image.jpg')->nullable();
+            $table->float('price')->default(0);
+            $table->ends_with('haystack', 'needles')('image_data')->default('default_image.jpg')->nullable();
             $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
             $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
             $table->unsignedBigInteger('subject_id')->references('id')->on('subjects')->onDelete('cascade');
            $table->timestamps();
         });
     }
- 
+
     /**
      * Reverse the migrations.
      */
