@@ -238,10 +238,10 @@ Route::group(['prefix' => 'comment'], function () {
         Route::post('/store', 'store');
         Route::post('/update', 'update');
         Route::post('/destroy', 'destroy');
-        Route::post('/getComments', 'getComments');
+        Route::get('/getComments', 'getComments');
 
     });
-    
+
 });
 Route::group(['prefix' => 'video'], function () {
     Route::controller(VideoController::class)->group(function () {
@@ -259,4 +259,11 @@ Route::group(['prefix' => 'files'], function () {
        
     });
 });
-Route::post('/message', [MessageController::class, 'message']);
+Route::group(['prefix' => 'message'], function () {
+    Route::controller(MessageController::class)->group(function () {
+        Route::post('/send', 'sendmessage');
+        Route::post('/update', 'updateMessage');
+        Route::post('/destroy', 'deleteMessage');
+       
+    });
+});

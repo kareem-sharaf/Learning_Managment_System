@@ -29,7 +29,7 @@ class CommentsController extends Controller
 public function update(Request $request)
 {
     $validatedData = $request->validate([
-        'id' => 'equired|integer|exists:comments,id'
+        'id' => 'required|integer|exists:comments,id'
     ]);
 
     $comment = Comment::find($validatedData['id']);
@@ -56,7 +56,7 @@ public function update(Request $request)
 public function destroy(Request $request)
 {
     $validatedData = $request->validate([
-        'id' => 'equired|integer|exists:comments,id'
+        'id' => 'required|integer|exists:comments,id'
     ]);
 
     $comment = Comment::find($validatedData['id']);

@@ -17,7 +17,7 @@ class FilesController extends Controller
         'unit_id' => 'required|integer|exists:units,id',
         'lesson_id' => 'required|integer|exists:lessons,id',
     ]);
-
+    
     $file = new Files();
     $file->name = $validatedData['name'];
     $file->subject_id = $validatedData['subject_id'];
