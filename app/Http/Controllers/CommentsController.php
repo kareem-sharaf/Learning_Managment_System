@@ -43,6 +43,25 @@ public function update(Request $request, Comment $comment)
     return response()->json($comment);
 }
 
+public function destroy(Request $request)
+{
+    $validatedData = $request->validate([
+        'id' => 'equired|integer|exists:comments,id'
+    ]);
+
+    $comment = Comment::find($validatedData['id']);
+
+    if (!$comment) {
+        return response()->json(['error' => 'Comment not found'], 404);
+    }
+
+    if ($comment->delete()) {
+        return response()->json(['message' => 'Comment deleted successfully'], 200);
+    } else {
+        return response()->json(['message' => 'Comment not deleted'], 400);
+    }
+}
+
 public function getComments(Request $request)
 {
     $validatedData = $request->validate([

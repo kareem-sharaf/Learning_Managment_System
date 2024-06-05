@@ -220,7 +220,7 @@ Route::group(['prefix' => 'profile'], function () {
         Route::get('teachers_in_category/{category_id}', 'teachers_in_category');
         Route::get('search_in_teacher', 'search_in_teacher');
         Route::group(['middleware' => 'auth:sanctum', 'checkIfManager','checkIfAdmin'], function () {
-            
+
         });
 
     });
@@ -238,8 +238,10 @@ Route::group(['prefix' => 'comment'], function () {
         Route::post('/store', 'store');
         Route::post('/update', 'update');
         Route::post('/destroy', 'destroy');
-       
+        Route::post('/getComments', 'getComments');
+
     });
+    
 });
 Route::group(['prefix' => 'video'], function () {
     Route::controller(VideoController::class)->group(function () {
