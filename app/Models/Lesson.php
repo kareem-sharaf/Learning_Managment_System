@@ -15,10 +15,11 @@ class Lesson extends Model
     {
         return $this->hasMany(Comment::class);
     }
-       public function unit()
+    public function unit()
     {
         return $this->belongsTo(Unit::class);
     }
+
     public function files()
     {
         return $this->hasMany(Files::class);
@@ -26,7 +27,7 @@ class Lesson extends Model
 
     public function videos()
     {
-        return $this->hasMany(Videos::class);
+        return $this->hasMany(Video::class);
     }
     public function quizes()
 {

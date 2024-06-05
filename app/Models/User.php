@@ -88,6 +88,9 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
                     ->withPivot('subject_id');
     }
-
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 
 }

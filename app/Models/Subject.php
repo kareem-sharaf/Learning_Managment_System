@@ -17,7 +17,10 @@ class Subject extends Model
         'file_id',
         'category_id'
     ];
-
+    public function videos()
+    {
+        return $this->hasMany(Video::class);
+    }
 
     // public $timestamps=false;
     public function users()
@@ -44,7 +47,10 @@ class Subject extends Model
                     ->withPivot('year_id');
     }
 
-
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 
 
 }

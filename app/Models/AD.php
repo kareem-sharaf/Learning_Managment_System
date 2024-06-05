@@ -16,4 +16,8 @@ class AD extends Model
         'stage_id',
         'isExpired'
     ];
+    public function videos()
+{
+    return $this->hasMany(Video::class);
+}
 }

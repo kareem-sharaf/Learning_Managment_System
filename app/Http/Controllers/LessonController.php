@@ -131,4 +131,5 @@ public function delete_lesson(Request $request)
 } 
 
 
+
 }

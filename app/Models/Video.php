@@ -24,4 +24,9 @@ public function lesson()
 {
     return $this->belongsTo(Lesson::class);
 }
+public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
+
 }

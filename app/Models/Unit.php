@@ -18,10 +18,20 @@ class Unit extends Model
         'price'
     ];
 
-
+    public function videos()
+    {
+        return $this->hasMany(Video::class);
+    }
     public function subject()
     {
         return $this->belongsTo(Subject::class);
     }
-    
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class);
+    }
 }

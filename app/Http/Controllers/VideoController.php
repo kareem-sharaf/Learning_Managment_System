@@ -15,27 +15,33 @@ class VideoController extends Controller
 {
     $validatedData = $request->validate([
         'name' => 'required|string|max:255',
-        'video' => 'required|file|mimes:mp4|max:10240', 
-        'subject_id' => 'required|integer|exists:subjects,id',
-        'unit_id' => 'required|integer|exists:units,id',
-        'lesson_id' => 'required|integer|exists:lessons,id',
+        'videos' => 'required|array',
+        'videos.*' => 'required|file|mimes:mp4|max:10240',
+        'subject_id' => '|integer|exists:subjects,id',
+        'unit_id' => '|integer|exists:units,id',
+        'lesson_id' => '|integer|exists:lessons,id',
+        'ads_id' => '|integer|exists:a_d_s,id'
     ]);
 
-    $videoFile = $request->file('video');
-    $videoPath = $videoFile->store('videos', 'public');
+    $videos = [];
+    foreach ($request->file('videos') as $videoFile) {
+        $videoPath = $videoFile->store('videos', 'public');
+        $videos[] = Video::create([
+            'name' => $validatedData['name'],
+            'video' => $videoPath,
+            'subject_id' => $validatedData['subject_id'],
+            'unit_id' => $validatedData['unit_id'],
+            'lesson_id' => $validatedData['lesson_id'],
+            'ads_id' => $validatedData['ads_id'],
+        ]);
+    }
 
-    $video = Video::create([
-        'name' => $validatedData['name'],
-        'video' => $videoPath,
-        'subject_id' => $validatedData['subject_id'],
-        'unit_id' => $validatedData['unit_id'],
-        'lesson_id' => $validatedData['lesson_id'],
-    ]); 
-
-    return response()->json($video, 201);
+    return response()->json($videos, 201);
 }
-  public function update(Request $request, $id)
+
+public function update(Request $request)
     {
+        $id = $request->id;
         $video = Video::find($id);
 
         if (!$video) {
@@ -43,11 +49,12 @@ class VideoController extends Controller
         }
 
         $validatedData = $request->validate([
-            'name' => 'equired|string|max:255',
+            'name' => 'required|string|max:255',
             'video' => 'nullable|file|mimes:mp4|max:10240', // 10MB max file size
-            'ubject_id' => 'equired|integer|exists:subjects,id',
-            'unit_id' => 'equired|integer|exists:units,id',
-            'lesson_id' => 'equired|integer|exists:lessons,id',
+            'subject_id' => '|integer|exists:subjects,id',
+            'unit_id' => '|integer|exists:units,id',
+            'lesson_id' => '|integer|exists:lessons,id',
+            'ads_id'=>'|integer|exists:a_d_s,id'
         ]);
 
         if ($request->hasFile('video')) {
@@ -66,18 +73,20 @@ class VideoController extends Controller
         return response()->json($video, 200);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request)
     {
+        $id = $request->id;
+    
         $video = Video::find($id);
-
+    
         if (!$video) {
             return response()->json(['error' => 'Video not found'], 404);
         }
-
+    
         Storage::delete($video->video);
-
+    
         $video->delete();
-
+    
         return response()->json(['message' => 'Video deleted successfully'], 200);
     }
 }

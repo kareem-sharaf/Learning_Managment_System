@@ -8,7 +8,7 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ADController;
-use App\Http\Controllers\ChatController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\LessonController;
@@ -257,4 +257,4 @@ Route::group(['prefix' => 'files'], function () {
        
     });
 });
-Route::post('/message', [ChatController::class, 'message']);
+Route::post('/message', [MessageController::class, 'message']);
