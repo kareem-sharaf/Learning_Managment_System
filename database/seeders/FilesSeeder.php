@@ -4,31 +4,31 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Lesson;
+use App\Models\Files;
 
-class LessonsSeeder extends Seeder
+class FilesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Lesson::create([
+        Files::create([
             'id' => '1',
             'name' => 'part 1',
-            'unit_id' => '2',
-            'price' => '2',
-            'description' => '2',
-            'image' => '2',
+            'unit_id' => '1',
+            'subject_id' => '1',
+            'lesson_id' => '1',
+            'content' => '2.pdf',
             
         ]);
-        Lesson::create([
+        Files::create([
             'id' => '2',
-            'name' => 'prprprprprprp',
+            'name' => 'part 1',
             'unit_id' => '1',
-            'price' => '2',
-            'description' => '2',
-            'image' => '2',
+            'subject_id' => '1',
+            'lesson_id' => '1',
+            'content' => '2.pdf',
             
         ]);
     }

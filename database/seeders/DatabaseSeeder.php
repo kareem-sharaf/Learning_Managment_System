@@ -24,6 +24,10 @@ class DatabaseSeeder extends Seeder
             Teacher_subject_yearSeeder::class,
             UnitsSeeder::class,
             LessonsSeeder::class,
+            CommentSeeder::class,
+            VideoSeeder::class,
+            FilesSeeder::class,
+            MessageSeeder::class,          
                 ]);
     }
 }

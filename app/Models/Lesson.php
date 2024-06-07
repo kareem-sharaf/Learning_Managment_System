@@ -34,8 +34,6 @@ class Lesson extends Model
         'name',
         'description',
         'unit_id',
-       'video_id',
-       'image',
-       'file_id'
+       'image'
        ,'price'];
 }

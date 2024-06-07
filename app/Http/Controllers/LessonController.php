@@ -21,11 +21,7 @@ class LessonController extends Controller
             'price' => 'required|numeric|min:0',
             'description' => 'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'file_id' => 'required|array',
-            'file_id.*' => 'required|exists:files,id',
-            'video_id' => 'required|array',
-            'video_id.*' => 'required|exists:videos,id',
-        ]);
+              ]);
     
         $imagePath = $request->image->store('images', 'public');
         $imageFilename = basename($imagePath);
@@ -38,20 +34,7 @@ class LessonController extends Controller
         $lesson->image = $imagePath;
     
         if ($lesson->save()) {
-            // Loop through the file IDs and create the corresponding records
-            foreach ($request->file_id as $fileId) {
-                $file = Files::find($fileId);
-                $file->lesson_id = $lesson->id;
-                $file->save();
-            }
-    
-            // Loop through the video IDs and create the corresponding records
-            foreach ($request->video_id as $videoId) {
-                $video = Video::find($videoId);
-                $video->lesson_id = $lesson->id;
-                $video->save();
-            }
-    
+            
             return response()->json([
                 'message' => 'Lesson created successfully',
                 'data' => $lesson,
@@ -75,8 +58,7 @@ class LessonController extends Controller
         'price'=>'required|numeric|min:0',
         'description'=>'required|string|max:255',
         'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240', 
-        'file_id' => 'required|exists:files,id',
-        'video_id' => 'required|exists:videos,id',   
+        
     ]);
      $id=$request->id;
     $lesson = Lesson::findOrFail($id);
@@ -89,8 +71,7 @@ class LessonController extends Controller
     $lesson->price = $request->price;
     $lesson->description = $request->description;
     $lesson->unit_id = $request->unit_id;
-    $lesson->video_id=$request->video_id;
-    $lesson->file_id=$request->file_id;
+
     $lesson->image = $imagePath;
 
     if ($lesson->save()) {

@@ -16,7 +16,7 @@ class VideoController extends Controller
     $validatedData = $request->validate([
         'name' => 'required|string|max:255',
         'videos' => 'required|array',
-        'videos.*' => 'required|file|mimes:mp4|max:10240',
+        'videos.*' => 'required|file|mimes:mp4|',
         'subject_id' => '|integer|exists:subjects,id',
         'unit_id' => '|integer|exists:units,id',
         'lesson_id' => '|integer|exists:lessons,id',
@@ -53,7 +53,7 @@ public function update(Request $request)
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'video' => 'nullable|file|mimes:mp4|max:10240', // 10MB max file size
+            'video' => 'nullable|file|mimes:mp4|', 
             'subject_id' => '|integer|exists:subjects,id',
             'unit_id' => '|integer|exists:units,id',
             'lesson_id' => '|integer|exists:lessons,id',
@@ -64,6 +64,9 @@ public function update(Request $request)
             $videoFile = $request->file('video');
             $videoPath = $videoFile->store('videos', 'public');
             $video->video = $videoPath;
+            if ($video->video) {
+                Storage::delete('public/' . $video->video);
+            }
         }
 
         $video->name = $validatedData['name'];

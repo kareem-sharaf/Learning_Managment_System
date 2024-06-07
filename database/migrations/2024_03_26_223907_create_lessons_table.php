@@ -17,9 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('unit_id')->constrained('units')->cascadeOnDelete();
             $table->integer('price');
             $table->text('description');
-            $table->unsignedBigInteger('file_id')->nullable()->constrained('files')->cascadeOnDelete();
-            $table->unsignedBigInteger('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
-            $table->string('image')->nullable();
+           $table->string('image')->nullable();
             $table->timestamps();
         });
     }
