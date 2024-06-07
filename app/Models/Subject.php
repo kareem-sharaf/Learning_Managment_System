@@ -47,10 +47,7 @@ class Subject extends Model
                     ->withPivot('year_id');
     }
 
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
+    
 
 
 }

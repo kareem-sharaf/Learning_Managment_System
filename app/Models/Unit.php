@@ -26,10 +26,7 @@ class Unit extends Model
     {
         return $this->belongsTo(Subject::class);
     }
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
+    
     public function lessons()
     {
         return $this->hasMany(Lesson::class);

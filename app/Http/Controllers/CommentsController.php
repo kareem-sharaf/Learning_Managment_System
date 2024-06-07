@@ -15,10 +15,8 @@ class CommentsController extends Controller
     $validatedData = $request->validate([
         'content' => 'required|string|max:255',
         'user_id' => 'required|integer|exists:users,id',
-        'subject_id' => 'nullable|integer|exists:subjects,id',
-        'lesson_id' => 'nullable|integer|exists:lessons,id',
+       
             'video_id' => 'required|exists:videos.id',
-            'unit_id' => 'nullable|integer|exists:units,id',
     ]);
 
     $comment = Comment::create($validatedData);
@@ -41,9 +39,7 @@ public function update(Request $request)
     $validatedData = $request->validate([
         'content' => 'sometimes|required|string|max:255',
         'user_id' => 'sometimes|required|integer|exists:users,id',
-        'subject_id' => 'sometimes|nullable|integer|exists:subjects,id',
-        'unit_id' => 'sometimes|nullable|integer|exists:units,id',
-        'lesson_id' => 'nullable|integer|exists:lessons,id',
+        
         'video_id' => 'required|exists:videos.id',
 
     ]);

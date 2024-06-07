@@ -11,27 +11,19 @@ class comment extends Model
     protected $fillable = [
         'content',
         'user_id',
-        'ubject_id',
-        'lesson_id',
+       
         'video_id',
-        'unit_id',
     ];
 public function user()
 {
     return $this->belongsTo(User::class);
 }
 
-public function subject()
-{
-    return $this->belongsTo(Subject::class);
-}
+
 
 public function video()
     {
         return $this->belongsTo(Video::class);
     }
-public function unit()
-{
-    return $this->belongsTo(Unit::class);
-}
+
 }

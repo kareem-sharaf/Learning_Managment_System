@@ -16,13 +16,10 @@ return new class extends Migration
             $table->text('content');
             $table->unsignedBigInteger('user_id')->constrained('users')->cascadeOnDelete();
 
-            $table->unsignedBigInteger('lesson_id')->nullable()->constrained('lessons')->cascadeOnDelete();
             $table->unsignedBigInteger('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
 
 
-            $table->unsignedBigInteger('subject_id')->nullable()->constrained('subjects')->cascadeOnDelete();
-            $table->unsignedBigInteger('unit_id')->nullable()->constrained('units')->cascadeOnDelete();
-
+       
             $table->timestamps();
         });
     }
