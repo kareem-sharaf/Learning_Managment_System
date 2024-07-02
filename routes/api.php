@@ -21,7 +21,6 @@ use App\Http\Middleware\checkIfTeacher;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FilesController;
-use App\Http\Controllers\YoutubeVideoController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -270,10 +269,4 @@ Route::group(['prefix' => 'message'], function () {
 });
 
 
-Route::group(['prefix' => 'youtube'], function () {
-    Route::controller(YoutubeVideoController::class)->group(function () {
-        Route::post('/send', 'uploadVideo');
-      
-       
-    });
-});
+
