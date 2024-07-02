@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0f436671c4a03027fdd653a8f748d69e",
+    "content-hash": "72b55e34ad5db3c81a291fe7047af99e",
     "packages": [
         {
             "name": "alaouy/youtube",
@@ -6657,6 +6657,73 @@
                 }
             ],
             "time": "2022-03-08T17:03:00+00:00"
+        },
+        {
+            "name": "w3ns0n/youtube-laravel-api",
+            "version": "v1.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wenson/YoutubeLaravelApi.git",
+                "reference": "22704dd89096448942252a012def01df82f33513"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wenson/YoutubeLaravelApi/zipball/22704dd89096448942252a012def01df82f33513",
+                "reference": "22704dd89096448942252a012def01df82f33513",
+                "shasum": ""
+            },
+            "require": {
+                "google/apiclient": "^2.0"
+            },
+            "require-dev": {
+                "squizlabs/php_codesniffer": "^2.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "w3ns0n\\YoutubeLaravelApi\\YoutubeLaravelApiServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "w3ns0n\\YoutubeLaravelApi\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mukesh Chandra",
+                    "email": "mukesh201722@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "clone from alchemyguy/YoutubeLaravelApi.",
+            "homepage": "https://github.com/w3ns0n/YoutubeLaravelApi",
+            "keywords": [
+                "AlchemyGuy",
+                "Youtube Api V3",
+                "Youtube Backup",
+                "Youtube Channel",
+                "Youtube LiveStream",
+                "Youtube Video",
+                "YoutubeLaravelApi",
+                "google api",
+                "laravel",
+                "oauth",
+                "php"
+            ],
+            "support": {
+                "source": "https://github.com/wenson/YoutubeLaravelApi/tree/v1.0.4"
+            },
+            "time": "2022-05-14T06:34:43+00:00"
         },
         {
             "name": "webmozart/assert",

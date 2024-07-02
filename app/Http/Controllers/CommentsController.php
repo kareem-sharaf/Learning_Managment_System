@@ -16,7 +16,7 @@ class CommentsController extends Controller
         'content' => 'required|string|max:255',
         'user_id' => 'required|integer|exists:users,id',
        
-            'video_id' => 'required|exists:videos.id',
+            'video_id' => 'required|',
     ]);
 
     $comment = Comment::create($validatedData);
@@ -40,7 +40,7 @@ public function update(Request $request)
         'content' => 'sometimes|required|string|max:255',
         'user_id' => 'sometimes|required|integer|exists:users,id',
         
-        'video_id' => 'required|exists:videos.id',
+        'video_id' => 'required|',
 
     ]);
 
@@ -74,13 +74,13 @@ public function getComments(Request $request)
         'video_id' => 'required|exists:videos,id'
     ]);
 
-    $video = Video::find($validatedData['video_id']);
+    $comments = Comment::whereHas('video', function ($query) use ($validatedData) {
+        $query->where('id', $validatedData['video_id']);
+    })->get();
 
-    if (!$video) {
-        return response()->json(['error' => 'Video not found'], 404);
+    if ($comments->isEmpty()) {
+        return response()->json(['error' => 'Video not found or no comments found'], 404);
     }
-
-    $comments = Comment::where('video_id', $validatedData['video_id'])->get();
 
     return response()->json($comments);
 }

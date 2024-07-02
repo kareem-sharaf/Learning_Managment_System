@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::create('message_models', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->constrained('users')->cascadeOnDelete();
-
-
             $table->text('message');
             $table->timestamps();
         });

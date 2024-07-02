@@ -16,7 +16,8 @@
         "michaelbelgium/laravel-youtube-api": "^2.4",
         "nesbot/carbon": "^2.72",
         "pusher/pusher-php-server": "^7.2",
-        "twilio/sdk": "^7.16"
+        "twilio/sdk": "^7.16",
+        "w3ns0n/youtube-laravel-api": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

@@ -115,6 +115,10 @@ public function delete_lesson(Request $request)
 
 public function getLessonsByUnitId(Request $request)
 {
+    $request->validate([
+        'unit_id' => 'required|integer|exists:units,id',
+    ]);
+    
     $unitId = $request->unit_id;
 
     $lessons = Lesson::where('unit_id', $unitId)->get();

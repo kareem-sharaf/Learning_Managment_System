@@ -18,7 +18,7 @@ class MessageController extends Controller
     $user = User::find($validatedData['user_id']);
     $userName = $user->name;
 
-    // Get the current authenticated user (sender)
+    
     $sender = auth()->user();
     $senderName = $sender->name;
 

@@ -21,6 +21,7 @@ use App\Http\Middleware\checkIfTeacher;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FilesController;
+use App\Http\Controllers\YoutubeVideoController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -230,7 +231,7 @@ Route::group(['prefix' => 'lessons'], function () {
         Route::post('/add', 'add_lesson');
         Route::post('/update', 'update_lesson');
         Route::post('/delete', 'delete_lesson');
-        Route::get('/get', 'getLessonsByUnitId');
+        Route::post('/get', 'getLessonsByUnitId');
     });
 });
 Route::group(['prefix' => 'comment'], function () {
@@ -264,6 +265,15 @@ Route::group(['prefix' => 'message'], function () {
         Route::post('/send', 'sendmessage');
         Route::post('/update', 'updateMessage');
         Route::post('/destroy', 'deleteMessage');
+       
+    });
+});
+
+
+Route::group(['prefix' => 'youtube'], function () {
+    Route::controller(YoutubeVideoController::class)->group(function () {
+        Route::post('/send', 'uploadVideo');
+      
        
     });
 });
