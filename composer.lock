@@ -91,11 +91,6 @@
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.0-dev"
-                },
-                "laravel": {
-                    "providers": [
-                        "alchemyguy\\YoutubeLaravelApi\\YoutubeLaravelApiServiceProvider"
-                    ]
                 }
             },
             "autoload": {
@@ -6682,11 +6677,6 @@
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.0-dev"
-                },
-                "laravel": {
-                    "providers": [
-                        "w3ns0n\\YoutubeLaravelApi\\YoutubeLaravelApiServiceProvider"
-                    ]
                 }
             },
             "autoload": {
