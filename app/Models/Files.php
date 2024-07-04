@@ -24,4 +24,10 @@ public function lesson()
 {
     return $this->belongsTo(Lesson::class);
 }
+
+    public function leason()
+    {
+        return $this->belongsTo(Lesson::class);
+    }
+    
 }

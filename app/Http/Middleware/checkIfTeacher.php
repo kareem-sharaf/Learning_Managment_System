@@ -19,7 +19,7 @@ class checkIfTeacher
     {
         $user = Auth::user();
 
-        if (Auth::check() && ($user->role_id == 1 || $user->role_id == 2 || $user->role_id == 3)) {
+        if (Auth::check() && ($user->role_id == 3)) {
             return $next($request);
         }
 
