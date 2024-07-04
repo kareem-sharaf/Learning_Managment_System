@@ -94,7 +94,7 @@
                 },
                 "laravel": {
                     "providers": [
-                        "alchemyguy\\YoutubeLaravelApi\\YoutubeLaravelApiServiceProvider"
+                        
                     ]
                 }
             },
@@ -6685,7 +6685,7 @@
                 },
                 "laravel": {
                     "providers": [
-                        "w3ns0n\\YoutubeLaravelApi\\YoutubeLaravelApiServiceProvider"
+
                     ]
                 }
             },
