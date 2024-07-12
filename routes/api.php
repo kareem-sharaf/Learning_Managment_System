@@ -202,7 +202,7 @@ Route::group(['prefix' => 'unit'], function () {
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('add_unit', 'add_unit');
-            Route::post('edit_unit/{unit_id}', 'edit_unit');
+            Route::post('edit_unit', 'edit_unit');
             Route::delete('delete_unit/{unit_id}', 'delete_unit');
         });
     });
@@ -248,7 +248,7 @@ Route::group(['prefix' => 'video'], function () {
         Route::post('/store', 'store');
         Route::post('/update', 'update');
         Route::post('/destroy', 'destroy');
-       
+
     });
 });
 Route::group(['prefix' => 'files'], function () {
@@ -256,7 +256,7 @@ Route::group(['prefix' => 'files'], function () {
         Route::post('/store', 'store');
         Route::post('/update', 'update');
         Route::post('/destroy', 'destroy');
-       
+
     });
 });
 Route::group(['prefix' => 'message'], function () {
@@ -264,7 +264,7 @@ Route::group(['prefix' => 'message'], function () {
         Route::post('/send', 'sendmessage');
         Route::post('/update', 'updateMessage');
         Route::post('/destroy', 'deleteMessage');
-       
+
     });
 });
 
