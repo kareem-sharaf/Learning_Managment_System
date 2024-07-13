@@ -22,8 +22,9 @@ class Subject extends Model
         return $this->hasMany(Video::class);
     }
 
-    // public $timestamps=false;
-    public function users()
+    public $timestamps = true;
+
+        public function users()
     {
         return $this->belongsToMany(User::class,'subscriptions');
     }
@@ -44,10 +45,14 @@ class Subject extends Model
     public function years_users()
     {
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
-                    ->withPivot('year_id');
+                    ->withPivot('year_id')
+                    ->withTimestamps();
     }
 
-    
 
+    public function quizzes()
+    {
+        return $this->morphMany(Quiz::class, 'quizable');
+    }
 
 }

@@ -11,18 +11,10 @@ class UnitsController extends Controller
     //******************************************************************************************* */
     public function show_all_units(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'subject_id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
-
+        $subject_id = $request->query('subject_id');
         $input= $request->all();
-        $subject_id = $input['subject_id'];
-        $unit = Unit::where('subject_id', $input['subject_id'])->get();
+        $unit = Unit::where('subject_id', $subject_id)->get();
         $message = "this is the all units";
-
         return response()->json([
             'message' => $message,
             'data' => $unit,
@@ -63,8 +55,9 @@ class UnitsController extends Controller
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            //  'image'=>'required',
-            //  'video'=>'required',
+            //  'image_data'=>'required',
+            //  'video_id'=>'required',
+            //  'file_id'=>'required',
             'subject_id' => 'required',
             'description' => 'required'
         ]);
@@ -90,8 +83,9 @@ class UnitsController extends Controller
         $validator = Validator::make($input, [
             'unit_id' => 'required',
             'name' => 'required',
-            //  'image'=>'required',
-            //  'video'=>'required',
+            //  'image_data'=>'required',
+            //  'video_id'=>'required',
+            //  'file_id'=>'required',
             'description' => 'required'
         ]);
         $unit = Unit::where('id', $input['unit_id'])->first();
@@ -103,9 +97,10 @@ class UnitsController extends Controller
             ]);
         }
         $unit->name = $input['name'];
-        // $unit->image = $input['image'];
-        // $unit->video = $input['video'];
-        $unit->name = $input['description'];
+        $unit->image_data = $input['image_data'];
+        // $unit->video_id = $input['video_id'];
+        // $unit->file_id = $input['file_id'];
+        $unit->description = $input['description'];
         $unit->save();
 
         $message = "The unit edit successfully.";

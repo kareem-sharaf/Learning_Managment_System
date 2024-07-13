@@ -8,10 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Lesson extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'name',
+        'description',
+        'unit_id',
+       'image'
+       ,'price'
+    ];
 
-  
 
-   
+
     public function unit()
     {
         return $this->belongsTo(Unit::class);
@@ -26,14 +32,9 @@ class Lesson extends Model
     {
         return $this->hasMany(Video::class);
     }
-    public function quizes()
-{
-    return $this->belongsToMany(Quiz::class);
-}
-    protected $fillable = [
-        'name',
-        'description',
-        'unit_id',
-       'image'
-       ,'price'];
+    public function quizzes()
+    {
+        return $this->morphMany(Quiz::class, 'quizable');
+    }
+
 }

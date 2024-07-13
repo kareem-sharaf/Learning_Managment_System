@@ -13,30 +13,30 @@ class Quiz extends Model
         'name',
         'duration',
         'total mark',
+        'success mark',
         'public',
-        'questions_content',
-        'subject_id'
+        'type',
     ];
 
+    public function quizable()
+    {
+        return $this->morphTo();
+    }
+     public function teacher()
+     {
+         return $this->belongsTo(User::class, 'teacher_id');
+     }
 
-public function questions()
-{
-    return $this->hasMany(Question::class);
-}
-
-public function lessons()
-{
-    return $this->belongsToMany(Lessons::class);
-}
-
-public function subjects()
-{
-    return $this->belongsToMany(Subjects::class);
-}
-
-public function units()
-{
-    return $this->belongsToMany(Units::class);
-}
-
+     public function students()
+     {
+         return $this->belongsToMany(User::class, 'student_exams', 'quize_id', 'user_id');
+     }
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
+    }
+    public function type()
+    {
+        return $this->morphTo();
+    }
 }

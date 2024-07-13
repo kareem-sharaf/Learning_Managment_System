@@ -65,10 +65,6 @@ class User extends Authenticatable
         return $this->belongsToMany(Subject::class,'subscriptions');
     }
 
-    // public function courses()
-    // {
-    //     return $this->hasMany(Course::class);
-    // }
 
     public function favorites()
     {
@@ -95,7 +91,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
-     
+
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');
@@ -104,5 +100,14 @@ class User extends Authenticatable
     public function receivedMessages()
     {
         return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    public function quizzes()
+    {
+        return $this->belongsToMany(Quiz::class, 'student_exams', 'user_id', 'quize_id');
+    }
+    public function createdQuizzes()
+    {
+        return $this->hasMany(Quiz::class, 'teacher_id');
     }
 }

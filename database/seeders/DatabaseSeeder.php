@@ -27,7 +27,9 @@ class DatabaseSeeder extends Seeder
             CommentSeeder::class,
             VideoSeeder::class,
             FilesSeeder::class,
-            MessageSeeder::class,          
+            MessageSeeder::class,
+            QuizSeeder::class,
+            QuestionSeeder::class,
                 ]);
     }
 }

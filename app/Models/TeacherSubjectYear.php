@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class TeacherSubjectYear extends Model
 {
+    use HasFactory;
+
     protected $fillable=[
         'user_id',
         'subject_id',
         'year_id'
     ];
-    use HasFactory;
+    public $timestamps = true;
 }

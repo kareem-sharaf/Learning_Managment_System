@@ -10,15 +10,14 @@ class Question extends Model
     use HasFactory;
     protected $fillable=[
         'text',
-        'answers',
         'mark',
+        'answers',
         'correct_answer',
-        'subject_id',
+        'quiz_id',
     ];
 
-
-    public function quizes()
+    public function quiz()
     {
-        return $this->belongsToMany(Quiz::class);
+        return $this->belongsTo(Quiz::class, 'quize_id');
     }
 }

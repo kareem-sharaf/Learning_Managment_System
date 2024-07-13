@@ -252,31 +252,21 @@ public function search_in_subjects(Request $request)
 //************************************************************************************************************** */
     public function add_subject(Request $request)
 {
-    $user = Auth::user();
-    $user_id = $user->id;
+    $user_id = Auth::id();
 
     $request->validate([
-        'category_id' => 'required',
+        'category_id' => 'required|exists:categories,id',
         'name' => 'required',
         'price' => 'required',
         'description' => 'required',
-        'image_data' ,
+        'image_data' => 'sometimes',
         'video_id' => 'integer',
         'file_id' => 'integer',
-        'users_content' => 'required|array',
-        'users_content.*.user_id' => 'required|integer',
+        // 'users_content' => 'required|array',
+        // 'users_content.*.user_id' => 'required|integer',
         'years_content.*.year_id' => 'integer',
     ]);
-     // Check if required fields are missing
-     if (!$request->filled('category_id') || !$request->filled('users_content') || !$request->filled('users_content.0.user_id')) {
-        return response()->json(['message' => 'Missing required fields.'], 400);
-    }
 
-    // Check if category exists
-    $category = Category::find($request->input('category_id'));
-    if (!$category) {
-        return response()->json(['message' => 'Category not found.'], 404);
-    }
     $subject = Subject::create([
         'name' => $request->name,
         'price' => $request->price,
@@ -290,30 +280,26 @@ public function search_in_subjects(Request $request)
 
         if ($request->category_id == 1) { // If the category is educational
             $yearsContent = $request->years_content;
-            $usersContent = $request->users_content;
+            // $usersContent = $request->users_content;
 
-            foreach ($usersContent as $user) {
+            // foreach ($usersContent as $user) {
                 foreach ($yearsContent as $year) {
-                    $existingUser = User::find($user['user_id']);
-                    if (!$existingUser) {
-                    return response()->json(['message' => 'User not found.'], 404);
-                        }
 
                     $existingYear = Year::find($year['year_id']);
                     if (!$existingYear) {
                     return response()->json(['message' => 'Year not found.'], 404);
                         }
-                    $subject->years_users()->attach($user['user_id'], ['year_id' => $year['year_id']]);
+                    $subject->years_users()->attach($user_id, ['year_id' => $year['year_id']]);
                 }
-            }
+            // }
         }else {
-            foreach ($request->users_content as $user) {
-                $existingUser = User::find($user['user_id']);
+            // foreach ($request->users_content as $user) {
+                $existingUser = User::where('id',$user_id);
                 if (!$existingUser) {
                 return response()->json(['message' => 'User not found.'], 404);
                     }
-                $subject->years_users()->attach($user['user_id']);
-            }
+                $subject->years_users()->attach($user_id);
+            // }
         }
 
     return response()->json([
