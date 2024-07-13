@@ -21,6 +21,8 @@ use App\Http\Middleware\checkIfTeacher;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FilesController;
+use App\Http\Controllers\QuizesController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -142,6 +144,7 @@ Route::group(['prefix' => 'fav'], function () {
     });
 });
 
+//  subject routes
 Route::group(['prefix' => 'subject'], function () {
     Route::controller(SubjectController::class)->group(function () {
         Route::get('show_all_subjects', 'show_all_subjects');
@@ -165,12 +168,26 @@ Route::group(['prefix' => 'subject'], function () {
 });
 
 
+//  quiz routes
+Route::group(['prefix' => 'quiz'], function () {
+    Route::controller(QuizesController::class)->group(function () {
+        Route::post('show_all', 'show_all');
 
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::group(['middleware' => 'checkIfTeacher:sanctum' ] , function(){
+            Route::get('show_one_to_teacher', 'show_one_to_teacher');
+            Route::post('add_quiz', 'add_quiz');
+            Route::post('edit_quiz', 'edit_quiz');
+            Route::get('delete_quiz/{quiz_id}', 'delete_quiz');
 
+           });
 
+        });
 
+    });
+});
 
-
+//  subscription routes
 
 Route::group(['prefix' => 'subscription'], function () {
     Route::controller(SubscriptionController::class)->group(function () {
@@ -191,9 +208,7 @@ Route::group(['prefix' => 'subscription'], function () {
 });
 
 
-
-
-
+//  unit routes
 
 Route::group(['prefix' => 'unit'], function () {
     Route::controller(UnitsController::class)->group(function () {
@@ -210,6 +225,7 @@ Route::group(['prefix' => 'unit'], function () {
 
 
 
+//  profile routes
 
 Route::group(['prefix' => 'profile'], function () {
     Route::controller(ProfileController::class)->group(function () {
@@ -225,6 +241,9 @@ Route::group(['prefix' => 'profile'], function () {
 
     });
 });
+
+//  lessons routes
+
 Route::group(['prefix' => 'lessons'], function () {
     Route::controller(LessonController::class)->group(function () {
         Route::post('/add', 'add_lesson');
@@ -233,6 +252,9 @@ Route::group(['prefix' => 'lessons'], function () {
         Route::post('/get', 'getLessonsByUnitId');
     });
 });
+
+//  comment routes
+
 Route::group(['prefix' => 'comment'], function () {
     Route::controller(CommentsController::class)->group(function () {
         Route::post('/store', 'store');
@@ -243,6 +265,9 @@ Route::group(['prefix' => 'comment'], function () {
     });
 
 });
+
+//  video routes
+
 Route::group(['prefix' => 'video'], function () {
     Route::controller(VideoController::class)->group(function () {
         Route::post('/store', 'store');
@@ -251,6 +276,9 @@ Route::group(['prefix' => 'video'], function () {
 
     });
 });
+
+//  files routes
+
 Route::group(['prefix' => 'files'], function () {
     Route::controller(FilesController::class)->group(function () {
         Route::post('/store', 'store');
@@ -259,6 +287,9 @@ Route::group(['prefix' => 'files'], function () {
 
     });
 });
+
+//  message routes
+
 Route::group(['prefix' => 'message'], function () {
     Route::controller(MessageController::class)->group(function () {
         Route::post('/send', 'sendmessage');

@@ -30,4 +30,9 @@ class Unit extends Model
     {
         return $this->hasMany(Lesson::class);
     }
+    public function quizzes()
+    {
+        return $this->morphMany(Quiz::class, 'quizable');
+    }
 }
+ 

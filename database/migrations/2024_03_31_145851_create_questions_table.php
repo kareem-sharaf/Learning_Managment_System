@@ -1,4 +1,4 @@
-<?php
+   <?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->text("text");
-            $table->text("answers");
-            $table->char("correct_answer");
-            $table->integer("mark");
-            $table->unsignedBigInteger('subject_id')->constrained('subject')->cascadeOnDelete();
+            $table->text('text');
+            $table->text('answers');
+            $table->char('correct_answer');
+            $table->integer('mark');
+            $table->foreignId('quiz_id')->constrained('quizzes')->onDelete('cascade');
             $table->timestamps();
         });
     }
