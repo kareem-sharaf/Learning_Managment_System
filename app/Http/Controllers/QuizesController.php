@@ -8,6 +8,7 @@ use App\Models\Stage;
 use App\Models\SubjectYear;
 use App\Models\Quiz;
 use App\Models\Question;
+use App\Models\Subscription;
 
 
 use App\Http\Responses\ApiSuccessResponse;
@@ -47,10 +48,10 @@ class QuizesController extends Controller
 
         return response()->json($quizzes);
     }
+    /************************************************************************ */
     public function show_one_to_teacher(Request $request)
     {
-        $user = Auth::user();
-        $user_id = $user->id;
+        $user_id = Auth::id();
         $quiz_id = $request->query('quiz_id');
 
 
@@ -66,8 +67,10 @@ class QuizesController extends Controller
         }
 
     }
+        /************************************************************************ */
+
     public function add_quiz(Request $request)
-{
+    {
     $user = Auth::user();
 
     $validated = $request->validate([
@@ -107,20 +110,19 @@ class QuizesController extends Controller
     }
 
     return response()->json(['message' => 'Quiz created successfully', 'quiz' => $quiz], 201);
-}
+    }
+        /************************************************************************ */
 
-
-public function edit_quiz(Request $request)
-{
-    $user = Auth::user();
-    $user_id = $user->id;
+    public function edit_quiz(Request $request)
+    {
+    $user_id = Auth::id();
 
     $request->validate([
         'quiz_id' => 'required|integer',
         'name' => 'required|string|max:255',
         'duration' => 'required|integer',
-        'total mark' => 'required|integer',
-        'success mark' => 'required|integer',
+        'total_mark' => 'required|integer',
+        'success_mark' => 'required|integer',
         'public' => 'required|boolean',
         'type_id' => 'required|integer',
         'type_type' => 'required|string',
@@ -137,41 +139,110 @@ public function edit_quiz(Request $request)
     if (!$quiz) {
         return response()->json(['error' => 'Quiz not found or you are not the teacher'], 404);
     }
+    $quiz->name = $request->name;
+    $quiz->duration = $request->duration;
+    $quiz->total_mark = $request->total_mark;
+    $quiz->success_mark = $request->success_mark;
+    $quiz->public = $request->public;
+    $quiz->type_id = $request->type_id;
+    $quiz->type_type = $request->type_type;
+    $quiz->save();
 
-    $quiz->update([
-        'name' => $request->name,
-        'duration' => $request->duration,
-        'total mark' => $request->total_mark,
-        'success mark' => $request->success_mark,
-        'public' => $request->public,
-        'type_id' => $request->type_id,
-        'type_type' => $request->type_type,
-    ]);
+    $quiz->questions()->delete();
 
     foreach ($request->questions as $questionData) {
-        if (isset($questionData['id'])) {
-            $question = Question::find($questionData['id']);
-            if ($question) {
-                $question->update([
-                    'text' => $questionData['text'],
-                    'mark' => $questionData['mark'],
-                    'answers' => json_encode($questionData['answers']),
-                    'correct_answer' => $questionData['correct_answer'],
-                ]);
-            }
-        } else {
-            Question::create([
-                'text' => $questionData['text'],
-                'mark' => $questionData['mark'],
-                'answers' => json_encode($questionData['answers']),
-                'correct_answer' => $questionData['correct_answer'],
-                'quiz_id' => $quiz->id,
-            ]);
-        }
+        $question = Question::create([
+            'text' => $questionData['text'],
+            'mark' => $questionData['mark'],
+            'answers' => json_encode($questionData['answers']),
+            'correct_answer' => $questionData['correct_answer'],
+            'quiz_id' => $quiz->id,
+        ]);
     }
 
     return response()->json(['success' => 'Quiz and questions updated successfully'], 200);
-}
+    }
+        /************************************************************************ */
 
+    public function delete_quiz($quiz_id)
+    {
+        $user = auth()->user();
+        $quiz = Quiz::find($quiz_id);
+        if (!$quiz) {
+            $message = "The quiz doesn't exist.";
+            return response()->json([
+                'message' => $message,
+            ]);
+        }
+
+        $quiz->questions()->delete();
+        $quiz->delete();
+
+        $message = "The quiz deleted successfully.";
+        return response()->json([
+            'message' => $message,
+        ]);
+
+    }
+    /************************************************************************ */
+
+public function show_to_all(Request $request)
+{
+    $user_id = Auth::id();
+    $validated = $request->validate([
+        'type_id' => 'required|integer',
+        'type' => 'required|string',
+        'subject_id' => 'required|integer'
+    ]);
+
+    $typeMapping = [
+        'subject' => 'App\Models\Subject',
+        'unit' => 'App\Models\Unit',
+        'lesson' => 'App\Models\Lesson',
+    ];
+
+    $typeType = $typeMapping[$validated['type']] ?? null;
+
+    if (!$typeType) {
+        return response()->json(['error' => 'Invalid type'], 400);
+    }
+
+    $openQuizzes = Quiz::where('type_id', $validated['type_id'])
+                       ->where('type_type', $typeType)
+                       ->where('public', true)
+                       ->get();
+
+    $lockQuizzes = Quiz::where('type_id', $validated['type_id'])
+                       ->where('type_type', $typeType)
+                       ->where('public', false)
+                       ->get();
+
+    // Load questions for each quiz
+    $openQuizzes->load('questions');
+
+
+    $subscription = Subscription::where('user_id', $user_id)
+                                ->where('subject_id', $validated['subject_id'])
+                                ->where('status', 'buy')
+                                ->first();
+
+    if ($subscription) {
+        $lockQuizzes->load('questions');
+        return response()->json([
+            'OpenQuizzes' => $openQuizzes,
+            'LockQuizzes' => $lockQuizzes->map(function ($quiz) {
+                return [
+                    'quiz' => $quiz,
+                ];
+            }),
+        ]);
+    } else {
+        return response()->json([
+            'OpenQuizzes' => $openQuizzes,
+            'LockQuizzes' => $lockQuizzes,
+        ]);
+    }
+}
+    /************************************************************************ */
 
 }
