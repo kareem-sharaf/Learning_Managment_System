@@ -172,14 +172,17 @@ Route::group(['prefix' => 'subject'], function () {
 Route::group(['prefix' => 'quiz'], function () {
     Route::controller(QuizesController::class)->group(function () {
         Route::post('show_all', 'show_all');
-
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::group(['middleware'] , function(){
+                Route::post('show_to_all', 'show_to_all');
+            });
+        });
     Route::middleware('auth:sanctum')->group(function () {
         Route::group(['middleware' => 'checkIfTeacher:sanctum' ] , function(){
             Route::get('show_one_to_teacher', 'show_one_to_teacher');
             Route::post('add_quiz', 'add_quiz');
             Route::post('edit_quiz', 'edit_quiz');
             Route::get('delete_quiz/{quiz_id}', 'delete_quiz');
-
            });
 
         });
