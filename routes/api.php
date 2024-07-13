@@ -17,7 +17,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitsController;
 use App\Http\Controllers\UserVerificationController;
 use App\Http\Controllers\SubscriptionController;
-use App\Http\Middleware\checkIfTeacher;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FilesController;
@@ -248,7 +247,7 @@ Route::group(['prefix' => 'video'], function () {
         Route::post('/store', 'store');
         Route::post('/update', 'update');
         Route::post('/destroy', 'destroy');
-       
+
     });
 });
 Route::group(['prefix' => 'files'], function () {
@@ -256,15 +255,23 @@ Route::group(['prefix' => 'files'], function () {
         Route::post('/store', 'store');
         Route::post('/update', 'update');
         Route::post('/destroy', 'destroy');
-       
+
     });
 });
 Route::group(['prefix' => 'message'], function () {
     Route::controller(MessageController::class)->group(function () {
-        Route::post('/send', 'sendmessage');
-        Route::post('/update', 'updateMessage');
-        Route::post('/destroy', 'deleteMessage');
-       
+
+            Route::post('/update', 'updateMessage');
+            Route::post('/destroy', 'deleteMessage');
+            Route::group(['middleware' => 'auth:sanctum'], function () {
+                Route::post('send', 'sendmessage');
+                Route::get('show_all_requests_for_teacher', 'show_all_requests_for_teacher');
+                Route::get('show_one_request_for_teacher', 'show_one_request_for_teacher');
+                Route::post('edit_request', 'edit_request');
+                Route::get('delete_request', 'delete_request');
+
+            });
+
     });
 });
 

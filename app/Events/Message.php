@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Message as MessageModel;
+use App\Models\MessageModel;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -15,9 +15,11 @@ class Message implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
+    public $user_id;
 
-    public function __construct(MessageModel $message)
+    public function __construct(MessageModel $message, $user_id)
     {
+        $this->user_id = $user_id;
         $this->message = $message;
     }
 
@@ -30,7 +32,6 @@ class Message implements ShouldBroadcast
     {
         return [
             'message' => $this->message->message,
-            'sender_name' => $this->message->sender->name,
         ];
     }
 }

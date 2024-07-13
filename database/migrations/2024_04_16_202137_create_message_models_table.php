@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('message_models', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade');
-            $table->text('message');
-            $table->timestamps();
-        });
+       Schema::create('message_models', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedBigInteger('user_id');
+    $table->text('message');
+    $table->timestamps();
+});
     }
 
     /**
@@ -28,4 +27,3 @@ return new class extends Migration
         Schema::dropIfExists('message_models');
     }
 };
- 

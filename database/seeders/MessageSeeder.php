@@ -14,14 +14,12 @@ class MessageSeeder extends Seeder
     {
         MessageModel::create([
             'id' => '1',
-            'sender_id' => ' 2',
-            'receiver_id'=>'3',
+            'user_id' => ' 2',
             'message' => 'who are you '
         ]);
         MessageModel::create([
             'id' => '2',
-            'sender_id' => ' 2',
-            'receiver_id'=>'1',
+            'user_id' => ' 2',
             'message' => 'iam you '
         ]);
     }
