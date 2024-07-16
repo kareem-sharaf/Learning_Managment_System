@@ -11,15 +11,14 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'description',
-        'image_data',
+        'image_url',
         'price',
         'video_id',
         'file_id',
         'category_id'
     ];
 
-
-    // public $timestamps=false;
+    public $timestamps=false;
     public function users()
     {
         return $this->belongsToMany(User::class,'subscriptions');

@@ -17,10 +17,9 @@ return new class extends Migration
             $table->string('description');
             $table->integer('price')->default(0);
             $table->unsignedBigInteger('category_id')->references('id')->on('categories')->cascadeOnDelete();
-            $table->string('image_data')->default('default_image.jpg')->nullable();
+            $table->string('image_url')->nullable();
             $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
             $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
-            $table->timestamps();
         });
     }
     /**

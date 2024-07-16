@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('title');
             $table->integer('price')->default(0);
             $table->binary('image_data')->default('default_image.jpg')->nullable();
-             
             $table->timestamps();
         });
     }
