@@ -294,23 +294,9 @@ Route::group(['prefix' => 'files'], function () {
 
 Route::group(['prefix' => 'message'], function () {
     Route::controller(MessageController::class)->group(function () {
-<<<<<<< HEAD
-
-            Route::post('/update', 'updateMessage');
-            Route::post('/destroy', 'deleteMessage');
-            Route::group(['middleware' => 'auth:sanctum'], function () {
-                Route::post('send', 'sendmessage');
-                Route::get('show_all_requests_for_teacher', 'show_all_requests_for_teacher');
-                Route::get('show_one_request_for_teacher', 'show_one_request_for_teacher');
-                Route::post('edit_request', 'edit_request');
-                Route::get('delete_request', 'delete_request');
-
-            });
-=======
         Route::post('/send', 'sendmessage');
         Route::post('/update', 'updateMessage');
         Route::post('/destroy', 'deleteMessage');
->>>>>>> 19b9facb254f2b764a06bd7fea6607ea56f77164
 
     });
 });

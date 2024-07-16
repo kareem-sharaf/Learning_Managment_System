@@ -18,6 +18,7 @@ use App\Models\Subscription;
  use App\Http\Responses\ApiErrorResponse;
  use Illuminate\Support\Facades\Auth;
  use Illuminate\Support\Facades\Storage;
+ use Illuminate\Support\Facades\File;
 
 
 use Illuminate\Http\Request;
@@ -254,36 +255,45 @@ public function search_in_subjects(Request $request)
 //************************************************************************************************************** */
     public function add_subject(Request $request)
 {
-    $user = Auth::user();
-    $user_id = $user->id;
+    $user_id = Auth::id();
 
     $request->validate([
         'category_id' => 'required',
         'name' => 'required',
         'price' => 'required',
         'description' => 'required',
-        'image_url' => 'required' ,
+        'image' => 'required' ,
         'video_id' => 'integer',
         'file_id' => 'integer',
-        'users_content' => 'required|array',
-        'users_content.*.user_id' => 'required|integer',
+        // 'users_content' => 'required|array',
+        // 'users_content.*.user_id' => 'required|integer',
         'years_content.*.year_id' => 'integer',
     ]);
-     // Check if required fields are missing
-     if (!$request->filled('category_id') || !$request->filled('users_content') || !$request->filled('users_content.0.user_id')) {
-        return response()->json(['message' => 'Missing required fields.'], 400);
-    }
+    //  // Check if required fields are missing
+    //  if (!$request->filled('category_id') || !$request->filled('users_content') || !$request->filled('users_content.0.user_id')) {
+    //     return response()->json(['message' => 'Missing required fields.'], 400);
+    // }
 
     // Check if category exists
     $category = Category::find($request->input('category_id'));
     if (!$category) {
         return response()->json(['message' => 'Category not found.'], 404);
     }
+
+    // Check if image is uploaded
+    if (!$request->hasFile('image')) {
+        return response()->json(['message' => 'Image file is required.'], 400);
+    }
+
+    // Store the image and get the URL
+    $imagePath = $request->file('image')->store('subject_images', 'public');
+    $imageUrl = Storage::url($imagePath);
+
     $subject = Subject::create([
         'name' => $request->name,
         'price' => $request->price,
         'description' => $request->description,
-        'image_url' => $request->image_url,
+        'image_url' => $imageUrl,
         'video_id' => $request->video_id,
         'file_id' => $request->file_id,
         'category_id' => $request->category_id,
@@ -292,31 +302,30 @@ public function search_in_subjects(Request $request)
 
         if ($request->category_id == 1) { // If the category is educational
             $yearsContent = $request->years_content;
-            $usersContent = $request->users_content;
+            // $usersContent = $request->users_content;
 
-            foreach ($usersContent as $user) {
+            // foreach ($usersContent as $user) {
                 foreach ($yearsContent as $year) {
-                    $existingUser = User::find($user['user_id']);
-                    if (!$existingUser) {
-                    return response()->json(['message' => 'User not found.'], 404);
-                        }
+                    // $existingUser = User::find($user['user_id']);
+                    // if (!$existingUser) {
+                    // return response()->json(['message' => 'User not found.'], 404);
+                    //     }
 
                     $existingYear = Year::find($year['year_id']);
                     if (!$existingYear) {
                     return response()->json(['message' => 'Year not found.'], 404);
                         }
-                    $subject->years_users()->attach($user['user_id'], ['year_id' => $year['year_id']]);
-                }
-            }
+                        $subject->years_users()->attach($user_id, ['year_id' => $year['year_id']]);                }
+            // }
         }else {
-            foreach ($request->users_content as $user) {
-                $existingUser = User::find($user['user_id']);
-                if (!$existingUser) {
-                return response()->json(['message' => 'User not found.'], 404);
-                    }
-                $subject->years_users()->attach($user['user_id']);
-            }
-        }
+            // foreach ($request->users_content as $user) {
+                // $existingUser = User::find($user['user_id']);
+                // if (!$existingUser) {
+                // return response()->json(['message' => 'User not found.'], 404);
+                //     }
+                $subject->years_users()->attach($user_id);
+                     }
+        // }
 
     return response()->json([
         'message' => 'Subject added successfully.',
@@ -327,7 +336,7 @@ public function search_in_subjects(Request $request)
     //***********************************************************************************************************************\\
     public function edit_subject(Request $request)
     {
-        $user = Auth::user();
+        $user_id = Auth::id();
         $request->validate([
             'subject_id' => 'required|integer|exists:subjects,id',
             'category_id' => 'integer|exists:categories,id|nullable',
@@ -337,8 +346,8 @@ public function search_in_subjects(Request $request)
             'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240|nullable',
             'video_id' => 'integer|nullable',
             'file_id' => 'integer|nullable',
-            'users_content' => 'required|array',
-            'users_content.*.user_id' => 'required|integer|exists:users,id',
+            // 'users_content' => 'required|array',
+            // 'users_content.*.user_id' => 'required|integer|exists:users,id',
             'years_content' => 'array|nullable',
             'years_content.*.year_id' => 'integer|exists:years,id',
         ]);
@@ -367,18 +376,18 @@ public function search_in_subjects(Request $request)
 
         $subject->years_users()->detach();
 
-        $usersContent = $request->users_content;
+        // $usersContent = $request->users_content;
         $yearsContent = $request->years_content ?? [];
 
-        foreach ($usersContent as $user) {
+        // foreach ($usersContent as $user) {
             if ($request->category_id == 1) {
                 foreach ($yearsContent as $year) {
-                    $subject->years_users()->attach($user['user_id'], ['year_id' => $year['year_id']]);
+                    $subject->years_users()->attach($user_id , ['year_id' => $year['year_id']]);
                 }
             } else {
-                $subject->years_users()->attach($user['user_id']);
+                $subject->years_users()->attach($user_id);
             }
-        }
+        // }
 
         return response()->json([
             'message' => 'Subject updated successfully',
