@@ -11,20 +11,15 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'description',
-        'image_data',
+        'image_url',
         'price',
         'video_id',
         'file_id',
         'category_id'
     ];
-    public function videos()
-    {
-        return $this->hasMany(Video::class);
-    }
 
-    public $timestamps = true;
-
-        public function users()
+    public $timestamps=false;
+    public function users()
     {
         return $this->belongsToMany(User::class,'subscriptions');
     }
@@ -45,14 +40,10 @@ class Subject extends Model
     public function years_users()
     {
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
-                    ->withPivot('year_id')
-                    ->withTimestamps();
+                    ->withPivot('year_id');
     }
 
 
-    public function quizzes()
-    {
-        return $this->morphMany(Quiz::class, 'quizable');
-    }
+
 
 }

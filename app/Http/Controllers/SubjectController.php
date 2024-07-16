@@ -17,6 +17,8 @@ use App\Models\Subscription;
  use App\Http\Responses\ApiSuccessResponse;
  use App\Http\Responses\ApiErrorResponse;
  use Illuminate\Support\Facades\Auth;
+ use Illuminate\Support\Facades\Storage;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -252,26 +254,36 @@ public function search_in_subjects(Request $request)
 //************************************************************************************************************** */
     public function add_subject(Request $request)
 {
-    $user_id = Auth::id();
+    $user = Auth::user();
+    $user_id = $user->id;
 
     $request->validate([
-        'category_id' => 'required|exists:categories,id',
+        'category_id' => 'required',
         'name' => 'required',
         'price' => 'required',
         'description' => 'required',
-        'image_data' => 'sometimes',
+        'image_url' => 'required' ,
         'video_id' => 'integer',
         'file_id' => 'integer',
-        // 'users_content' => 'required|array',
-        // 'users_content.*.user_id' => 'required|integer',
+        'users_content' => 'required|array',
+        'users_content.*.user_id' => 'required|integer',
         'years_content.*.year_id' => 'integer',
     ]);
+     // Check if required fields are missing
+     if (!$request->filled('category_id') || !$request->filled('users_content') || !$request->filled('users_content.0.user_id')) {
+        return response()->json(['message' => 'Missing required fields.'], 400);
+    }
 
+    // Check if category exists
+    $category = Category::find($request->input('category_id'));
+    if (!$category) {
+        return response()->json(['message' => 'Category not found.'], 404);
+    }
     $subject = Subject::create([
         'name' => $request->name,
         'price' => $request->price,
         'description' => $request->description,
-        'image_data' => $request->image_data,
+        'image_url' => $request->image_url,
         'video_id' => $request->video_id,
         'file_id' => $request->file_id,
         'category_id' => $request->category_id,
@@ -280,70 +292,7 @@ public function search_in_subjects(Request $request)
 
         if ($request->category_id == 1) { // If the category is educational
             $yearsContent = $request->years_content;
-            // $usersContent = $request->users_content;
-
-            // foreach ($usersContent as $user) {
-                foreach ($yearsContent as $year) {
-
-                    $existingYear = Year::find($year['year_id']);
-                    if (!$existingYear) {
-                    return response()->json(['message' => 'Year not found.'], 404);
-                        }
-                    $subject->years_users()->attach($user_id, ['year_id' => $year['year_id']]);
-                }
-            // }
-        }else {
-            // foreach ($request->users_content as $user) {
-                $existingUser = User::where('id',$user_id);
-                if (!$existingUser) {
-                return response()->json(['message' => 'User not found.'], 404);
-                    }
-                $subject->years_users()->attach($user_id);
-            // }
-        }
-
-    return response()->json([
-        'message' => 'Subject added successfully.',
-        'data' => $subject,
-    ]);
-}
-
-    //***********************************************************************************************************************\\
-    public function edit_subject(Request $request)
-    {
-        $user = auth()->user();
-        $request->validate([
-            'subject_id' => 'required',
-            'category_id' => 'required',
-            'name' => 'required',
-            'price' => 'required',
-            'description' => 'required',
-            'image_data' ,
-            'video_id' => 'integer',
-            'file_id' => 'integer',
-            'users_content' => 'required|array',
-            'users_content.*.user_id' => 'required|integer',
-            'years_content.*.year_id' => 'integer',
-        ]);
-
-        $subject_id = $request->subject_id;
-        $subject = Subject::find($subject_id);
-
-        $subject->name = $request->name;
-        $subject->price = $request->price;
-        $subject->description = $request->description;
-        $subject->category_id = $request->category_id;
-        $subject->image_data = $request->image_data;
-        $subject->video_id = $request->video_id;
-        $subject->file_id = $request->file_id;
-        $subject->save();
-
-
-        if ($request->category_id == 1) { // if the category is educational
-            $yearsContent = $request->years_content;
             $usersContent = $request->users_content;
-
-            $subject->years_users()->detach();
 
             foreach ($usersContent as $user) {
                 foreach ($yearsContent as $year) {
@@ -369,15 +318,79 @@ public function search_in_subjects(Request $request)
             }
         }
 
-        return response()->json([
-            'message' => 'subject updated successfully',
-            'data' => $subject,
+    return response()->json([
+        'message' => 'Subject added successfully.',
+        'data' => $subject,
+    ]);
+}
+
+    //***********************************************************************************************************************\\
+    public function edit_subject(Request $request)
+    {
+        $user = Auth::user();
+        $request->validate([
+            'subject_id' => 'required|integer|exists:subjects,id',
+            'category_id' => 'integer|exists:categories,id|nullable',
+            'name' => 'string|max:255|nullable',
+            'price' => 'numeric|nullable',
+            'description' => 'string|nullable',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240|nullable',
+            'video_id' => 'integer|nullable',
+            'file_id' => 'integer|nullable',
+            'users_content' => 'required|array',
+            'users_content.*.user_id' => 'required|integer|exists:users,id',
+            'years_content' => 'array|nullable',
+            'years_content.*.year_id' => 'integer|exists:years,id',
         ]);
+
+        $subject = Subject::find($request->subject_id);
+
+        if (!$subject) {
+            return response()->json(['message' => 'Subject not found'], 404);
+        }
+
+        $subjectData = $request->only(['name', 'price', 'description', 'category_id', 'video_id', 'file_id']);
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('subject_images', 'public');
+            $imageUrl = Storage::url($imagePath);
+
+            if ($subject->image_url) {
+                $oldImagePath = str_replace('/storage', 'public', $subject->image_url);
+                Storage::delete($oldImagePath);
+            }
+
+            $subjectData['image_url'] = $imageUrl;
+        }
+
+        $subject->update($subjectData);
+
+        $subject->years_users()->detach();
+
+        $usersContent = $request->users_content;
+        $yearsContent = $request->years_content ?? [];
+
+        foreach ($usersContent as $user) {
+            if ($request->category_id == 1) {
+                foreach ($yearsContent as $year) {
+                    $subject->years_users()->attach($user['user_id'], ['year_id' => $year['year_id']]);
+                }
+            } else {
+                $subject->years_users()->attach($user['user_id']);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Subject updated successfully',
+            'data' => $subject,
+        ], 200);
     }
+
+
     //***********************************************************************************************************************\\
  public function delete_subject($subject_id)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $subject = Subject::find($subject_id);
         if (!$subject) {
             $message = "The subject doesn't exist.";
