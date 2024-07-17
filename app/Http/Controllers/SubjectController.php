@@ -346,8 +346,6 @@ public function search_in_subjects(Request $request)
             'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240|nullable',
             'video_id' => 'integer|nullable',
             'file_id' => 'integer|nullable',
-            // 'users_content' => 'required|array',
-            // 'users_content.*.user_id' => 'required|integer|exists:users,id',
             'years_content' => 'array|nullable',
             'years_content.*.year_id' => 'integer|exists:years,id',
         ]);
@@ -361,15 +359,17 @@ public function search_in_subjects(Request $request)
         $subjectData = $request->only(['name', 'price', 'description', 'category_id', 'video_id', 'file_id']);
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('subject_images', 'public');
-            $imageUrl = Storage::url($imagePath);
-
+            // Delete old image
             if ($subject->image_url) {
                 $oldImagePath = str_replace('/storage', 'public', $subject->image_url);
-                Storage::delete($oldImagePath);
+                if (Storage::exists($oldImagePath)) {
+                    Storage::delete($oldImagePath);
+                }
             }
 
-            $subjectData['image_url'] = $imageUrl;
+            // Store new image
+            $imagePath = $request->file('image')->store('subject_images', 'public');
+            $subject->image_url = Storage::url($imagePath);
         }
 
         $subject->update($subjectData);
@@ -407,7 +407,12 @@ public function search_in_subjects(Request $request)
                 'message' => $message,
             ]);
         }
-
+        if ($subject->image_url) {
+            $oldImagePath = str_replace('/storage', 'public', $subject->image_url);
+            if (Storage::exists($oldImagePath)) {
+                Storage::delete($oldImagePath);
+            }
+        }
         $subject->years_users()->detach();
         $subject->delete();
 
@@ -419,5 +424,6 @@ public function search_in_subjects(Request $request)
     }
 
     //***********************************************************************************************************************\\
+
 
 }

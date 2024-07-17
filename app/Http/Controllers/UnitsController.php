@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Unit;
+use App\Models\Subject;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class UnitsController extends Controller
 {
@@ -53,20 +57,37 @@ class UnitsController extends Controller
     public function add_unit(Request $request)
     {
         $user = auth()->user();
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required',
-            //  'image_data'=>'required',
-            //  'video_id'=>'required',
-            //  'file_id'=>'required',
-            'subject_id' => 'required',
-            'description' => 'required'
+            'description' => 'required',
+            'image' => 'required' ,
+            'video_id' => 'integer',
+            'file_id' => 'integer',
+            'subject_id' => 'integer',
         ]);
-        if ($validator->fails()) {
-            return 'error in validation.';
-        }
 
-        $input = $request->all();
-        $unit = Unit::create($input);
+        $subject = Subject::find($request->input('subject_id'));
+    if (!$subject) {
+        return response()->json(['message' => 'subject not found.'], 404);
+    }
+
+    // Check if image is uploaded
+    if (!$request->hasFile('image')) {
+        return response()->json(['message' => 'Image file is required.'], 400);
+    }
+
+    // Store the image and get the URL
+    $imagePath = $request->file('image')->store('unit_images', 'public');
+    $imageUrl = Storage::url($imagePath);
+
+    $unit = Unit::create([
+        'name' => $request->name,
+        'description' => $request->description,
+        'image_url' => $imageUrl,
+        'video_id' => $request->video_id,
+        'file_id' => $request->file_id,
+        'subject_id' => $request->subject_id,
+    ]);
         $message = "add unit successfully";
         return response()->json(
             [
@@ -76,39 +97,51 @@ class UnitsController extends Controller
         );
     }
 //**************************************************************** */
-   public function edit_unit(Request $request)
-    {
-        $user = auth()->user();
-        $input = $request->all();
-        $validator = Validator::make($input, [
-            'unit_id' => 'required',
-            'name' => 'required',
-            //  'image_data'=>'required',
-            //  'video_id'=>'required',
-            //  'file_id'=>'required',
-            'description' => 'required'
-        ]);
-        $unit = Unit::where('id', $input['unit_id'])->first();
-        if ($validator->fails()) {
-            $message = "There is an error in the inputs.";
-            return response()->json([
-                'message' => $message,
-                'data' => $input,
-            ]);
-        }
-        $unit->name = $input['name'];
-        $unit->image_data = $input['image_data'];
-        // $unit->video_id = $input['video_id'];
-        // $unit->file_id = $input['file_id'];
-        $unit->description = $input['description'];
-        $unit->save();
+public function edit_unit(Request $request)
+{
+    $user = auth()->user();
+    $request->validate([
+        'unit_id' => 'required|integer|exists:units,id',
+        'name' => 'string|max:255|nullable',
+        'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240|nullable',
+        'description' => 'string|nullable',
+    ]);
 
-        $message = "The unit edit successfully.";
-        return response()->json([
-            'message' => $message,
-            'data' => $unit
-        ]);
+    $unit = Unit::find($request->unit_id);
+    if (!$unit) {
+        return response()->json(['message' => 'unit not found'], 404);
     }
+
+    $unitData = $request->only(['name', 'description', 'video_id', 'file_id']);
+
+    if ($request->hasFile('image')) {
+        // Delete old image if exists
+        if ($unit->image_url) {
+            $oldImagePath = str_replace('/storage', 'public', $unit->image_url);
+            \Log::info('Old image path: ' . $oldImagePath); // تسجيل مسار الصورة القديمة
+            if (Storage::exists($oldImagePath)) {
+                Storage::delete($oldImagePath);
+                \Log::info('Old image deleted: ' . $oldImagePath); // تأكيد حذف الصورة القديمة
+            } else {
+                \Log::warning('Old image not found: ' . $oldImagePath); // تحذير إذا لم تُجد الصورة القديمة
+            }
+        }
+
+        // Store new image
+        $imagePath = $request->file('image')->store('unit_images', 'public');
+        \Log::info('New image stored at: ' . $imagePath); // تسجيل مسار الصورة الجديدة
+        $unitData['image_url'] = Storage::url($imagePath);
+    }
+
+    $unit->update($unitData);
+
+    $message = "The unit edited successfully.";
+    return response()->json([
+        'message' => $message,
+        'data' => $unit
+    ]);
+}
+
 //********************************************************************************************************************************************* */
     public function delete_unit($unit_id)
     {
@@ -121,6 +154,12 @@ class UnitsController extends Controller
             ]);
         }
         $unit->delete();
+        if ($unit->image_url) {
+            $oldImagePath = str_replace('/storage', 'public', $unit->image_url);
+            if (Storage::exists($oldImagePath)) {
+                Storage::delete($oldImagePath);
+            }
+        }
         $message = "The unit deleted successfully.";
         return response()->json([
             'message' => $message,
