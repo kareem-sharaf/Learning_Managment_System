@@ -29,5 +29,9 @@ public function lesson()
     {
         return $this->belongsTo(Lesson::class);
     }
-    
+
+    public function bookmarks()
+    {
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
 }

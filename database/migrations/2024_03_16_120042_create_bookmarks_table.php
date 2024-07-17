@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('bookmarks', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('bookmarkable_id');
+            $table->string('bookmarkable_type');
+            $table->string('bookmark_name')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

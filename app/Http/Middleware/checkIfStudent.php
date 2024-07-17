@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
- 
+
 class checkIfStudent
 {
     /**
@@ -16,7 +16,7 @@ class checkIfStudent
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role == 4) {
+        if (Auth::check() && Auth::user()->role_id == 4) {
             return $next($request);
         }
         return response()->json(['error' => 'Unauthorized'], 403);

@@ -15,9 +15,7 @@ class Lesson extends Model
        'image'
        ,'price'
     ];
-
-
-
+    
     public function unit()
     {
         return $this->belongsTo(Unit::class);
@@ -36,5 +34,8 @@ class Lesson extends Model
     {
         return $this->morphMany(Quiz::class, 'quizable');
     }
-
+    public function bookmarks()
+    {
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
 }

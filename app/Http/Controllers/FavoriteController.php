@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Favorite;
 use App\Models\User;
 use App\Models\Subject;
-use App\Models\Favorite;
 use App\Models\Category;
 
 class FavoriteController extends Controller
@@ -33,54 +33,50 @@ class FavoriteController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function toggle(Request $request)
     {
         $user = Auth::user();
-        $user_id = $user->id;
-
         $request->validate([
-            'category' => 'string|exists:categories,category',
-            'teacher' => 'string|exists:users,name',
-            'subject' => 'string|exists:subjects,name'
+            'category' => 'string|exists:categories,category|nullable',
+            'teacher' => 'string|exists:users,name|nullable',
+            'subject' => 'string|exists:subjects,name|nullable'
         ]);
 
-        $favoritable_type = '';
-        $favoritable_id = '';
+        $favoritable = null;
 
         if ($request->has('category')) {
-            $category = Category::where('category', $request->category)->first();
-            if (!$category) {
-                return response()->json(['message' => 'Category not found!'], 404);
-            }
-            $favoritable_type = 'category';
-            $favoritable_id = $category->id;
-            $favoritable_name = $category->category;
+            $favoritable = Category::where('category', $request->category)->first();
+            $favoritable_name = $favoritable->category;
         } elseif ($request->has('teacher')) {
-            $teacher = User::where('name', $request->teacher)->where('role_id', 3)->first();
-            if (!$teacher) {
-                return response()->json(['message' => 'Teacher not found!'], 404);
-            }
-            $favoritable_type = 'teacher';
-            $favoritable_id = $teacher->id;
-            $favoritable_name = $teacher->name;
+            $favoritable = User::where('name', $request->teacher)->where('role_id', 3)->first();
+            $favoritable_name = $favoritable->name;
         } elseif ($request->has('subject')) {
-            $subject = Subject::where('name', $request->subject)->first();
-            if (!$subject) {
-                return response()->json(['message' => 'Subject not found!'], 404);
-            }
-            $favoritable_type = 'subject';
-            $favoritable_id = $subject->id;
-            $favoritable_name = $subject->name;
+            $favoritable = Subject::where('name', $request->subject)->first();
+            $favoritable_name = $favoritable->name;
+        }
+
+        if (!$favoritable) {
+            return response()->json(['message' => 'Item not found!'], 404);
+        }
+
+        $existingFavorite = Favorite::where('user_id', $user->id)
+            ->where('favoritable_id', $favoritable->id)
+            ->where('favoritable_type', get_class($favoritable))
+            ->first();
+
+        if ($existingFavorite) {
+            $existingFavorite->delete();
+            return response()->json(['message' => 'Successfully deleted'], 400);
         }
 
         $favorite = new Favorite([
-            'favoritable_id' => $favoritable_id,
-            'favoritable_type' => $favoritable_type,
-            'favoritable_name' => $favoritable_name
+            'user_id' => $user->id,
+            'favoritable_id' => $favoritable->id,
+            'favoritable_type' => get_class($favoritable),
+            'favoritable_name' => $favoritable_name,
         ]);
 
-        $user_id->favorites()->save($favorite);
-        $favorite->users()->attach($user->id);
+        $favorite->save();
 
         return response()->json([
             'message' => 'Favorite stored successfully',

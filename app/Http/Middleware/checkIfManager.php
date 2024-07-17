@@ -17,7 +17,7 @@ class checkIfManager
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role == 1) {
+        if (Auth::check() && Auth::user()->role_id == 1) {
             return $next($request);
         }
         return response()->json(
@@ -26,4 +26,3 @@ class checkIfManager
         );
     }
 }
- 

@@ -70,12 +70,11 @@ class User extends Authenticatable
     {
         return $this->morphToMany(Favorite::class, 'favoritable');
     }
-
-    public function favoritess()
+    
+    public function bookmarks()
     {
-        return $this->belongsToMany(Favorite::class);
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
     }
-
 
     public function subjects()
     {
@@ -94,12 +93,12 @@ class User extends Authenticatable
 
     public function sentMessages()
     {
-        return $this->hasMany(Message::class, 'sender_id');
+        return $this->hasMany(MessageModel::class, 'sender_id');
     }
 
     public function receivedMessages()
     {
-        return $this->hasMany(Message::class, 'receiver_id');
+        return $this->hasMany(MessageModel::class, 'receiver_id');
     }
 
     public function quizzes()

@@ -34,5 +34,8 @@ class Unit extends Model
     {
         return $this->morphMany(Quiz::class, 'quizable');
     }
+    public function bookmarks()
+    {
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
 }
- 
