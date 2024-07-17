@@ -65,12 +65,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Subject::class,'subscriptions');
     }
 
-
     public function favorites()
     {
         return $this->morphToMany(Favorite::class, 'favoritable');
     }
-    
+
     public function bookmarks()
     {
         return $this->morphMany(Bookmark::class, 'bookmarkable');

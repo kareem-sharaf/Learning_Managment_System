@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
-use App\Models\Teacher;
 use App\Models\Year;
 use App\Models\Stage;
 use App\Models\SubjectYear;
