@@ -11,11 +11,12 @@ class Unit extends Model
     protected $fillable = [
         'name',
         'description',
-        'image_data',
+        'image_url',
         'video_id',
         'file_id',
         'subject_id',
     ];
+    public $timestamps=false;
 
     public function videos()
     {
