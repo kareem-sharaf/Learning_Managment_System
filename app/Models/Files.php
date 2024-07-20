@@ -19,7 +19,6 @@ public function unit()
 {
     return $this->belongsTo(Unit::class);
 }
-
 public function lesson()
 {
     return $this->belongsTo(Lesson::class);

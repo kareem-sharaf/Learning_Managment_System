@@ -17,7 +17,7 @@ class UnitsController extends Controller
     {
         $subject_id = $request->query('subject_id');
         $input= $request->all();
-        $unit = Unit::where('subject_id', $subject_id)->get();
+        $unit = Unit::where('subject_id', $subject_id)->with('lessons','files','videos')->get();
         $message = "this is the all units";
         return response()->json([
             'message' => $message,

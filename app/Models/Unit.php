@@ -18,10 +18,6 @@ class Unit extends Model
     ];
     public $timestamps=false;
 
-    public function videos()
-    {
-        return $this->hasMany(Video::class);
-    }
     public function subject()
     {
         return $this->belongsTo(Subject::class);
@@ -30,6 +26,14 @@ class Unit extends Model
     public function lessons()
     {
         return $this->hasMany(Lesson::class);
+    }
+    public function files()
+    {
+        return $this->hasMany(Files::class);
+    }
+    public function videos()
+    {
+        return $this->hasMany(Video::class);
     }
     public function quizzes()
     {

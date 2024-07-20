@@ -221,7 +221,7 @@ Route::group(['prefix' => 'subscription'], function () {
 
 Route::group(['prefix' => 'unit'], function () {
     Route::controller(UnitsController::class)->group(function () {
-        Route::post('show_all_units', 'show_all_units');
+        Route::get('show_all_units', 'show_all_units');
         Route::post('search_to_unit', 'search_to_unit');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
