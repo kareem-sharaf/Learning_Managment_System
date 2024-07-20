@@ -19,7 +19,7 @@ class BookmarkController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $bookmarks = $user->bookmarks()->with('bookmarkable')->get();
+        $bookmarks = $user->bookmarks;
         if ($bookmarks->isNotEmpty()) {
             return response()->json(['bookmarks' => $bookmarks], 200);
         } else {

@@ -18,14 +18,14 @@ class Bookmark extends Model
 
     public $timestamps = false;
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'role_id', 4);
+    }
+
     public function bookmarkable()
     {
         return $this->morphTo();
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 }
 
