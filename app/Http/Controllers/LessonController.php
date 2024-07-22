@@ -22,19 +22,19 @@ class LessonController extends Controller
             'description' => 'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
               ]);
-    
+
         $imagePath = $request->image->store('images', 'public');
         $imageFilename = basename($imagePath);
-    
+
         $lesson = new Lesson();
         $lesson->name = $request->name;
         $lesson->price = $request->price;
         $lesson->description = $request->description;
         $lesson->unit_id = $request->unit_id;
         $lesson->image = $imagePath;
-    
+
         if ($lesson->save()) {
-            
+
             return response()->json([
                 'message' => 'Lesson created successfully',
                 'data' => $lesson,
@@ -51,14 +51,14 @@ class LessonController extends Controller
     public function update_lesson(Request $request)
 {
 
-    
+
     $request->validate([
         'name'=>'required|string|max:255',
         'unit_id'=>'required',
         'price'=>'required|numeric|min:0',
         'description'=>'required|string|max:255',
-        'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240', 
-        
+        'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
+
     ]);
      $id=$request->id;
     $lesson = Lesson::findOrFail($id);
@@ -66,7 +66,7 @@ class LessonController extends Controller
     $imagePath = $request->image ? $request->image->store('images', 'public') : $lesson->image;
     $imageFilename = basename($imagePath);
 
-   
+
     $lesson->name = $request->name;
     $lesson->price = $request->price;
     $lesson->description = $request->description;
@@ -89,14 +89,14 @@ class LessonController extends Controller
 }
 public function delete_lesson(Request $request)
 {
-    
+
     $id = $request->id;
     $lesson = Lesson::findOrFail($id);
 
-  
+
     Storage::delete([
         $lesson->image,
-       
+
     ]);
 
     // Delete the lesson
@@ -111,14 +111,14 @@ public function delete_lesson(Request $request)
             'status' => 400,
         ]);
     }
-} 
+}
 
 public function getLessonsByUnitId(Request $request)
 {
     $request->validate([
         'unit_id' => 'required|integer|exists:units,id',
     ]);
-    
+
     $unitId = $request->unit_id;
 
     $lessons = Lesson::where('unit_id', $unitId)->get();
@@ -137,4 +137,27 @@ public function getLessonsByUnitId(Request $request)
     }
 }
 
+public function getLessonById(Request $request)
+{
+    $request->validate([
+        'id' => 'required|integer|exists:lessons,id',
+    ]);
+
+    $lessonId = $request->id;
+
+    $lesson = Lesson::with(['files', 'videos'])->find($lessonId);
+
+    if ($lesson) {
+        return response()->json([
+            'message' => 'Lesson retrieved successfully',
+            'data' => $lesson,
+            'status' => 200,
+        ]);
+    } else {
+        return response()->json([
+            'message' => 'Lesson not found',
+            'status' => 404,
+        ]);
+    }
+}
 }
