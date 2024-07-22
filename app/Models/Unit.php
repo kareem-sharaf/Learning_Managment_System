@@ -11,16 +11,13 @@ class Unit extends Model
     protected $fillable = [
         'name',
         'description',
-        'image_data',
+        'image_url',
         'video_id',
         'file_id',
         'subject_id',
     ];
+    public $timestamps=false;
 
-    public function videos()
-    {
-        return $this->hasMany(Video::class);
-    }
     public function subject()
     {
         return $this->belongsTo(Subject::class);
@@ -30,9 +27,20 @@ class Unit extends Model
     {
         return $this->hasMany(Lesson::class);
     }
+    public function files()
+    {
+        return $this->hasMany(Files::class);
+    }
+    public function videos()
+    {
+        return $this->hasMany(Video::class);
+    }
     public function quizzes()
     {
         return $this->morphMany(Quiz::class, 'quizable');
     }
+    public function bookmarks()
+    {
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
 }
- 

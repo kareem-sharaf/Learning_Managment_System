@@ -208,6 +208,12 @@ class ADController extends Controller
         $ad = AD::where('id', $request->ad_id)
             ->first();
         if ($ad) {
+            if ($ad->image_url) {
+                $oldImagePath = str_replace('/storage', 'public', $ad->image_url);
+                if (Storage::exists($oldImagePath)) {
+                    Storage::delete($oldImagePath);
+                }
+            }
             $ad->delete();
             return response()->json(
                 ['message' => 'ad deleted successfully'],

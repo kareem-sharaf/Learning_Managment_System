@@ -12,6 +12,7 @@ class AD extends Model
         'title',
         'description',
         'image_url',
+        'subject_id',
         'year_id',
         'stage_id',
         'isExpired'

@@ -19,7 +19,6 @@ public function unit()
 {
     return $this->belongsTo(Unit::class);
 }
-
 public function lesson()
 {
     return $this->belongsTo(Lesson::class);
@@ -29,5 +28,9 @@ public function lesson()
     {
         return $this->belongsTo(Lesson::class);
     }
-    
+
+    public function bookmarks()
+    {
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
 }

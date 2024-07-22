@@ -57,25 +57,29 @@ class User extends Authenticatable
     ];
 
     public function messages()
-{
-    return $this->hasMany(MessageModel::class);
-}
-    public function subjects2()
     {
-        return $this->belongsToMany(Subject::class,'subscriptions');
+        return $this->hasMany(MessageModel::class);
     }
 
+    public function subjects2()
+    {
+        return $this->belongsToMany(Subject::class, 'subscriptions');
+    }
 
     public function favorites()
     {
-        return $this->morphToMany(Favorite::class, 'favoritable');
+        return $this->hasMany(Favorite::class);
     }
 
-    public function favoritess()
+    public function favorited()
     {
-        return $this->belongsToMany(Favorite::class);
+        return $this->morphMany(Favorite::class, 'favoritable');
     }
 
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
 
     public function subjects()
     {
@@ -85,8 +89,9 @@ class User extends Authenticatable
     public function subjects_users()
     {
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
-                    ->withPivot('subject_id');
+            ->withPivot('subject_id');
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
@@ -94,18 +99,19 @@ class User extends Authenticatable
 
     public function sentMessages()
     {
-        return $this->hasMany(Message::class, 'sender_id');
+        return $this->hasMany(MessageModel::class, 'sender_id');
     }
 
     public function receivedMessages()
     {
-        return $this->hasMany(Message::class, 'receiver_id');
+        return $this->hasMany(MessageModel::class, 'receiver_id');
     }
 
     public function quizzes()
     {
         return $this->belongsToMany(Quiz::class, 'student_exams', 'user_id', 'quize_id');
     }
+    
     public function createdQuizzes()
     {
         return $this->hasMany(Quiz::class, 'teacher_id');

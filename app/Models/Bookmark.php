@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Favorite extends Model
+class Bookmark extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'favoritable_id',
-        'favoritable_type',
-        'favoritable_name'
+        'bookmarkable_id',
+        'bookmarkable_type',
+        'bookmark_name'
     ];
 
     public $timestamps = false;
@@ -23,8 +23,9 @@ class Favorite extends Model
         return $this->belongsToMany(User::class, 'role_id', 4);
     }
 
-    public function favoritable()
+    public function bookmarkable()
     {
         return $this->morphTo();
     }
 }
+

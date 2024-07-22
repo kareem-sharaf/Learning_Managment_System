@@ -17,19 +17,19 @@ class FilesSeeder extends Seeder
             'id' => '1',
             'name' => 'part 1',
             'unit_id' => '1',
-            'subject_id' => '1',
-            'lesson_id' => '1',
+            'subject_id' => '0',
+            'lesson_id' => '0',
             'content' => '2.pdf',
-            
+
         ]);
         Files::create([
             'id' => '2',
             'name' => 'part 1',
-            'unit_id' => '1',
-            'subject_id' => '1',
-            'lesson_id' => '1',
+            'unit_id' => '2',
+            'subject_id' => '0',
+            'lesson_id' => '0',
             'content' => '2.pdf',
-            
+
         ]);
     }
 }

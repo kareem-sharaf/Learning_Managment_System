@@ -12,12 +12,12 @@ class FilesController extends Controller
 {
     $validatedData = $request->validate([
         'name' => 'required|string|max:255',
-        'content' => 'required|file|mimes:pdf,docx,xlsx,jpg,png,gif|max:10240', // 10MB max file size
+        'content' => 'required|file|mimes:pdf,docx,xlsx,jpg,png,gif|max:10240',
         'subject_id' => 'required|integer|exists:subjects,id',
         'unit_id' => 'required|integer|exists:units,id',
         'lesson_id' => 'required|integer|exists:lessons,id',
     ]);
-    
+
     $file = new Files();
     $file->name = $validatedData['name'];
     $file->subject_id = $validatedData['subject_id'];
@@ -46,7 +46,7 @@ public function update(Request $request)
 
     $validatedData = $request->validate([
         'name' => 'required|string|max:255',
-        'content' => 'nullable|file|mimes:pdf,docx,xlsx,jpg,png,gif|max:10240', // 10MB max file size
+        'content' => 'nullable|file|mimes:pdf,docx,xlsx,jpg,png,gif|max:10240',
         'subject_id' => 'required|integer|exists:subjects,id',
         'unit_id' => 'required|integer|exists:units,id',
         'lesson_id' => 'required|integer|exists:lessons,id',
