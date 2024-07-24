@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Video;
-use App\Models\Subject;
-use App\Models\Unit;
-use App\Models\Lesson;
+
+use Illuminate\Support\Facades\Auth;
 
 class VideoController extends Controller
 {
@@ -25,6 +24,11 @@ class VideoController extends Controller
         $videoFile = $request->file('video');
         $videoPath = $videoFile->store('videos', 'public');
 
+        $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
+
+        if (($sender_role_id == '2' || $sender_role_id == '3') ) {
+
         $video = Video::create([
             'name' => $validatedData['name'],
             'video' => $videoPath,
@@ -35,7 +39,7 @@ class VideoController extends Controller
         ]);
 
         return response()->json($video, 201);
-    }
+    }}
 
     public function update(Request $request)
     {
@@ -58,6 +62,10 @@ class VideoController extends Controller
             'ads_id' => 'nullable|integer|exists:a_d_s,id'
         ]);
 
+        $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
+
+        if (($sender_role_id == '2' || $sender_role_id == '3') ) {
         if ($request->hasFile('video')) {
             Storage::delete($video->video);
             $videoFile = $request->file('video');
@@ -75,7 +83,7 @@ class VideoController extends Controller
         $video->save();
 
         return response()->json($video, 200);
-    }
+    }}
 
     public function destroy(Request $request)
     {
@@ -86,7 +94,10 @@ class VideoController extends Controller
 
         $video = Video::find($validatedData['id']);
 
+        $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
 
+        if (($sender_role_id == '2' || $sender_role_id == '3') ) {
         if (!$video) {
             return response()->json(['error' => 'Video not found'], 404);
         }
@@ -98,4 +109,4 @@ class VideoController extends Controller
         return response()->json(['message' => 'Video deleted successfully'], 200);
     }
 }
-
+}

@@ -9,12 +9,17 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use App\Models\Lesson;
 use App\Models\Video;
+use Illuminate\Support\Facades\Auth;
 
 
 class LessonController extends Controller
 {
     public function add_lesson(Request $request)
     {
+
+        $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
+
         $request->validate([
             'name' => 'required|string|max:255',
             'unit_id' => 'required',
@@ -23,6 +28,10 @@ class LessonController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
               ]);
 
+              $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
+
+        if (($sender_role_id == '2' || $sender_role_id == '3') ) {
         $imagePath = $request->image->store('images', 'public');
         $imageFilename = basename($imagePath);
 
@@ -32,6 +41,8 @@ class LessonController extends Controller
         $lesson->description = $request->description;
         $lesson->unit_id = $request->unit_id;
         $lesson->image = $imagePath;
+
+
 
         if ($lesson->save()) {
 
@@ -47,7 +58,7 @@ class LessonController extends Controller
             ]);
         }
     }
-
+    }
     public function update_lesson(Request $request)
 {
 
@@ -60,6 +71,10 @@ class LessonController extends Controller
         'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
 
     ]);
+    $sender = Auth::user();
+    $sender_role_id= $sender->role_id;
+
+    if (($sender_role_id == '2' || $sender_role_id == '3') ) {
      $id=$request->id;
     $lesson = Lesson::findOrFail($id);
 
@@ -74,6 +89,8 @@ class LessonController extends Controller
 
     $lesson->image = $imagePath;
 
+
+
     if ($lesson->save()) {
         return response()->json([
             'message' => 'Lesson updated successfully',
@@ -86,7 +103,7 @@ class LessonController extends Controller
             'status' => 400,
         ]);
     }
-}
+}}
 public function delete_lesson(Request $request)
 {
 
@@ -98,6 +115,10 @@ public function delete_lesson(Request $request)
         $lesson->image,
 
     ]);
+    $sender = Auth::user();
+    $sender_role_id= $sender->role_id;
+
+    if (($sender_role_id == '2' || $sender_role_id == '3') ) {
 
     // Delete the lesson
     if ($lesson->delete()) {
@@ -111,7 +132,7 @@ public function delete_lesson(Request $request)
             'status' => 400,
         ]);
     }
-}
+}}
 
 public function getLessonsByUnitId(Request $request)
 {

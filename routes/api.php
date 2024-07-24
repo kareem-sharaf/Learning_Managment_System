@@ -254,6 +254,7 @@ Route::group(['prefix' => 'profile'], function () {
 
 Route::group(['prefix' => 'lessons'], function () {
     Route::controller(LessonController::class)->group(function () {
+
         Route::post('/add', 'add_lesson');
         Route::post('/update', 'update_lesson');
         Route::post('/delete', 'delete_lesson');

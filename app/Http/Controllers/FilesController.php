@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Files;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class FilesController extends Controller
 {
@@ -17,6 +18,10 @@ class FilesController extends Controller
             'unit_id' => 'required|integer|exists:units,id',
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
+        $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
+
+        if (($sender_role_id == '2' || $sender_role_id == '3'|| $sender_role_id='1') ) {
 
         $file = new Files();
         $file->name = $validatedData['name'];
@@ -30,7 +35,7 @@ class FilesController extends Controller
         $file->content = $filePath;
 
         $file->save();
-
+        }
         return response()->json($file, 201);
     }
 
@@ -54,6 +59,9 @@ class FilesController extends Controller
             'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
+        $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
+        if (($sender_role_id == '2' || $sender_role_id == '3'|| $sender_role_id='1') ) {
         if ($request->hasFile('content')) {
             Storage::delete($file->content);
             $fileContent = $request->file('content');
@@ -70,7 +78,7 @@ class FilesController extends Controller
         $file->save();
 
         return response()->json($file, 200);
-    }
+    }}
 
 
 public function destroy(Request $request)
@@ -84,13 +92,16 @@ public function destroy(Request $request)
     if (!$file) {
         return response()->json(['error' => 'File not found'], 404);
     }
+    $sender = Auth::user();
+    $sender_role_id= $sender->role_id;
+    if (($sender_role_id == '2' || $sender_role_id == '3'|| $sender_role_id='1') ) {
 
     Storage::delete($file->content);
 
     $file->delete();
 
     return response()->json(['message' => 'File deleted successfully'], 200);
-}
+}}
 
 
 }
