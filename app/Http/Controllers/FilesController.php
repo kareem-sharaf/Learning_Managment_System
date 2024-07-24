@@ -9,65 +9,69 @@ use Illuminate\Support\Facades\Storage;
 class FilesController extends Controller
 {
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'name' => 'required|string|max:255',
-        'content' => 'required|file|mimes:pdf,docx,xlsx,jpg,png,gif|max:10240',
-        'subject_id' => 'required|integer|exists:subjects,id',
-        'unit_id' => 'required|integer|exists:units,id',
-        'lesson_id' => 'required|integer|exists:lessons,id',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'content' => 'required|file|mimes:pdf,docx',
+            'subject_id' => 'required|integer|exists:subjects,id',
+            'unit_id' => 'required|integer|exists:units,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+        ]);
 
-    $file = new Files();
-    $file->name = $validatedData['name'];
-    $file->subject_id = $validatedData['subject_id'];
-    $file->unit_id = $validatedData['unit_id'];
-    $file->lesson_id = $validatedData['lesson_id'];
+        $file = new Files();
+        $file->name = $validatedData['name'];
+        $file->subject_id = $validatedData['subject_id'];
+        $file->unit_id = $validatedData['unit_id'];
+        $file->lesson_id = $validatedData['lesson_id'];
 
-    $fileContent = $request->file('content');
-    $filePath = $fileContent->store('files', 'public');
-    $file->content = $filePath;
-
-    $file->save();
-
-    return response()->json($file, 201);
-}
-public function update(Request $request)
-{
-    $validatedData = $request->validate([
-        'id' => 'required|integer|exists:files,id'
-    ]);
-
-    $file = Files::find($validatedData['id']);
-
-    if (!$file) {
-        return response()->json(['error' => 'File not found'], 404);
-    }
-
-    $validatedData = $request->validate([
-        'name' => 'required|string|max:255',
-        'content' => 'nullable|file|mimes:pdf,docx,xlsx,jpg,png,gif|max:10240',
-        'subject_id' => 'required|integer|exists:subjects,id',
-        'unit_id' => 'required|integer|exists:units,id',
-        'lesson_id' => 'required|integer|exists:lessons,id',
-    ]);
-
-    if ($request->hasFile('content')) {
-        Storage::delete($file->content);
         $fileContent = $request->file('content');
-        $filePath = $fileContent->store('files', 'public');
+        $filePath = $fileContent->store('videos', 'public');
+
         $file->content = $filePath;
+
+        $file->save();
+
+        return response()->json($file, 201);
     }
 
-    $file->name = $validatedData['name'];
-    $file->subject_id = $validatedData['subject_id'];
-    $file->unit_id = $validatedData['unit_id'];
-    $file->lesson_id = $validatedData['lesson_id'];
+    public function update(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required|integer|exists:files,id'
+        ]);
 
-    $file->save();
+        $file = Files::find($validatedData['id']);
 
-    return response()->json($file, 200);
-}
+        if (!$file) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'content' => 'nullable|file|mimes:pdf,docx',
+            'subject_id' => 'required|integer|exists:subjects,id',
+            'unit_id' => 'required|integer|exists:units,id',
+            'lesson_id' => 'required|integer|exists:lessons,id',
+        ]);
+
+        if ($request->hasFile('content')) {
+            Storage::delete($file->content);
+            $fileContent = $request->file('content');
+        $filePath = $fileContent->store('videos', 'public');
+
+            $file->content = $filePath;
+        }
+
+        $file->name = $validatedData['name'];
+        $file->subject_id = $validatedData['subject_id'];
+        $file->unit_id = $validatedData['unit_id'];
+        $file->lesson_id = $validatedData['lesson_id'];
+
+        $file->save();
+
+        return response()->json($file, 200);
+    }
+
 
 public function destroy(Request $request)
 {

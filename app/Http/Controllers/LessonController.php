@@ -148,6 +148,16 @@ public function getLessonById(Request $request)
     $lesson = Lesson::with(['files', 'videos'])->find($lessonId);
 
     if ($lesson) {
+        $lesson->videos->transform(function ($video) {
+            $video->video_url = Storage::url($video->video);
+            return $video;
+        });
+
+        $lesson->files->transform(function ($file) {
+            $file->file_url = Storage::url($file->content);
+            return $file;
+        });
+
         return response()->json([
             'message' => 'Lesson retrieved successfully',
             'data' => $lesson,

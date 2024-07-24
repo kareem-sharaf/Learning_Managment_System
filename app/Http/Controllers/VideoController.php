@@ -12,67 +12,65 @@ use App\Models\Lesson;
 class VideoController extends Controller
 {
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'name' => 'required|string|max:255',
-        'videos' => 'required|array',
-        'videos.*' => 'required|file|mimes:mp4|',
-        'subject_id' => '|integer|exists:subjects,id',
-        'unit_id' => '|integer|exists:units,id',
-        'lesson_id' => '|integer|exists:lessons,id',
-        'ads_id' => '|integer|exists:a_d_s,id'
-    ]);
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'video' => 'required|file|mimes:mp4',
+            'subject_id' => 'nullable|integer|exists:subjects,id',
+            'unit_id' => 'nullable|integer|exists:units,id',
+            'lesson_id' => 'nullable|integer|exists:lessons,id',
+            'ads_id' => 'nullable|integer|exists:a_d_s,id'
+        ]);
 
-    $videos = [];
-    foreach ($request->file('videos') as $videoFile) {
+        $videoFile = $request->file('video');
         $videoPath = $videoFile->store('videos', 'public');
-        $videos[] = Video::create([
+
+        $video = Video::create([
             'name' => $validatedData['name'],
             'video' => $videoPath,
-            'subject_id' => $validatedData['subject_id'],
-            'unit_id' => $validatedData['unit_id'],
-            'lesson_id' => $validatedData['lesson_id'],
-            'ads_id' => $validatedData['ads_id'],
+            'subject_id' => $validatedData['subject_id'] ?? null,
+            'unit_id' => $validatedData['unit_id'] ?? null,
+            'lesson_id' => $validatedData['lesson_id'] ?? null,
+            'ads_id' => $validatedData['ads_id'] ?? null,
         ]);
+
+        return response()->json($video, 201);
     }
 
-    return response()->json($videos, 201);
-}
-
-public function update(Request $request)
+    public function update(Request $request)
     {
         $validatedData = $request->validate([
             'id' => 'required|integer|exists:videos,id'
         ]);
-    
+
         $video = Video::find($validatedData['id']);
-    
+
         if (!$video) {
             return response()->json(['error' => 'Video not found'], 404);
         }
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'video' => 'nullable|file|mimes:mp4|', 
-            'subject_id' => '|integer|exists:subjects,id',
-            'unit_id' => '|integer|exists:units,id',
-            'lesson_id' => '|integer|exists:lessons,id',
-            'ads_id'=>'|integer|exists:a_d_s,id'
+            'video' => 'nullable|file|mimes:mp4',
+            'subject_id' => 'nullable|integer|exists:subjects,id',
+            'unit_id' => 'nullable|integer|exists:units,id',
+            'lesson_id' => 'nullable|integer|exists:lessons,id',
+            'ads_id' => 'nullable|integer|exists:a_d_s,id'
         ]);
 
         if ($request->hasFile('video')) {
+            Storage::delete($video->video);
             $videoFile = $request->file('video');
-            $videoPath = $videoFile->store('videos', 'public');
+        $videoPath = $videoFile->store('videos', 'public');
+
             $video->video = $videoPath;
-            if ($video->video) {
-                Storage::delete('public/' . $video->video);
-            }
         }
 
         $video->name = $validatedData['name'];
-        $video->subject_id = $validatedData['subject_id'];
-        $video->unit_id = $validatedData['unit_id'];
-        $video->lesson_id = $validatedData['lesson_id'];
+        $video->subject_id = $validatedData['subject_id'] ?? $video->subject_id;
+        $video->unit_id = $validatedData['unit_id'] ?? $video->unit_id;
+        $video->lesson_id = $validatedData['lesson_id'] ?? $video->lesson_id;
+        $video->ads_id = $validatedData['ads_id'] ?? $video->ads_id;
 
         $video->save();
 
@@ -81,22 +79,22 @@ public function update(Request $request)
 
     public function destroy(Request $request)
     {
-        
+
         $validatedData = $request->validate([
             'id' => 'required|integer|exists:videos,id'
         ]);
-    
+
         $video = Video::find($validatedData['id']);
-    
-    
+
+
         if (!$video) {
             return response()->json(['error' => 'Video not found'], 404);
         }
-    
+
         Storage::delete($video->video);
-    
+
         $video->delete();
-    
+
         return response()->json(['message' => 'Video deleted successfully'], 200);
     }
 }
