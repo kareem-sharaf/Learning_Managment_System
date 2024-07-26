@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\AD;
-use App\Models\Year;
-use App\Models\Stage;
+use App\Models\Category;
+use App\Models\Video;
 
 class ADController extends Controller
 {
@@ -27,42 +27,51 @@ class ADController extends Controller
         );
     }
 
-    //  add a new ad
     public function store(Request $request)
     {
-        $user = Auth::user();
-
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'year_id' => 'exists:years'
+            'category' => 'required|exists:categories,category',
+            'subject_id' => 'exists:subjects',
+            'video' => 'mimes:mp4,mov,avi,flv|max:204800',
+            'video_name' => 'required|string|max:255'
         ]);
 
-        $year = Year::find($request->year_id);
-        $stage = $year ? Stage::find($year->stage_id) : null;
+        $category = Category::where('category', $request->category)->first();
 
         $adData = [
             'title' => $request->title,
             'description' => $request->description,
-            'year_id' => $year ? $year->id : null,
-            'stage_id' => $stage ? $stage->id : null,
+            'category_id' => $category->id,
+            'subject_id' => $request->subject_id,
         ];
 
         $imagePath = $request->file('image')->store('ad_images', 'public');
-
         $imageUrl = Storage::url($imagePath);
-
         $adData['image_url'] = $imageUrl;
 
         $ad = AD::create($adData);
 
-        $ad = AD::find($ad->id);
+        $videoPath = $request->file('video')->store('videos', 'public');
+        $videoUrl = Storage::url($videoPath);
+
+        // Create the video record
+        $video = Video::create([
+            'name' => $request->video_name,
+            'video' => $videoUrl,
+            'ad_id' => $ad->id
+        ]);
+
+        $ad->video_id = $video->id;
+        $ad->save();
 
         return response()->json(
             [
-                'message' => 'AD added successfully',
-                'ad:' => $ad
+                'message' => 'AD and Video added successfully',
+                'ad' => $ad,
+                'video' => $video
             ],
             200
         );
@@ -71,7 +80,7 @@ class ADController extends Controller
     //  show specific ad details
     public function show(Request $request)
     {
-        $ad = AD::find($request->ad_id);
+        $ad = AD::with('videos')->find($request->ad_id);
 
         if (!$ad) {
             return response()->json(
@@ -119,65 +128,93 @@ class ADController extends Controller
         );
     }
 
-    // update an ad
-    public function update(Request $request)
-    {
-        $user = Auth::user();
+// Update an ad
+public function update(Request $request)
+{
+    $request->validate([
+        'ad_id' => 'required|exists:a_d_s,id|numeric',
+        'title' => 'string|max:255',
+        'description' => 'string',
+        'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
+        'video' => 'mimes:mp4,mov,avi,flv|max:204800',
+        'video_name' => 'string|max:255'
+    ]);
 
-        $request->validate([
-            'ad_id' => 'required|exists:a_d_s,id|numeric',
-            'title' => 'string|max:255',
-            'description' => 'string',
-            'image' => 'image',
-            'year' => 'string'
-        ]);
+    $ad = AD::findOrFail($request->ad_id);
 
-        $ad = AD::findOrFail($request->ad_id);
+    $adUpdated = false;
+    $videoUpdated = false;
 
-        if ($request->filled('title') && $ad->title !== $request->title) {
-            $ad->title = $request->title;
-        }
+    if ($request->filled('title') && $ad->title !== $request->title) {
+        $ad->title = $request->title;
+        $adUpdated = true;
+    }
 
-        if ($request->filled('description') && $ad->description !== $request->description) {
-            $ad->description = $request->description;
-        }
+    if ($request->filled('description') && $ad->description !== $request->description) {
+        $ad->description = $request->description;
+        $adUpdated = true;
+    }
 
-        if ($request->filled('year')) {
-            $year = Year::where('year', $request->year)->first();
-            if ($year && $ad->year_id !== $year->id) {
-                $ad->year_id = $year->id;
-                $ad->stage_id = $year->stage_id;
+    if ($request->hasFile('image')) {
+        if ($ad->image_url) {
+            $oldImagePath = str_replace('/storage', 'public', $ad->image_url);
+            if (Storage::exists($oldImagePath)) {
+                Storage::delete($oldImagePath);
             }
         }
 
-        if ($request->hasFile('image')) {
-            // Delete old image
-            if ($ad->image_url) {
-                $oldImagePath = str_replace('/storage', 'public', $ad->image_url);
-                if (Storage::exists($oldImagePath)) {
-                    Storage::delete($oldImagePath);
-                }
+        $imagePath = $request->file('image')->store('ad_images', 'public');
+        $ad->image_url = Storage::url($imagePath);
+        $adUpdated = true;
+    }
+
+    if ($request->hasFile('video')) {
+        $video = $ad->video;
+
+        if ($video) {
+            $oldVideoPath = str_replace('/storage', 'public', $video->video);
+            if (Storage::exists($oldVideoPath)) {
+                Storage::delete($oldVideoPath);
             }
-
-            // Store new image
-            $imagePath = $request->file('image')->store('ad_images', 'public');
-            $ad->image_url = Storage::url($imagePath);
+        } else {
+            $video = new Video();
+            $video->ad_id = $ad->id;
         }
 
-        if (!$ad->isDirty()) {
-            return response()->json(['error' => 'Nothing to update'], 400);
-        }
+        $videoPath = $request->file('video')->store('videos', 'public');
+        $video->video = Storage::url($videoPath);
+        $videoUpdated = true;
+    }
 
-        $ad->save();
+    if ($request->filled('video_name')) {
+        if (!$video) {
+            $video = new Video();
+            $video->ad_id = $ad->id;
+        }
+        $video->name = $request->video_name;
+        $videoUpdated = true;
+    }
+
+    if ($videoUpdated) {
+        $video->save();
+    }
+
+    if ($adUpdated || $videoUpdated) {
+        if ($ad->isDirty()) {
+            $ad->save();
+        }
 
         return response()->json(
             [
                 'message' => 'Ad updated successfully',
-                'ad:' => $ad
+                'ad' => $ad->load('videos')
             ],
             200
         );
+    } else {
+        return response()->json(['error' => 'Nothing to update'], 400);
     }
+}
 
     //  set the ad to be expired
     public function setExpired(Request $request)
@@ -203,26 +240,40 @@ class ADController extends Controller
     // delete an ad
     public function destroy(Request $request)
     {
-        $user = Auth::user();
+        $ad = AD::where('id', $request->ad_id)->first();
 
-        $ad = AD::where('id', $request->ad_id)
-            ->first();
         if ($ad) {
+            $videos = $ad->videos;
+
+            if ($videos) {
+                if ($videos->video) {
+                    $oldVideoPath = str_replace('/storage', 'public', $videos->video);
+                    if (Storage::exists($oldVideoPath)) {
+                        Storage::delete($oldVideoPath);
+                    }
+                }
+                $videos->delete();
+            }
+
             if ($ad->image_url) {
                 $oldImagePath = str_replace('/storage', 'public', $ad->image_url);
                 if (Storage::exists($oldImagePath)) {
                     Storage::delete($oldImagePath);
                 }
             }
+
             $ad->delete();
+
             return response()->json(
-                ['message' => 'ad deleted successfully'],
+                ['message' => 'Ad and associated videos deleted successfully'],
                 200
             );
         }
+
         return response()->json(
-            ['error' => 'ad not found'],
+            ['error' => 'Ad not found'],
             404
         );
     }
+
 }

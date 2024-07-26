@@ -20,7 +20,7 @@ class VideoSeeder extends Seeder
             'unit_id' => '1',
             'subject_id' => '0',
             'lesson_id' => '0',
-            'ads_id' => '1',
+            'ad_id' => '1',
 
         ]);
         Video::create([
@@ -30,7 +30,7 @@ class VideoSeeder extends Seeder
             'unit_id' => '2',
             'subject_id' => '0',
             'lesson_id' => '0',
-            'ads_id' => '1',
+            'ad_id' => '1',
 
         ]);
     }

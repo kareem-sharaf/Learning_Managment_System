@@ -55,7 +55,6 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');
 
-
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
         });
