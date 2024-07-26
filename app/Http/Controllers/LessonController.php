@@ -17,14 +17,9 @@ class LessonController extends Controller
     public function add_lesson(Request $request)
     {
 
-<<<<<<< HEAD
 
         $sender = Auth::user();
         $sender_role_id = $sender->role_id;
-=======
-        $sender = Auth::user();
-        $sender_role_id= $sender->role_id;
->>>>>>> 4daf2304093ea2d807c7f190a68be2a2151cc98b
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -33,10 +28,9 @@ class LessonController extends Controller
             'description' => 'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
               ]);
-              if (($sender_role_id == '3' ) ) {
 
-              $sender = Auth::user();
-        $sender_role_id= $sender->role_id;
+
+
 
         if (($sender_role_id == '2' || $sender_role_id == '3') ) {
         $imagePath = $request->image->store('images', 'public');
@@ -64,13 +58,8 @@ class LessonController extends Controller
                 'status' => 400,
             ]);
         }
-<<<<<<< HEAD
     }}
 
-=======
-    }
-    }
->>>>>>> 4daf2304093ea2d807c7f190a68be2a2151cc98b
     public function update_lesson(Request $request)
 {
 
@@ -102,7 +91,7 @@ class LessonController extends Controller
     $lesson->unit_id = $request->unit_id;
 
     $lesson->image = $imagePath;
-
+    }}
 
 
     if ($lesson->save()) {
@@ -116,8 +105,9 @@ class LessonController extends Controller
             'message' => 'Lesson not updated',
             'status' => 400,
         ]);
-    }
-}}
+    }}
+
+
 public function delete_lesson(Request $request)
 {
     $sender = Auth::user();
@@ -149,8 +139,8 @@ public function delete_lesson(Request $request)
             'status' => 400,
         ]);
     }
+}
 }}
-
 public function getLessonsByUnitId(Request $request)
 {
     $request->validate([
