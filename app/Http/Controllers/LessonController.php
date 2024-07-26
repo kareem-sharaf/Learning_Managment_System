@@ -17,9 +17,14 @@ class LessonController extends Controller
     public function add_lesson(Request $request)
     {
 
+<<<<<<< HEAD
 
         $sender = Auth::user();
         $sender_role_id = $sender->role_id;
+=======
+        $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
+>>>>>>> 4daf2304093ea2d807c7f190a68be2a2151cc98b
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -30,6 +35,10 @@ class LessonController extends Controller
               ]);
               if (($sender_role_id == '3' ) ) {
 
+              $sender = Auth::user();
+        $sender_role_id= $sender->role_id;
+
+        if (($sender_role_id == '2' || $sender_role_id == '3') ) {
         $imagePath = $request->image->store('images', 'public');
         $imageFilename = basename($imagePath);
 
@@ -39,6 +48,8 @@ class LessonController extends Controller
         $lesson->description = $request->description;
         $lesson->unit_id = $request->unit_id;
         $lesson->image = $imagePath;
+
+
 
         if ($lesson->save()) {
 
@@ -53,8 +64,13 @@ class LessonController extends Controller
                 'status' => 400,
             ]);
         }
+<<<<<<< HEAD
     }}
 
+=======
+    }
+    }
+>>>>>>> 4daf2304093ea2d807c7f190a68be2a2151cc98b
     public function update_lesson(Request $request)
 {
 
@@ -69,6 +85,10 @@ class LessonController extends Controller
         'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
 
     ]);
+    $sender = Auth::user();
+    $sender_role_id= $sender->role_id;
+
+    if (($sender_role_id == '2' || $sender_role_id == '3') ) {
      $id=$request->id;
     $lesson = Lesson::findOrFail($id);
     if (($sender_role_id == '3' ) ) {
@@ -82,6 +102,8 @@ class LessonController extends Controller
     $lesson->unit_id = $request->unit_id;
 
     $lesson->image = $imagePath;
+
+
 
     if ($lesson->save()) {
         return response()->json([
@@ -110,6 +132,10 @@ public function delete_lesson(Request $request)
         $lesson->image,
 
     ]);
+    $sender = Auth::user();
+    $sender_role_id= $sender->role_id;
+
+    if (($sender_role_id == '2' || $sender_role_id == '3') ) {
 
     // Delete the lesson
     if ($lesson->delete()) {
@@ -160,6 +186,16 @@ public function getLessonById(Request $request)
     $lesson = Lesson::with(['files', 'videos'])->find($lessonId);
 
     if ($lesson) {
+        $lesson->videos->transform(function ($video) {
+            $video->video_url = Storage::url($video->video);
+            return $video;
+        });
+
+        $lesson->files->transform(function ($file) {
+            $file->file_url = Storage::url($file->content);
+            return $file;
+        });
+
         return response()->json([
             'message' => 'Lesson retrieved successfully',
             'data' => $lesson,
