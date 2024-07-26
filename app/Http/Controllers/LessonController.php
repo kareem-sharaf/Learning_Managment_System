@@ -9,12 +9,18 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use App\Models\Lesson;
 use App\Models\Video;
+use Illuminate\Support\Facades\Auth;
 
 
 class LessonController extends Controller
 {
     public function add_lesson(Request $request)
     {
+
+
+        $sender = Auth::user();
+        $sender_role_id = $sender->role_id;
+
         $request->validate([
             'name' => 'required|string|max:255',
             'unit_id' => 'required',
@@ -22,6 +28,7 @@ class LessonController extends Controller
             'description' => 'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
               ]);
+              if (($sender_role_id == '3' ) ) {
 
         $imagePath = $request->image->store('images', 'public');
         $imageFilename = basename($imagePath);
@@ -46,11 +53,13 @@ class LessonController extends Controller
                 'status' => 400,
             ]);
         }
-    }
+    }}
 
     public function update_lesson(Request $request)
 {
 
+    $sender = Auth::user();
+    $sender_role_id = $sender->role_id;
 
     $request->validate([
         'name'=>'required|string|max:255',
@@ -62,7 +71,7 @@ class LessonController extends Controller
     ]);
      $id=$request->id;
     $lesson = Lesson::findOrFail($id);
-
+    if (($sender_role_id == '3' ) ) {
     $imagePath = $request->image ? $request->image->store('images', 'public') : $lesson->image;
     $imageFilename = basename($imagePath);
 
@@ -86,12 +95,15 @@ class LessonController extends Controller
             'status' => 400,
         ]);
     }
-}
+}}
 public function delete_lesson(Request $request)
 {
+    $sender = Auth::user();
+    $sender_role_id = $sender->role_id;
 
     $id = $request->id;
     $lesson = Lesson::findOrFail($id);
+    if (($sender_role_id == '3' ) ) {
 
 
     Storage::delete([
@@ -111,7 +123,7 @@ public function delete_lesson(Request $request)
             'status' => 400,
         ]);
     }
-}
+}}
 
 public function getLessonsByUnitId(Request $request)
 {

@@ -252,51 +252,57 @@ Route::group(['prefix' => 'profile'], function () {
 
 //  lessons routes
 
-Route::group(['prefix' => 'lessons'], function () {
-    Route::controller(LessonController::class)->group(function () {
-        Route::post('/add', 'add_lesson');
-        Route::post('/update', 'update_lesson');
-        Route::post('/delete', 'delete_lesson');
-        Route::post('/get', 'getLessonsByUnitId');
-        Route::post('/getid', 'getLessonById');
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('lessons')->group(function () {
+        Route::controller(LessonController::class)->group(function () {
+            Route::post('/add', 'add_lesson');
+            Route::post('/update', 'update_lesson');
+            Route::post('/delete', 'delete_lesson');
+            Route::post('/get', 'getLessonsByUnitId');
+            Route::post('/getid', 'getLessonById');
+        });
     });
 });
 
+
 //  comment routes
 
-Route::group(['prefix' => 'comment'], function () {
-    Route::controller(CommentsController::class)->group(function () {
-        Route::post('/store', 'store');
-        Route::post('/update', 'update');
-        Route::post('/destroy', 'destroy');
-        Route::get('/getComments', 'getComments');
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('comment')->group(function () {
+        Route::controller(CommentsController::class)->group(function () {
+            Route::post('/store', 'store');
+            Route::post('/update', 'update');
+            Route::post('/destroy', 'destroy');
+            Route::get('/getComments', 'getComments');
+        });
     });
-
 });
 
 //  video routes
 
-Route::group(['prefix' => 'video'], function () {
-    Route::controller(VideoController::class)->group(function () {
-        Route::post('/store', 'store');
-        Route::post('/update', 'update');
-        Route::post('/destroy', 'destroy');
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('video')->group(function () {
+        Route::controller(VideoController::class)->group(function () {
+            Route::post('/store', 'store');
+            Route::post('/update', 'update');
+            Route::post('/destroy', 'destroy');
+        });
     });
 });
+
 
 //  files routes
-
-Route::group(['prefix' => 'files'], function () {
-    Route::controller(FilesController::class)->group(function () {
-        Route::post('/store', 'store');
-        Route::post('/update', 'update');
-        Route::post('/destroy', 'destroy');
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('files')->group(function () {
+        Route::controller(FilesController::class)->group(function () {
+            Route::post('/store', 'store');
+            Route::post('/update', 'update');
+            Route::post('/destroy', 'destroy');
+        });
     });
 });
+
 
 //  message routes
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Video extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'video', 'subject_id', 'unit_id', 'lesson_id'];
+    protected $fillable = ['name', 'video', 'subject_id', 'unit_id', 'lesson_id','ads_id'];
 
 public function subject()
 {
@@ -23,6 +23,10 @@ public function unit()
 public function lesson()
 {
     return $this->belongsTo(Lesson::class);
+}
+public function ads()
+{
+    return $this->belongsTo(AD::class);
 }
 public function comments()
 {

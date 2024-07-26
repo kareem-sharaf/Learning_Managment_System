@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-   
+
     public function up(): void
     {
         Schema::create('files', function (Blueprint $table) {
@@ -14,9 +14,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('content');
 
-            $table->unsignedBigInteger('subject_id')->constrained('subjects')->cascadeOnDelete();
-            $table->unsignedBigInteger('unit_id')->constrained('units')->cascadeOnDelete();
-            $table->unsignedBigInteger('lesson_id')->constrained('lessons')->cascadeOnDelete();
+            $table->unsignedBigInteger('subject_id')->nullable()->constrained('subjects')->cascadeOnDelete();
+            $table->unsignedBigInteger('unit_id')->nullable()->constrained('units')->cascadeOnDelete();
+            $table->unsignedBigInteger('lesson_id')->nullable()->constrained('lessons')->cascadeOnDelete();
 
             $table->timestamps();
         });
