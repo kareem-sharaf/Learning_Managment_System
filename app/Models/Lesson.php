@@ -12,10 +12,12 @@ class Lesson extends Model
         'name',
         'description',
         'unit_id',
-       'image'
-       ,'price'
+        'image',
+        'price',
+        'video_id',
+        'teacher_id'
     ];
-    
+
     public function unit()
     {
         return $this->belongsTo(Unit::class);
@@ -25,10 +27,9 @@ class Lesson extends Model
     {
         return $this->hasMany(Files::class);
     }
-
-    public function videos()
+    public function video()
     {
-        return $this->hasMany(Video::class);
+        return $this->hasOne(Video::class, 'lesson_id');
     }
     public function quizzes()
     {

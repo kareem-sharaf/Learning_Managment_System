@@ -275,5 +275,4 @@ public function update(Request $request)
             404
         );
     }
-
 }
