@@ -17,13 +17,15 @@ class UnitsController extends Controller
     {
         $subject_id = $request->query('subject_id');
         $input= $request->all();
-        $unit = Unit::where('subject_id', $subject_id)->with('lessons','files','videos')->get();
+        $unit = Unit::where('subject_id', $subject_id)->with('lessons','lessons.videos','files','lessons.files','videos')->get();
         $message = "this is the all units";
         return response()->json([
             'message' => $message,
             'data' => $unit,
         ]);
     }
+    
+    
 //************************************************************************************************************** */
 
     public function search_to_unit(Request $request)

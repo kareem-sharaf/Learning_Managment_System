@@ -27,10 +27,11 @@ class Lesson extends Model
     {
         return $this->hasMany(Files::class);
     }
-    public function video()
+    public function videos()
     {
-        return $this->hasOne(Video::class, 'lesson_id');
+        return $this->hasMany(Video::class);
     }
+    
     public function quizzes()
     {
         return $this->morphMany(Quiz::class, 'quizable');
