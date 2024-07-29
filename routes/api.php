@@ -55,7 +55,6 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');
 
-
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
         });
@@ -165,12 +164,11 @@ Route::group(['prefix' => 'subject'], function () {
         Route::group(['middleware' => 'checkIfTeacher:sanctum' ] , function(){
             Route::post('add_subject', 'add_subject');
             Route::post('edit_subject', 'edit_subject');
-            Route::post('delete_subject', 'delete_subject');
+            Route::get('delete_subject/{subject_id}', 'delete_subject');
 
            });
             Route::get('buy_subject', 'buy_subject');
         });
-
     });
 });
 
@@ -180,20 +178,18 @@ Route::group(['prefix' => 'quiz'], function () {
     Route::controller(QuizesController::class)->group(function () {
         Route::post('show_all', 'show_all');
         Route::middleware('auth:sanctum')->group(function () {
-            Route::group(['middleware'] , function(){
+            Route::group(['middleware'], function () {
                 Route::post('show_to_all', 'show_to_all');
             });
         });
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::group(['middleware' => 'checkIfTeacher:sanctum' ] , function(){
-            Route::get('show_one_to_teacher', 'show_one_to_teacher');
-            Route::post('add_quiz', 'add_quiz');
-            Route::post('edit_quiz', 'edit_quiz');
-            Route::get('delete_quiz/{quiz_id}', 'delete_quiz');
-           });
-
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
+                Route::get('show_one_to_teacher', 'show_one_to_teacher');
+                Route::post('add_quiz', 'add_quiz');
+                Route::post('edit_quiz', 'edit_quiz');
+                Route::get('delete_quiz/{quiz_id}', 'delete_quiz');
+            });
         });
-
     });
 });
 
@@ -201,29 +197,15 @@ Route::group(['prefix' => 'quiz'], function () {
 Route::group(['prefix' => 'subscription'], function () {
     Route::controller(SubscriptionController::class)->group(function () {
     Route::group(['middleware' => 'checkIfStudent:sanctum'], function () {
-        // Route::post('buy_subject', 'buy_subject');
+        Route::get('buy_subject', 'buy_subject');
         Route::get('delete_request', 'delete_request');
+        Route::get('show_all_requests_for_student', 'show_all_requests_for_student');
         Route::get('show_one_request_for_student', 'show_one_request_for_student');
     });
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::group(['middleware' => 'checkIfStudent:sanctum' ] , function(){
-            Route::post('buy_subject', 'buy_subject');
-            Route::get('show_all_requests_for_student', 'show_all_requests_for_student');
-
-           });
-
-        });
-        Route::middleware('auth:sanctum')->group(function () {
-            Route::group(['middleware' => 'checkIfTeacher:sanctum' ] , function(){
-                Route::get('show_all_requests_for_teacher', 'show_all_requests_for_teacher');
-                Route::post('edit_request', 'edit_request');
-
-            });
-
-            });
     Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
+        Route::get('show_all_requests_for_teacher', 'show_all_requests_for_teacher');
         Route::get('show_one_request_for_teacher', 'show_one_request_for_teacher');
+        Route::post('edit_request', 'edit_request');
         Route::get('delete_request', 'delete_request');
 
     });
@@ -257,58 +239,64 @@ Route::group(['prefix' => 'profile'], function () {
         Route::get('show_teachers_in_subject', 'show_teachers_in_subject');
         Route::get('teachers_in_category/{category_id}', 'teachers_in_category');
         Route::get('search_in_teacher', 'search_in_teacher');
-        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager','checkIfAdmin'], function () {
-
+        Route::group(['middleware' => 'auth:sanctum', 'checkIfManager', 'checkIfAdmin'], function () {
         });
-
     });
 });
 
 //  lessons routes
 
-Route::group(['prefix' => 'lessons'], function () {
+
+Route::prefix('lessons')->group(function () {
     Route::controller(LessonController::class)->group(function () {
-        Route::post('/add', 'add_lesson');
-        Route::post('/update', 'update_lesson');
-        Route::post('/delete', 'delete_lesson');
+        Route::middleware(['auth:sanctum', 'checkIfTeacher'])->group(function () {            Route::post('/add', 'add_lesson');
+            Route::post('/update', 'update_lesson');
+            Route::post('/delete', 'delete_lesson');
+        });
         Route::post('/get', 'getLessonsByUnitId');
+        Route::post('/getid', 'getLessonById');
     });
 });
 
+
 //  comment routes
 
-Route::group(['prefix' => 'comment'], function () {
-    Route::controller(CommentsController::class)->group(function () {
-        Route::post('/store', 'store');
-        Route::post('/update', 'update');
-        Route::post('/destroy', 'destroy');
-        Route::get('/getComments', 'getComments');
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('comment')->group(function () {
+        Route::controller(CommentsController::class)->group(function () {
+            Route::post('/store', 'store');
+            Route::post('/update', 'update');
+            Route::post('/destroy', 'destroy');
+            Route::get('/getComments', 'getComments');
+        });
     });
-
 });
 
 //  video routes
 
-Route::group(['prefix' => 'video'], function () {
-    Route::controller(VideoController::class)->group(function () {
-        Route::post('/store', 'store');
-        Route::post('/update', 'update');
-        Route::post('/destroy', 'destroy');
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('video')->group(function () {
+        Route::controller(VideoController::class)->group(function () {
+            Route::post('/store', 'store');
+            Route::post('/update', 'update');
+            Route::post('/destroy', 'destroy');
+        });
     });
 });
+
 
 //  files routes
-
-Route::group(['prefix' => 'files'], function () {
-    Route::controller(FilesController::class)->group(function () {
-        Route::post('/store', 'store');
-        Route::post('/update', 'update');
-        Route::post('/destroy', 'destroy');
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('files')->group(function () {
+        Route::controller(FilesController::class)->group(function () {
+            Route::post('/store', 'store');
+            Route::post('/update', 'update');
+            Route::post('/destroy', 'destroy');
+        });
     });
 });
+
 
 //  message routes
 
@@ -317,9 +305,5 @@ Route::group(['prefix' => 'message'], function () {
         Route::post('/send', 'sendmessage');
         Route::post('/update', 'updateMessage');
         Route::post('/destroy', 'deleteMessage');
-
     });
 });
-
-
-

@@ -8,17 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class AD extends Model
 {
     use HasFactory;
-    protected $fillable=[
+    protected $fillable = [
         'title',
         'description',
         'image_url',
-        'subject_id',
-        'year_id',
-        'stage_id',
+        'category_id',
+        'video_id',
         'isExpired'
     ];
     public function videos()
-{
-    return $this->hasMany(Video::class);
-}
+    {
+        return $this->hasOne(Video::class, 'ad_id');
+    }
 }
