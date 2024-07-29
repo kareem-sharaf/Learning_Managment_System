@@ -22,20 +22,12 @@ class LessonController extends Controller
             'price' => 'required|numeric|min:0',
             'description' => 'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'video' => 'required|mimes:mp4,mov,avi,flv|max:204800',
-            'video_name' => 'required|string|max:255',
+            'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800|',
+            'video_name' => 'nullable|string|max:255',
         ]);
-
-        if (!$request->hasFile('image') || !$request->hasFile('video')) {
-            return response()->json([
-                'message' => 'The image and video fields are required.',
-                'status' => 400,
-            ]);
-        }
-
+    
         $imagePath = $request->file('image')->store('lessons_images', 'public');
-        $videoPath = $request->file('video')->store('videos', 'public');
-
+    
         $lesson = new Lesson();
         $lesson->name = $request->name;
         $lesson->price = $request->price;
@@ -43,17 +35,21 @@ class LessonController extends Controller
         $lesson->unit_id = $request->unit_id;
         $lesson->image = Storage::url($imagePath);
         $lesson->teacher_id = Auth::id(); // Set teacher_id to the currently authenticated user
-
+    
         if ($lesson->save()) {
-            $video = new Video();
-            $video->video = Storage::url($videoPath);
-            $video->name = $request->video_name;
-            $video->lesson_id = $lesson->id;
-            $video->save();
-
-            $lesson->video_id = $video->id;
-            $lesson->save();
-
+            if ($request->hasFile('video')) {
+                $videoPath = $request->file('video')->store('videos', 'public');
+                $video = new Video();
+                $video->video = Storage::url($videoPath);
+                $video->name = $request->video_name;
+                $video->lesson_id = $lesson->id;
+                $video->save();
+    
+                $lesson->video_id = $video->id;
+                $lesson->save();
+            }
+    
+            $lesson->load('videos');
             return response()->json([
                 'message' => 'Lesson created successfully',
                 'data' => $lesson,
@@ -61,16 +57,14 @@ class LessonController extends Controller
             ]);
         } else {
             Storage::delete($imagePath);
-            Storage::delete($videoPath);
-
+    
             return response()->json([
                 'message' => 'Lesson creation failed',
                 'status' => 400,
             ]);
         }
     }
-
-    public function update_lesson(Request $request)
+        public function update_lesson(Request $request)
     {
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id|numeric',

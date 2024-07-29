@@ -90,6 +90,8 @@ class UnitsController extends Controller
         'file_id' => $request->file_id,
         'subject_id' => $request->subject_id,
     ]);
+
+    $unit->load('lessons');
         $message = "add unit successfully";
         return response()->json(
             [
