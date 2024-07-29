@@ -247,7 +247,7 @@ Route::group(['prefix' => 'profile'], function () {
 
 Route::prefix('lessons')->group(function () {
     Route::controller(LessonController::class)->group(function () {
-        Route::middleware(['auth:sanctum', ])->group(function () {            Route::post('/add', 'add_lesson');
+        Route::middleware(['auth:sanctum', 'checkIfTeacher'])->group(function () {            Route::post('/add', 'add_lesson');
             Route::post('/update', 'update_lesson');
             Route::post('/delete', 'delete_lesson');
         });

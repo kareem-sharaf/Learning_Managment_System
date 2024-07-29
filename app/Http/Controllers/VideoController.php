@@ -27,10 +27,13 @@ class VideoController extends Controller
             'ads_id' => 'nullable|integer|exists:a_d_s,id'
         ]);
 
-        $count = collect([$validatedData['subject_id'], $validatedData['unit_id'], $validatedData['lesson_id'], $validatedData['ads_id']])
-            ->filter()
-            ->count();
-
+        $count = collect([
+            array_key_exists('subject_id', $validatedData) ? $validatedData['subject_id'] : null,
+            array_key_exists('unit_id', $validatedData) ? $validatedData['unit_id'] : null,
+            array_key_exists('lesson_id', $validatedData) ? $validatedData['lesson_id'] : null,
+            array_key_exists('ads_id', $validatedData) ? $validatedData['ads_id'] : null,
+        ])->filter()->count();
+        
         if ($count > 1) {
             return response()->json(['error' => 'Only one of subject_id, unit_id, lesson_id, or ads_id must be selected'], 422);
         }
