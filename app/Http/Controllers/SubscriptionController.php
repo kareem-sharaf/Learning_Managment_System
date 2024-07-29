@@ -26,20 +26,34 @@ class SubscriptionController extends Controller
 {
     //************************************************************************************************* */
     // whene the student add request.
-    public function buy_subject(Request $request)
-    {
+    public function buy_subject(Request $request){
         $user = Auth::user();
-        $user_id = $user->id;
-        $subject_id = $request->query('subject_id');
+        $user_id = Auth::id();
 
+        $subject_id = $request->subject_id;
         $subject = Subject::find($subject_id);
-        $teacher_id = TeacherSubjectYear::where('subject_id', $subject_id)->first();
-        $user_id = $teacher_id->user_id;
-        if($subject && $teacher_id){
-            $user->subjects2()->attach($subject->id, ['status' => 'attended', 'teacher_id' =>$user_id]);
-            $message = "The request added successfully.";
+        $teacher_subject = TeacherSubjectYear::where('subject_id', $subject_id)->first();
+        $teacher_id = $teacher_subject->user_id;
+        if ($subject && $teacher_id) {
+            // Check if the record already exists
+            $exists = $user->subjects2()->wherePivot('subject_id', $subject_id)
+                                        ->wherePivot('teacher_id', $teacher_id)
+                                        ->exists();
+
+            if (!$exists) {
+                $user->subjects2()->attach($subject_id, [
+                    'status' => 'attended',
+                    'teacher_id' => $teacher_id,
+                    'user_id' => $user_id,
+                    'subject_id' => $subject_id,
+                ]);
+                $message = "The request added successfully.";
+            } else {
+                $message = "The record already exists.";
+            }
+
             return response()->json([
-                 'message' => $message,
+                'message' => $message,
             ]);
         }
     }
@@ -186,6 +200,7 @@ class SubscriptionController extends Controller
             'subscription_id' => 'required',
             'status' => 'required',
         ]);
+        
         $subscription_id = $request->subscription_id;
         $status = $request->status;
 

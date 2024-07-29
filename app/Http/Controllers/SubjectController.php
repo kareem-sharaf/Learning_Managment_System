@@ -396,22 +396,30 @@ public function search_in_subjects(Request $request)
 
 
     //***********************************************************************************************************************\\
- public function delete_subject($subject_id)
+ public function delete_subject(Request $request )
     {
-        $user = Auth::user();
+        $user_id = Auth::id();
+        $subject_id = $request->subject_id;
         $subject = Subject::find($subject_id);
+        $teacher_subject=TeacherSubjectYear::where('user_id',$user_id)
+        ->where('subject_id',$subject_id)->first();
+
+
         if (!$subject) {
             $message = "The subject doesn't exist.";
             return response()->json([
                 'message' => $message,
             ]);
         }
+        if($teacher_subject){
+
         if ($subject->image_url) {
             $oldImagePath = str_replace('/storage', 'public', $subject->image_url);
             if (Storage::exists($oldImagePath)) {
                 Storage::delete($oldImagePath);
             }
         }
+
         $subject->years_users()->detach();
         $subject->delete();
 
@@ -419,6 +427,12 @@ public function search_in_subjects(Request $request)
         return response()->json([
             'message' => $message,
         ]);
+    }else{
+        $message = "You can't delete the subject.";
+        return response()->json([
+            'message' => $message,
+        ]);
+    }
 
     }
 
