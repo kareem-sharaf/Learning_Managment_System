@@ -31,7 +31,6 @@ class Lesson extends Model
     {
         return $this->hasMany(Video::class);
     }
-    
     public function quizzes()
     {
         return $this->morphMany(Quiz::class, 'quizable');

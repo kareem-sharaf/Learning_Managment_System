@@ -16,8 +16,7 @@ class CreateQuizzesTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('duration');
-            $table->integer('total_mark');
-            $table->integer('success_mark');
+            $table->integer('total_mark');            $table->integer('success_mark');
             $table->boolean('public');
             $table->morphs('type');
             $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');

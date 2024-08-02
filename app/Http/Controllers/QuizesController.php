@@ -69,99 +69,117 @@ class QuizesController extends Controller
     }
         /************************************************************************ */
 
-    public function add_quiz(Request $request)
-    {
-    $user = Auth::user();
+        public function add_quiz(Request $request)
+        {
+            $user_id = Auth::id();
 
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'duration' => 'required|integer',
-        'total_mark' => 'required|integer',
-        'success_mark' => 'required|integer',
-        'public' => 'required|boolean',
-        'type_id' => 'required|integer',
-        'type_type' => 'required|string',
-        'questions' => 'required|array',
-        'questions.*.text' => 'required|string',
-        'questions.*.mark' => 'required|integer',
-        'questions.*.answers' => 'required|array',
-        'questions.*.correct_answer' => 'required|string',
-    ]);
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'duration' => 'required|integer',
+                'success_mark' => 'required|integer',
+                'public' => 'required|boolean',
+                'type_id' => 'required|integer',
+                'type_type' => 'required|string',
+                'questions' => 'required|array',
+                'questions.*.text' => 'required|string',
+                'questions.*.mark' => 'required|integer',
+                'questions.*.answers' => 'required|array',
+                'questions.*.correct_answer' => 'required|string',
+            ]);
 
-    $quiz = new Quiz();
-    $quiz->name = $validated['name'];
-    $quiz->duration = $validated['duration'];
-    $quiz->total_mark = $validated['total_mark'];
-    $quiz->success_mark = $validated['success_mark'];
-    $quiz->public = $validated['public'];
-    $quiz->type_id = $validated['type_id'];
-    $quiz->type_type = $validated['type_type'];
-    $quiz->teacher_id = $user->id;
-    $quiz->save();
+            $totalMark = 0;
+            if($request->type_type == 'subject'){
+                $subject_id=$request->type_id;
+                $TeacherSubject= TeacherSubjectYear::where('user_id',$user_id)->
+                                                     where('subject_id',$subject_id)->first();
+            }
+            foreach ($validated['questions'] as $questionData) {
+                $totalMark += $questionData['mark'];
+            }
 
-    foreach ($validated['questions'] as $questionData) {
-        $question = new Question();
-        $question->text = $questionData['text'];
-        $question->mark = $questionData['mark'];
-        $question->answers = json_encode($questionData['answers']);
-        $question->correct_answer = $questionData['correct_answer'];
-        $question->quiz_id = $quiz->id;
-        $question->save();
-    }
+            $quiz = new Quiz();
+            $quiz->name = $validated['name'];
+            $quiz->duration = $validated['duration'];
+            $quiz->total_mark = $totalMark;
+            $quiz->success_mark = $validated['success_mark'];
+            $quiz->public = $validated['public'];
+            $quiz->type_id = $validated['type_id'];
+            $quiz->type_type = $validated['type_type'];
+            $quiz->teacher_id = $user->id;
+            $quiz->save();
 
-    return response()->json(['message' => 'Quiz created successfully', 'quiz' => $quiz], 201);
-    }
+            foreach ($validated['questions'] as $questionData) {
+                $question = new Question();
+                $question->text = $questionData['text'];
+                $question->mark = $questionData['mark'];
+                $question->answers = json_encode($questionData['answers']);
+                $question->correct_answer = $questionData['correct_answer'];
+                $question->quiz_id = $quiz->id;
+                $question->save();
+            }
+
+            return response()->json([
+                'message' => 'Quiz created successfully', 'quiz' => $quiz], 201);
+        }
+
         /************************************************************************ */
 
-    public function edit_quiz(Request $request)
-    {
-    $user_id = Auth::id();
+        public function edit_quiz(Request $request)
+        {
+            $user_id = Auth::id();
 
-    $request->validate([
-        'quiz_id' => 'required|integer',
-        'name' => 'required|string|max:255',
-        'duration' => 'required|integer',
-        'total_mark' => 'required|integer',
-        'success_mark' => 'required|integer',
-        'public' => 'required|boolean',
-        'type_id' => 'required|integer',
-        'type_type' => 'required|string',
-        'questions' => 'required|array',
-        'questions.*.id' => 'sometimes|integer|exists:questions,id',
-        'questions.*.text' => 'required|string',
-        'questions.*.mark' => 'required|integer',
-        'questions.*.answers' => 'required|array',
-        'questions.*.correct_answer' => 'required|string',
-    ]);
+            $validated = $request->validate([
+                'quiz_id' => 'required|integer',
+                'name' => 'required|string|max:255',
+                'duration' => 'required|integer',
+                'success_mark' => 'required|integer',
+                'public' => 'required|boolean',
+                'type_id' => 'required|integer',
+                'type_type' => 'required|string',
+                'questions' => 'required|array',
+                'questions.*.id' => 'sometimes|integer|exists:questions,id',
+                'questions.*.text' => 'required|string',
+                'questions.*.mark' => 'required|integer',
+                'questions.*.answers' => 'required|array',
+                'questions.*.correct_answer' => 'required|string',
+            ]);
 
-    $quiz = Quiz::where('id', $request->quiz_id)->where('teacher_id', $user_id)->first();
+            $quiz = Quiz::where('id', $validated['quiz_id'])->where('teacher_id', $user_id)->first();
 
-    if (!$quiz) {
-        return response()->json(['error' => 'Quiz not found or you are not the teacher'], 404);
-    }
-    $quiz->name = $request->name;
-    $quiz->duration = $request->duration;
-    $quiz->total_mark = $request->total_mark;
-    $quiz->success_mark = $request->success_mark;
-    $quiz->public = $request->public;
-    $quiz->type_id = $request->type_id;
-    $quiz->type_type = $request->type_type;
-    $quiz->save();
+            if (!$quiz) {
+                return response()->json(['error' => 'Quiz not found or you are not the teacher'], 404);
+            }
 
-    $quiz->questions()->delete();
+            $quiz->name = $validated['name'];
+            $quiz->duration = $validated['duration'];
+            $quiz->success_mark = $validated['success_mark'];
+            $quiz->public = $validated['public'];
+            $quiz->type_id = $validated['type_id'];
+            $quiz->type_type = $validated['type_type'];
 
-    foreach ($request->questions as $questionData) {
-        $question = Question::create([
-            'text' => $questionData['text'],
-            'mark' => $questionData['mark'],
-            'answers' => json_encode($questionData['answers']),
-            'correct_answer' => $questionData['correct_answer'],
-            'quiz_id' => $quiz->id,
-        ]);
-    }
+            $totalMark = 0;
+            foreach ($validated['questions'] as $questionData) {
+                $totalMark += $questionData['mark'];
+            }
+            $quiz->total_mark = $totalMark;
 
-    return response()->json(['success' => 'Quiz and questions updated successfully'], 200);
-    }
+            $quiz->save();
+
+            $quiz->questions()->delete();
+
+            foreach ($validated['questions'] as $questionData) {
+                $question = new Question();
+                $question->text = $questionData['text'];
+                $question->mark = $questionData['mark'];
+                $question->answers = json_encode($questionData['answers']);
+                $question->correct_answer = $questionData['correct_answer'];
+                $question->quiz_id = $quiz->id;
+                $question->save();
+            }
+
+            return response()->json(['success' => 'Quiz and questions updated successfully'], 200);
+        }
+
         /************************************************************************ */
 
     public function delete_quiz($quiz_id)

@@ -32,7 +32,8 @@ class User extends Authenticatable
         'role_id',
         'stage_id',
         'year_id',
-        'image_id'
+        'image_id',
+        'balance'
     ];
 
     public $timestamps = false;

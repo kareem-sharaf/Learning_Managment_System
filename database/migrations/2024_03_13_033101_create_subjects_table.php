@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('price')->default(0);
             $table->unsignedBigInteger('category_id')->references('id')->on('categories')->cascadeOnDelete();
             $table->string('image_url')->nullable();
-            $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
+            $table->foreignId('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
             $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
         });
     }

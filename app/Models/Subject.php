@@ -42,8 +42,8 @@ class Subject extends Model
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
                     ->withPivot('year_id');
     }
-
-
-
-
+    public function videos()
+    {
+        return $this->hasMany(Video::class);
+    }
 }
