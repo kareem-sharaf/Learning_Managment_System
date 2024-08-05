@@ -28,14 +28,54 @@ class UnitsController extends Controller
     //******************************************************************************************* */
     public function show_all_units(Request $request)
     {
-        $subject_id = $request->query('subject_id');
+        $user=Auth::user();
+        $user_id=$user->id;
+        $role_id=$user->role_id;
+
+        $subject_id = $request->subject_id;
+
         $input= $request->all();
         $unit = Unit::where('subject_id', $subject_id)->with('lessons','lessons.videos','files','lessons.files','videos')->get();
+        // $subject_id = $unit->subject_id;
+        if($role_id==4 ){
+        $isSubscription = Subscription::where('user_id',$user_id)
+                                        ->where('subject_id',$subject_id)
+                                        ->first();
+        if($isSubscription){
+            $Subscriped=true;
+        }else{
+            $Subscriped=false;
+        }
+
+        $message = "this is the all units";
+        return response()->json([
+            'isSubscription' => $Subscriped,
+            'message' => $message,
+            'data' => $unit
+        ]);
+    }elseif($role_id == 3){
+        $Owner = TeacherSubjectYear::where('user_id',$user_id)
+                                        ->where('subject_id',$subject_id)
+                                        ->first();
+        if($Owner){
+            $isOwner=true;
+        }else{
+            $isOwner=false;
+        }
+        $message = "this is the all units";
+        return response()->json([
+            'isOwner' => $isOwner,
+            'message' => $message,
+            'data' => $unit
+        ]);
+    }else{
+        $unit = Unit::where('subject_id', $subject_id)->get();
         $message = "this is the all units";
         return response()->json([
             'message' => $message,
-            'data' => $unit,
+            'data' => $unit
         ]);
+    }
     }
 
 

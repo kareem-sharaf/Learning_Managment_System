@@ -321,10 +321,6 @@ public function add_subject(Request $request)
 
     return response()->json(['message' => 'Failed to add subject.'], 500);
 }
-
-
-
-
     //***********************************************************************************************************************\\
     public function edit_subject(Request $request)
 {

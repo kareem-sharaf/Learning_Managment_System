@@ -175,19 +175,18 @@ Route::group(['prefix' => 'subject'], function () {
 //  quiz routes
 Route::group(['prefix' => 'quiz'], function () {
     Route::controller(QuizesController::class)->group(function () {
-        Route::post('show_all', 'show_all');
-        Route::middleware('auth:sanctum')->group(function () {
-            Route::group(['middleware'], function () {
-                Route::post('show_to_all', 'show_to_all');
-            });
-        });
         Route::middleware('auth:sanctum')->group(function () {
             Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
-                Route::get('show_one_to_teacher', 'show_one_to_teacher');
                 Route::post('add_quiz', 'add_quiz');
                 Route::post('edit_quiz', 'edit_quiz');
-                Route::get('delete_quiz/{quiz_id}', 'delete_quiz');
+                Route::post('delete_quiz', 'delete_quiz');
+                Route::post('show_all_to_teacher', 'show_all_to_teacher');
             });
+        });
+            Route::middleware('auth:sanctum','checkIfStudent')->group(function () {
+                Route::post('show_all_to_student', 'show_all_to_student');
+                Route::post('take_quiz', 'take_quiz');
+
         });
     });
 });
@@ -214,7 +213,6 @@ Route::group(['prefix' => 'subscription'], function () {
 
 Route::group(['prefix' => 'unit'], function () {
     Route::controller(UnitsController::class)->group(function () {
-        Route::get('show_all_units', 'show_all_units');
         Route::post('search_to_unit', 'search_to_unit');
 
         Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -222,6 +220,11 @@ Route::group(['prefix' => 'unit'], function () {
             Route::post('edit_unit', 'edit_unit');
             Route::post('delete_unit', 'delete_unit');
         });
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::group(['middleware'] , function(){
+                Route::post('show_all_units', 'show_all_units');
+               });
+            });
     });
 });
 
