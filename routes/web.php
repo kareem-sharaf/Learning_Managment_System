@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\DemoController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
+
+
+// //Route::get('/', 'App\Http\Controllers\DemoController@index1');
+// Route::get('/edit', 'App\Http\Controllers\DemoController@edit');
+// Route::post('/upload-video', [DemoController::class, 'uploadVideo'])->name('upload.video');
+
+Route::post('/upload1', [DemoController::class, 'upload']);

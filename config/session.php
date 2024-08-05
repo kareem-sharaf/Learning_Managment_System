@@ -4,6 +4,10 @@ use Illuminate\Support\Str;
 
 return [
 
+
+    'driver' => env('SESSION_DRIVER', 'file'),
+    'cookie' => env('SESSION_COOKIE', 'laravel_session'),
+    'domain' => env('SESSION_DOMAIN', null),
     /*
     |--------------------------------------------------------------------------
     | Default Session Driver

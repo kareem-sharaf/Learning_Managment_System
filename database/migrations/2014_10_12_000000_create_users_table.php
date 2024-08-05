@@ -27,6 +27,7 @@ return new class extends Migration
             $table->foreignId('stage_id')->nullable()->constrained('stages')->cascadeOnDelete();
             $table->foreignId('year_id')->nullable()->constrained('years')->cascadeOnDelete();
             $table->integer('points')->default(0);
+            $table->string('fcm')->nullable();
             $table->rememberToken();
             // $table->timestamps();
         });

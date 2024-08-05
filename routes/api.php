@@ -22,6 +22,7 @@ use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FilesController;
 use App\Http\Controllers\QuizesController;
+use App\Http\Controllers\DemoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,9 +56,11 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');
 
-
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
+
+            Route::post('updateFcmToken','updateFcmToken');
+
         });
     });
     Route::controller(UserVerificationController::class)->group(function () {
@@ -301,6 +304,18 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/destroy', 'destroy');
         });
     });
+});
+
+// Route::post('/upload1', [DemoController::class, 'upload']);
+Route::middleware('auth:sanctum')->group(function () {
+Route::get('/auth', [DemoController::class, 'authenticate'])->name('youtube.auth');
+Route::get('/auth/callback', [DemoController::class, 'callback'])->name('youtube.callback');
+Route::post('/upload', [DemoController::class, 'upload'])->name('upload.video');
+Route::post('/update', [DemoController::class, 'update'])->name('update.video');
+Route::post('/destroy', [DemoController::class, 'destroy'])->name('destroy.video');
+
+
+
 });
 
 

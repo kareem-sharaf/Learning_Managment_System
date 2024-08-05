@@ -79,7 +79,7 @@ class FilesController extends Controller
             ]);
 
             $count = collect([$validatedData['subject_id'], $validatedData['unit_id'], $validatedData['lesson_id']])
-                ->filter()
+      ->filter()
                 ->count();
 
             if ($count > 1) {

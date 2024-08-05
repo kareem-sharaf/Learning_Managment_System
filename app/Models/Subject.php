@@ -43,6 +43,10 @@ class Subject extends Model
                     ->withPivot('year_id');
     }
 
+    public function youtubeVideos()
+    {
+        return $this->hasMany(YouTube1::class);
+    }
 
 
 

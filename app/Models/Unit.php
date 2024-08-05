@@ -43,4 +43,8 @@ class Unit extends Model
     {
         return $this->morphMany(Bookmark::class, 'bookmarkable');
     }
+    public function youtubeVideos()
+    {
+        return $this->hasMany(YouTube1::class);
+    }
 }

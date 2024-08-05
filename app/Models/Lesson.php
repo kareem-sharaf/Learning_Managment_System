@@ -15,7 +15,7 @@ class Lesson extends Model
        'image'
        ,'price'
     ];
-    
+
     public function unit()
     {
         return $this->belongsTo(Unit::class);
@@ -37,5 +37,9 @@ class Lesson extends Model
     public function bookmarks()
     {
         return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
+    public function youtubeVideos()
+    {
+        return $this->hasMany(YouTube1::class);
     }
 }

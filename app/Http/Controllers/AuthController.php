@@ -17,6 +17,11 @@ use App\Mail\EmailVerification;
 
 class AuthController extends Controller
 {
+    public function updateFcmToken(Request $request){
+        Auth::user()->update(['fcm'=>$request->fcm]);
+
+        return response()->json(['message'=>'Updated Successfully']);
+    }
     public function registerWeb(Request $request)
     {
         $UserVerification = UserVerification::find($request->user_id);

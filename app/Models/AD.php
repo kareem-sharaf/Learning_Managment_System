@@ -21,4 +21,8 @@ class AD extends Model
 {
     return $this->hasMany(Video::class);
 }
+public function youtubeVideos()
+    {
+        return $this->hasMany(YouTube1::class);
+    }
 }
