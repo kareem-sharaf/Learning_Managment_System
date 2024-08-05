@@ -20,7 +20,8 @@ class LessonsSeeder extends Seeder
             'price' => '2',
             'description' => '2',
             'image' => '2',
-            
+            'teacher_id' => '3'
+
         ]);
         Lesson::create([
             'id' => '2',
@@ -29,7 +30,8 @@ class LessonsSeeder extends Seeder
             'price' => '2',
             'description' => '2',
             'image' => '2',
-            
+            'teacher_id' => '3'
+
         ]);
     }
 }

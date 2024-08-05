@@ -26,20 +26,42 @@ class SubscriptionController extends Controller
 {
     //************************************************************************************************* */
     // whene the student add request.
-    public function buy_subject(Request $request)
-    {
+    public function buy_subject(Request $request){
         $user = Auth::user();
         $user_id = $user->id;
-        $subject_id = $request->query('subject_id');
 
+        $subject_id = $request->subject_id;
         $subject = Subject::find($subject_id);
-        $teacher_id = TeacherSubjectYear::where('subject_id', $subject_id)->first();
-        $user_id = $teacher_id->user_id;
-        if($subject && $teacher_id){
-            $user->subjects2()->attach($subject->id, ['status' => 'attended', 'teacher_id' =>$user_id]);
-            $message = "The request added successfully.";
+        $teacher_subject = TeacherSubjectYear::where('subject_id', $subject_id)->first();
+        $teacher_id = $teacher_subject->user_id;
+        $SubjectPrice = $subject->price;
+        $StudentBalance = $user->balance;
+        if ($subject && $teacher_id) {
+            // Check if the record already exists
+            $exists = $user->subjects2()->wherePivot('subject_id', $subject_id)
+                                        ->wherePivot('teacher_id', $teacher_id)
+                                        ->exists();
+
+            if (!$exists) {
+                if($StudentBalance>=$SubjectPrice){
+                $user->subjects2()->attach($subject_id, [
+                    'status' => 'done',
+                    'teacher_id' => $teacher_id,
+                    'user_id' => $user_id,
+                    'subject_id' => $subject_id,
+                ]);
+                $user->balance = $StudentBalance - $SubjectPrice ;
+                $user->save();
+                $message = "The request added successfully.";
+            }else{
+                $message = "not enough balance .";
+            }
+            } else {
+                $message = "The record already exists.";
+            }
+
             return response()->json([
-                 'message' => $message,
+                'message' => $message,
             ]);
         }
     }
@@ -48,10 +70,8 @@ class SubscriptionController extends Controller
     {
         $user = Auth::user();
         $user_id = $user->id;
-        $subscriptions = Subscription::where('teacher_id', $user_id)->where('status','attended')->get();
-        $DoneSubscriptions = Subscription::where('teacher_id', $user_id)->where('status','done')->get();
+        $subscriptions = Subscription::where('teacher_id', $user_id)->get();
         $subscriptionsWithData = [];
-        $DonesubscriptionsWithData = [];
 
         foreach ($subscriptions as $subscription) {
             $subject = Subject::find($subscription->subject_id);
@@ -65,22 +85,10 @@ class SubscriptionController extends Controller
 
             $subscriptionsWithData[] = $subscriptionData;
         }
-        foreach ($DoneSubscriptions as $DoneSubscription) {
-                    $subject = Subject::find($DoneSubscription->subject_id);
-                    $user = User::find($DoneSubscription->user_id);
 
-                    $DoneSubscription = [
-                        'subscription' => $DoneSubscription,
-                        'subject' => $subject,
-                        'user' => $user
-                    ];
-
-                    $DonesubscriptionsWithData[] = $DoneSubscription;
-                }
         return [
             'message' => "This is the all requests.",
-            'Attended Subscriptions' => $subscriptionsWithData,
-            'Done Subscriptions' => $DonesubscriptionsWithData
+            'Subscriptions' => $subscriptionsWithData,
         ];
 
     }
@@ -89,10 +97,8 @@ class SubscriptionController extends Controller
     {
         $user = Auth::user();
         $user_id = $user->id;
-        $subscriptions = Subscription::where('user_id', $user_id)->where('status','attended')->get();
-        $DoneSubscriptions = Subscription::where('user_id', $user_id)->where('status','done')->get();
+        $subscriptions = Subscription::where('user_id', $user_id)->get();
         $subscriptionsWithData = [];
-        $DonesubscriptionsWithData = [];
 
         foreach ($subscriptions as $subscription) {
             $subject = Subject::find($subscription->subject_id);
@@ -106,115 +112,12 @@ class SubscriptionController extends Controller
 
             $subscriptionsWithData[] = $subscriptionData;
         }
-        foreach ($DoneSubscriptions as $DoneSubscription) {
-                    $subject = Subject::find($DoneSubscription->subject_id);
-                    $user = User::find($DoneSubscription->user_id);
 
-                    $DoneSubscription = [
-                        'subscription' => $DoneSubscription,
-                        'subject' => $subject,
-                        'user' => $user
-                    ];
-
-                    $DonesubscriptionsWithData[] = $DoneSubscription;
-                }
         return [
             'message' => "This is the all requests.",
-            'Attended Subscriptions' => $subscriptionsWithData,
-            'Done Subscriptions' => $DonesubscriptionsWithData
+            'Subscriptions' => $subscriptionsWithData,
         ];
 
     }
     //***********************************************************************************************************************\\
-
-    public function show_one_request_for_teacher(Request $request)
-    {
-        $user = Auth::user();
-        $user_id = $user->id;
-        $subscription_id = $request->query('subscription_id');
-        $subscription = Subscription::where('id',$subscription_id)->where('teacher_id', $user_id)->first();
-
-        $subscriptionsWithData = [];
-
-            $subject = Subject::find($subscription->subject_id);
-            $user = User::find($subscription->user_id);
-
-            $subscriptionData = [
-                'subscription' => $subscription,
-                'subject' => $subject,
-                'user' => $user
-            ];
-
-            $subscriptionsWithData[] = $subscriptionData;
-        return [
-            'message' => "This is the all requests.",
-            'Subscription' => $subscriptionData,
-        ];
-    }
-    //********************************************************************************************************************* */
-    public function show_one_request_for_student(Request $request)
-    {
-        $user = Auth::user();
-        $user_id = $user->id;
-        $subscription_id = $request->query('subscription_id');
-        $subscription = Subscription::where('id',$subscription_id)->where('user_id', $user_id)->first();
-
-        $subscriptionsWithData = [];
-
-            $subject = Subject::find($subscription->subject_id);
-            $user = User::find($subscription->teacher_id);
-
-            $subscriptionData = [
-                'subscription' => $subscription,
-                'subject' => $subject,
-                'user' => $user
-            ];
-
-            $subscriptionsWithData[] = $subscriptionData;
-        return [
-            'message' => "This is the all requests.",
-            'Subscription' => $subscriptionData,
-        ];
-    }
-    //********************************************************************************************************************* */
-    public function edit_request(Request $request)
-    {
-        $user = Auth::user();
-        $user_id = $user->id;
-
-        $request->validate([
-            'subscription_id' => 'required',
-            'status' => 'required',
-        ]);
-        $subscription_id = $request->subscription_id;
-        $status = $request->status;
-
-        $subscription = Subscription::find($subscription_id);
-
-        $subscription->status = $status;
-        $subscription->save();
-
-        return response()->json([
-            'message' => 'Request updated successfully',
-            'data' => $subscription,
-        ]);
-    }
-    //********************************************************************************************************* */
-    public function delete_request(Request $request)
-    {
-        $user = Auth::user();
-        $user_id = $user->id;
-        $subscription_id = $request->query('subscription_id');
-
-
-        $subscription = Subscription::find($subscription_id);
-
-        $subscription->delete();
-
-        return response()->json([
-            'message' => 'Request deleted successfully',
-            'data' => $subscription,
-        ]);
-    }
-    //********************************************************************************************************* */
-}
+ }

@@ -33,7 +33,11 @@ class User extends Authenticatable
         'stage_id',
         'year_id',
         'image_id',
+<<<<<<< HEAD
         'fcm'
+=======
+        'balance'
+>>>>>>> d3a832360c4e6969fe6ef18cb3fc577a21b64d9d
     ];
 
     public $timestamps = false;

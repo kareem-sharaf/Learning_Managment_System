@@ -21,6 +21,8 @@ class ProfileController extends Controller
     public function show_all_teachers()
     {
         $teacher = User::where('role_id','3')->get();
+        $teacher_id = $teacher->id;
+        
         $message = "this is the all teachers.";
         return response()->json([
             'message' => $message,

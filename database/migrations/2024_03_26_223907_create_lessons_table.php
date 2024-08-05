@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->unsignedBigInteger('unit_id')->constrained('units')->cascadeOnDelete();
+            $table->foreignId('teacher_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreignId('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
             $table->integer('price');
             $table->text('description');
            $table->string('image')->nullable();
