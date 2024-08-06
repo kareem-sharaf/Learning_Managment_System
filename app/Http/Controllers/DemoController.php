@@ -159,12 +159,9 @@ class DemoController extends Controller
         $videoId = $status['id'];
         $videoUrl = 'https://www.youtube.com/watch?v=' . $videoId;
 
-        try {
-            // Use a transaction to ensure atomicity
-            DB::beginTransaction();
 
             // Insert into the youtube1 table
-            DB::table('youtube1')->insert([
+          $jp=  DB::table('you_tube1s')->insert([
                 'title' => $videoTitle,
                 'description' => $videoDescription,
                 'tags' => $request->input('tags'),
@@ -175,38 +172,45 @@ class DemoController extends Controller
                 'lesson_id' => $validatedData['lesson_id'],
                 'ads_id' => $validatedData['ads_id'],
             ]);
+if ($jp){
 
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Failed to save video information.'], 500);
+    return response()->json([
+        'status' => 'success',
+        'videoId' => $videoId,
+        'title' => $status['snippet']['title'],
+        'videoUrl' => $videoUrl
+    ]);
+}
+else{
+    return response()->json([
+'status'=>'false',
+'code'=>500,
+    ]);
+}
         }
 
-        return response()->json([
-            'status' => 'success',
-            'videoId' => $videoId,
-            'title' => $status['snippet']['title'],
-            'videoUrl' => $videoUrl
-        ]);}
     }
-    public function update(Request $request)
-    {
-        $sender = Auth::user();
-        $sender_role_id= $sender->role_id;
-        $validatedData = $request->validate([
-            'video_id' => 'required|string',
-            'tags'=>'required',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'subject_id' => 'nullable|integer|exists:subjects,id',
-            'unit_id' => 'nullable|integer|exists:units,id',
-            'lesson_id' => 'nullable|integer|exists:lessons,id',
-            'ads_id' => 'nullable|integer|exists:ads,id',
-        ]);
 
-        $accessToken = $request->input('access');
-        $refreshToken = $request->input('refresh');
-        if (($sender_role_id == '2' || $sender_role_id == '3'||$sender_role_id == '1') ) {
+    public function update(Request $request)
+{
+    $sender = Auth::user();
+    $sender_role_id = $sender->role_id;
+
+    $validatedData = $request->validate([
+        'video_id' => 'required|string',
+        'tags' => 'nullable',
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'subject_id' => 'nullable|integer|exists:subjects,id',
+        'unit_id' => 'nullable|integer|exists:units,id',
+        'lesson_id' => 'nullable|integer|exists:lessons,id',
+        'ads_id' => 'nullable|integer|exists:ads,id',
+    ]);
+
+    $accessToken = $request->input('access');
+    $refreshToken = $request->input('refresh');
+
+    if (in_array($sender_role_id, [1, 2, 3])) {
         $client = new Client();
         $client->setAuthConfig(base_path('youtube.json'));
         $client->setAccessType('offline');
@@ -230,14 +234,14 @@ class DemoController extends Controller
         $snippet->setTitle($validatedData['title']);
         $snippet->setDescription($validatedData['description']);
 
-        $updateRequest = $service->videos->update('snippet', $video);
-        $updateRequest->setSnippet($snippet);
-        $response = $updateRequest->execute();
+        $video->setSnippet($snippet);
+
+        $response = $service->videos->update('snippet', $video);
 
         // Update the record in your database
         DB::table('youtube1')->where('video_id', $validatedData['video_id'])->update([
             'title' => $validatedData['title'],
-            'tags'=>$validatedData['tags'],
+            'tags' => $validatedData['tags'],
             'description' => $validatedData['description'],
             'subject_id' => $validatedData['subject_id'],
             'unit_id' => $validatedData['unit_id'],
@@ -246,19 +250,24 @@ class DemoController extends Controller
         ]);
 
         return response()->json(['status' => 'success', 'videoId' => $validatedData['video_id']]);
-    }}
+    } else {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+}
 
-    public function delete(Request $request)
-    {
-        $sender = Auth::user();
-        $sender_role_id= $sender->role_id;
-        $validatedData = $request->validate([
-            'video_id' => 'required|string',
-        ]);
+public function delete(Request $request)
+{
+    $sender = Auth::user();
+    $sender_role_id = $sender->role_id;
 
-        $accessToken = $request->input('access');
-        $refreshToken = $request->input('refresh');
-        if (($sender_role_id == '2' || $sender_role_id == '3'||$sender_role_id == '1') ) {
+    $validatedData = $request->validate([
+        'video_id' => 'required|string',
+    ]);
+
+    $accessToken = $request->input('access');
+    $refreshToken = $request->input('refresh');
+
+    if (in_array($sender_role_id, [1, 2, 3])) {
         $client = new Client();
         $client->setAuthConfig(base_path('youtube.json'));
         $client->setAccessType('offline');
@@ -277,15 +286,17 @@ class DemoController extends Controller
         }
 
         $service = new YouTube($client);
-        $deleteRequest = $service->videos->delete(['id' => $validatedData['video_id']]);
-        $response = $deleteRequest->execute();
+        $service->videos->delete($validatedData['video_id']);
 
         // Delete the record in your database
-        DB::table('youtube1')->where('video_id', $validatedData['video_id'])->delete();
+        DB::table('you_tube1s')->where('video_id', $validatedData['video_id'])->delete();
 
         return response()->json(['status' => 'success', 'videoId' => $validatedData['video_id']]);
+    } else {
+        return response()->json(['error' => 'Unauthorized'], 403);
     }
-    }
+}
+
 
 
     // public function index()

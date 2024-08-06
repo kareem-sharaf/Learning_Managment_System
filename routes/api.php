@@ -302,13 +302,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-// Route::post('/upload1', [DemoController::class, 'upload']);
-Route::middleware('auth:sanctum')->group(function () {
 Route::get('/auth', [DemoController::class, 'authenticate'])->name('youtube.auth');
 Route::get('/auth/callback', [DemoController::class, 'callback'])->name('youtube.callback');
+// Route::post('/upload1', [DemoController::class, 'upload']);
+Route::middleware('auth:sanctum')->group(function () {
+
 Route::post('/upload', [DemoController::class, 'upload'])->name('upload.video');
 Route::post('/update', [DemoController::class, 'update'])->name('update.video');
-Route::post('/destroy', [DemoController::class, 'destroy'])->name('destroy.video');
+Route::post('/delete', [DemoController::class, 'delete'])->name('delete.video');
 
 
 
