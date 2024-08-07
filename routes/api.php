@@ -184,13 +184,16 @@ Route::group(['prefix' => 'quiz'], function () {
                 Route::post('add_quiz', 'add_quiz');
                 Route::post('edit_quiz', 'edit_quiz');
                 Route::post('delete_quiz', 'delete_quiz');
-                Route::post('show_all_to_teacher', 'show_all_to_teacher');
+
             });
         });
             Route::middleware('auth:sanctum','checkIfStudent')->group(function () {
                 Route::post('show_all_to_student', 'show_all_to_student');
                 Route::post('take_quiz', 'take_quiz');
 
+        });
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::post('show_all_to_teacher', 'show_all_to_teacher');
         });
     });
 });
