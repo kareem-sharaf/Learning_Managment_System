@@ -27,149 +27,154 @@ class QuizesController extends Controller
 {
     //show all quizzes to teacher whether it's public or not.
     public function show_all_to_teacher(Request $request)
-    {
-        $user_id = Auth::id();
+{
+    $user_id = Auth::id();
 
-        $validated = $request->validate([
-            'type_id' => 'required|integer',
-            'type' => 'required|string|in:subject,unit,lesson'
-        ]);
+    $validated = $request->validate([
+        'type_id' => 'required|integer',
+        'type' => 'required|string|in:subject,unit,lesson'
+    ]);
 
-        $typeMapping = [
-            'subject' => 'App\Models\Subject',
-            'unit' => 'App\Models\Unit',
-            'lesson' => 'App\Models\Lesson',
-        ];
+    $typeMapping = [
+        'subject' => 'App\Models\Subject',
+        'unit' => 'App\Models\Unit',
+        'lesson' => 'App\Models\Lesson',
+    ];
 
-        $typeType = $typeMapping[$validated['type']] ?? null;
-        $isTeacher = false;
+    $typeType = $typeMapping[$validated['type']] ?? null;
+    $isTeacher = false;
 
-        if (!$typeType) {
-            return response()->json(['error' => 'Invalid type'], 400);
-        }
-
-        $quizzes = Quiz::where('type_id', $validated['type_id'])
-                    ->where('type_type', $typeType)
-                    ->get();
-
-        $response = [];
-            foreach ($quizzes as $quiz) {
-                $questions = Question::where('quiz_id', $quiz->id)->get();
-                if($quiz->teacher_id == $user_id){
-                $response[] = [
-                    'quiz' => $quiz,
-                    'questions' => $questions
-                ];
-            }else {
-                $response[] = [
-                    'quiz' => $quiz
-                ];
-            }
-        }
-
-        return response()->json($response);
+    if (!$typeType) {
+        return response()->json(['error' => 'Invalid type'], 400);
     }
+
+    $quizzes = Quiz::where('type_id', $validated['type_id'])
+                ->where('type_type', $typeType)
+                ->get();
+
+    $response = [];
+    foreach ($quizzes as $quiz) {
+        $questions = Question::where('quiz_id', $quiz->id)->get();
+
+        foreach ($questions as $question) {
+            $question->answers = json_decode($question->answers);
+        }
+
+        if ($quiz->teacher_id == $user_id) {
+            $response[] = [
+                'quiz' => $quiz,
+                'questions' => $questions
+            ];
+        } else {
+            $response[] = [
+                'quiz' => $quiz
+            ];
+        }
+    }
+
+    return response()->json($response);
+}
     /************************************************************************ */
     public function add_quiz(Request $request)
-    {
-        $user_id = Auth::id();
+{
+    $user_id = Auth::id();
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'duration' => 'required|integer',
-            'success_mark' => 'required|integer',
-            'public' => 'required|boolean',
-            'type_type' => 'required|string|in:subject,unit,lesson',
-            'type_id' => 'required|integer',
-            'questions' => 'required|array',
-            'questions.*.text' => 'required|string',
-            'questions.*.mark' => 'required|integer',
-            'questions.*.answers' => 'required|array',
-            'questions.*.correct_answer' => 'required|string',
-        ]);
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'duration' => 'required|integer',
+        'success_mark' => 'required|integer',
+        'public' => 'required|boolean',
+        'type_type' => 'required|string|in:subject,unit,lesson',
+        'type_id' => 'required|integer',
+        'questions' => 'required|array',
+        'questions.*.text' => 'required|string',
+        'questions.*.mark' => 'required|integer',
+        'questions.*.answers' => 'required|array',
+        'questions.*.correct_answer' => 'required|string',
+    ]);
 
-        $typeMapping = [
-            'subject' => 'App\Models\Subject',
-            'unit' => 'App\Models\Unit',
-            'lesson' => 'App\Models\Lesson',
-        ];
+    $typeMapping = [
+        'subject' => 'App\Models\Subject',
+        'unit' => 'App\Models\Unit',
+        'lesson' => 'App\Models\Lesson',
+    ];
 
-        $type = $validated['type_type'];
-        $typeClass = $typeMapping[$type];
+    $type = $validated['type_type'];
+    $typeClass = $typeMapping[$type];
 
-        $totalMark = 0;
-        $isTeacher = false;
+    $totalMark = 0;
+    $isTeacher = false;
 
-        if ($typeClass == 'App\Models\Subject') {
-            $subject = Subject::find($validated['type_id']);
-            if (!$subject) {
-                return response()->json(['message' => 'Subject does not exist.'], 201);
-            }
-            $TeacherSubject = TeacherSubjectYear::where('user_id', $user_id)
-                                                ->where('subject_id', $validated['type_id'])
-                                                ->first();
-            if ($TeacherSubject) {
-                $isTeacher = true;
-            }
-        }elseif ($typeClass == 'App\Models\Unit') {
-            $unit = Unit::find($validated['type_id']);
-            if (!$unit) {
-                return response()->json(['message' => 'Unit does not exist.'], 201);
-            }
-            $subject_id = $unit->subject_id;
-            $TeacherSubject = TeacherSubjectYear::where('user_id', $user_id)
-                                                ->where('subject_id', $subject_id)
-                                                ->first();
-            if ($TeacherSubject) {
-                $isTeacher = true;
-            }
-        }elseif ($typeClass == 'App\Models\Lesson') {
-            $lesson = Lesson::find($validated['type_id']);
-            if (!$lesson) {
-                return response()->json(['message' => 'Lesson does not exist.'], 201);
-            }
-            $unit_id = $lesson->unit_id;
-            $unit = Unit::find($unit_id);
-            $subject_id = $unit->subject_id;
-            $TeacherSubject = TeacherSubjectYear::where('user_id', $user_id)
-                                                ->where('subject_id', $subject_id)
-                                                ->first();
-            if ($TeacherSubject) {
-                $isTeacher = true;
-            }
+    if ($typeClass == 'App\Models\Subject') {
+        $subject = Subject::find($validated['type_id']);
+        if (!$subject) {
+            return response()->json(['message' => 'Subject does not exist.'], 201);
         }
-
-        if ($isTeacher) {
-            foreach ($validated['questions'] as $questionData) {
-                $totalMark += $questionData['mark'];
-            }
-
-            $quiz = new Quiz();
-            $quiz->name = $validated['name'];
-            $quiz->duration = $validated['duration'];
-            $quiz->total_mark = $totalMark;
-            $quiz->success_mark = $validated['success_mark'];
-            $quiz->public = $validated['public'];
-            $quiz->type_id = $validated['type_id'];
-            $quiz->type_type = $typeClass;
-            $quiz->teacher_id = $user_id;
-            $quiz->save();
-
-            foreach ($validated['questions'] as $questionData) {
-                $question = new Question();
-                $question->text = $questionData['text'];
-                $question->mark = $questionData['mark'];
-                $question->answers = json_encode($questionData['answers']);
-                $question->correct_answer = $questionData['correct_answer'];
-                $question->quiz_id = $quiz->id;
-                $question->save();
-            }
-
-            return response()->json(['message' => 'Quiz created successfully', 'quiz' => $quiz], 201);
-        }else {
-            return response()->json(['message' => 'You cannot create quiz here.'], 201);
+        $TeacherSubject = TeacherSubjectYear::where('user_id', $user_id)
+                                            ->where('subject_id', $validated['type_id'])
+                                            ->first();
+        if ($TeacherSubject) {
+            $isTeacher = true;
+        }
+    } elseif ($typeClass == 'App\Models\Unit') {
+        $unit = Unit::find($validated['type_id']);
+        if (!$unit) {
+            return response()->json(['message' => 'Unit does not exist.'], 201);
+        }
+        $subject_id = $unit->subject_id;
+        $TeacherSubject = TeacherSubjectYear::where('user_id', $user_id)
+                                            ->where('subject_id', $subject_id)
+                                            ->first();
+        if ($TeacherSubject) {
+            $isTeacher = true;
+        }
+    } elseif ($typeClass == 'App\Models\Lesson') {
+        $lesson = Lesson::find($validated['type_id']);
+        if (!$lesson) {
+            return response()->json(['message' => 'Lesson does not exist.'], 201);
+        }
+        $unit_id = $lesson->unit_id;
+        $unit = Unit::find($unit_id);
+        $subject_id = $unit->subject_id;
+        $TeacherSubject = TeacherSubjectYear::where('user_id', $user_id)
+                                            ->where('subject_id', $subject_id)
+                                            ->first();
+        if ($TeacherSubject) {
+            $isTeacher = true;
         }
     }
+
+    if ($isTeacher) {
+        foreach ($validated['questions'] as $questionData) {
+            $totalMark += $questionData['mark'];
+        }
+
+        $quiz = new Quiz();
+        $quiz->name = $validated['name'];
+        $quiz->duration = $validated['duration'];
+        $quiz->total_mark = $totalMark;
+        $quiz->success_mark = $validated['success_mark'];
+        $quiz->public = $validated['public'];
+        $quiz->type_id = $validated['type_id'];
+        $quiz->type_type = $typeClass;
+        $quiz->teacher_id = $user_id;
+        $quiz->save();
+
+        foreach ($validated['questions'] as $questionData) {
+            $question = new Question();
+            $question->text = $questionData['text'];
+            $question->mark = $questionData['mark'];
+            $question->answers = json_encode($questionData['answers']); // يتم تحويل الإجابات إلى JSON
+            $question->correct_answer = $questionData['correct_answer'];
+            $question->quiz_id = $quiz->id;
+            $question->save();
+        }
+
+        return response()->json(['message' => 'Quiz created successfully', 'quiz' => $quiz], 201);
+    } else {
+        return response()->json(['message' => 'You cannot create quiz here.'], 201);
+    }
+}
     /************************************************************************ */
     public function edit_quiz(Request $request)
     {
@@ -262,60 +267,73 @@ class QuizesController extends Controller
     }
     /************************************************************************ */
     public function show_all_to_student(Request $request)
-    {
-        $user_id = Auth::id();
+{
+    $user_id = Auth::id();
 
-        $validated = $request->validate([
-            'type_id' => 'required|integer',
-            'type' => 'required|string',
-            'subject_id' => 'required|integer'
-        ]);
+    $validated = $request->validate([
+        'type_id' => 'required|integer',
+        'type' => 'required|string',
+        'subject_id' => 'required|integer'
+    ]);
 
-        $typeMapping = [
-            'subject' => 'App\Models\Subject',
-            'unit' => 'App\Models\Unit',
-            'lesson' => 'App\Models\Lesson',
-        ];
+    $typeMapping = [
+        'subject' => 'App\Models\Subject',
+        'unit' => 'App\Models\Unit',
+        'lesson' => 'App\Models\Lesson',
+    ];
 
-        $typeType = $typeMapping[$validated['type']] ?? null;
+    $typeType = $typeMapping[$validated['type']] ?? null;
 
-        if (!$typeType) {
-            return response()->json(['error' => 'Invalid type'], 400);
-        }
+    if (!$typeType) {
+        return response()->json(['error' => 'Invalid type'], 400);
+    }
 
-        $openQuizzes = Quiz::where('type_id', $validated['type_id'])
-                        ->where('type_type', $typeType)
-                        ->where('public', true)
-                        ->get();
+    $openQuizzes = Quiz::where('type_id', $validated['type_id'])
+                    ->where('type_type', $typeType)
+                    ->where('public', true)
+                    ->get();
 
-        $lockQuizzes = Quiz::where('type_id', $validated['type_id'])
-                        ->where('type_type', $typeType)
-                        ->where('public', false)
-                        ->get();
+    $lockQuizzes = Quiz::where('type_id', $validated['type_id'])
+                    ->where('type_type', $typeType)
+                    ->where('public', false)
+                    ->get();
 
-        // Load questions for each quiz
-        $openQuizzes->load('questions');
-        $subscription = Subscription::where('user_id', $user_id)
-                                    ->where('subject_id', $validated['subject_id'])
-                                    ->first();
-
-        if ($subscription) {
-            $lockQuizzes->load('questions');
-            return response()->json([
-                'OpenQuizzes' => $openQuizzes,
-                'LockQuizzes' => $lockQuizzes->map(function ($quiz) {
-                    return [
-                        'quiz' => $quiz,
-                    ];
-                }),
-            ]);
-        }else {
-            return response()->json([
-                'OpenQuizzes' => $openQuizzes,
-                'LockQuizzes' => $lockQuizzes,
-            ]);
+    // Load questions for each quiz and decode answers
+    $openQuizzes->load('questions');
+    foreach ($openQuizzes as $quiz) {
+        foreach ($quiz->questions as $question) {
+            $question->answers = json_decode($question->answers);
         }
     }
+
+    $subscription = Subscription::where('user_id', $user_id)
+                                ->where('subject_id', $validated['subject_id'])
+                                ->first();
+
+    if ($subscription) {
+        $lockQuizzes->load('questions');
+        foreach ($lockQuizzes as $quiz) {
+            foreach ($quiz->questions as $question) {
+                $question->answers = json_decode($question->answers);
+            }
+        }
+
+        return response()->json([
+            'OpenQuizzes' => $openQuizzes,
+            'LockQuizzes' => $lockQuizzes->map(function ($quiz) {
+                return [
+                    'quiz' => $quiz,
+                ];
+            }),
+        ]);
+    } else {
+        return response()->json([
+            'OpenQuizzes' => $openQuizzes,
+            'LockQuizzes' => $lockQuizzes,
+        ]);
+    }
+}
+
     /************************************************************************ */
     public function take_quiz(Request $request)
     {
