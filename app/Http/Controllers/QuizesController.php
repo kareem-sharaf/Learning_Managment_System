@@ -32,7 +32,8 @@ class QuizesController extends Controller
 
     $validated = $request->validate([
         'type_id' => 'required|integer',
-        'type' => 'required|string|in:subject,unit,lesson'
+        'type' => 'required|string|in:subject,unit,lesson',
+        'subject_id' => 'required|integer'
     ]);
 
     $typeMapping = [
@@ -42,31 +43,53 @@ class QuizesController extends Controller
     ];
 
     $typeType = $typeMapping[$validated['type']] ?? null;
+    $openQuizzes = Quiz::where('type_id', $validated['type_id'])
+    ->where('type_type', $typeType)
+    ->where('public', true)
+    ->get();
+
+    $lockQuizzes = Quiz::where('type_id', $validated['type_id'])
+        ->where('type_type', $typeType)
+        ->where('public', false)
+        ->get();
+
+    // Load questions for each quiz and decode answers
+    $openQuizzes->load('questions');
+    foreach ($openQuizzes as $quiz) {
+    foreach ($quiz->questions as $question) {
+    $question->answers = json_decode($question->answers);
+    }
+    }
 
     if (!$typeType) {
         return response()->json(['error' => 'Invalid type'], 400);
     }
+    $isTeacher= TeacherSubjectYear :: where('user_id',$user_id)
+                                    ->where('subject_id',$validated['subject_id'])->first();
 
-    $quizzes = Quiz::where('type_id', $validated['type_id'])
-                ->where('type_type', $typeType)
-                ->get();
-
-    $response = [];
-    foreach ($quizzes as $quiz) {
-        $quiz->load('questions');
-
-        foreach ($quiz->questions as $question) {
-            $question->answers = json_decode($question->answers);
+    if($isTeacher){
+        $lockQuizzes->load('questions');
+        foreach ($lockQuizzes as $quiz) {
+            foreach ($quiz->questions as $question) {
+                $question->answers = json_decode($question->answers);
+            }
         }
 
-        $response[] = [
-            'quiz' => $quiz,
-        ];
+        return response()->json([
+            'OpenQuizzes' => $openQuizzes,
+            'LockQuizzes' => $lockQuizzes->map(function ($quiz) {
+                return [
+                    'quiz' => $quiz,
+                ];
+            }),
+        ]);
+    } else {
+        return response()->json([
+            'OpenQuizzes' => $openQuizzes,
+            'LockQuizzes' => $lockQuizzes,
+        ]);
     }
-
-    return response()->json($response);
 }
-
     /************************************************************************ */
     public function add_quiz(Request $request)
 {
