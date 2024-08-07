@@ -61,7 +61,7 @@ class QuizesController extends Controller
 
         $response[] = [
             'quiz' => $quiz,
-            'questions' => $quiz->questions
+            // 'questions' => $quiz->questions
         ];
     }
 
