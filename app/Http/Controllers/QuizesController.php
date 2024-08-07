@@ -42,7 +42,6 @@ class QuizesController extends Controller
     ];
 
     $typeType = $typeMapping[$validated['type']] ?? null;
-    $isTeacher = false;
 
     if (!$typeType) {
         return response()->json(['error' => 'Invalid type'], 400);
@@ -54,26 +53,21 @@ class QuizesController extends Controller
 
     $response = [];
     foreach ($quizzes as $quiz) {
-        $questions = Question::where('quiz_id', $quiz->id)->get();
+        $quiz->load('questions');
 
-        foreach ($questions as $question) {
+        foreach ($quiz->questions as $question) {
             $question->answers = json_decode($question->answers);
         }
 
-        if ($quiz->teacher_id == $user_id) {
-            $response[] = [
-                'quiz' => $quiz,
-                'questions' => $questions
-            ];
-        } else {
-            $response[] = [
-                'quiz' => $quiz
-            ];
-        }
+        $response[] = [
+            'quiz' => $quiz,
+            'questions' => $quiz->questions
+        ];
     }
 
     return response()->json($response);
 }
+
     /************************************************************************ */
     public function add_quiz(Request $request)
 {
