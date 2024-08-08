@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
 class QuizesController extends Controller
 {
     //show all quizzes to teacher whether it's public or not.
+    // 8 /8 /2024
     public function show_all_to_teacher(Request $request)
 {
     $user_id = Auth::id();
