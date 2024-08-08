@@ -179,22 +179,23 @@ Route::group(['prefix' => 'subject'], function () {
 //  quiz routes
 Route::group(['prefix' => 'quiz'], function () {
     Route::controller(QuizesController::class)->group(function () {
+
         Route::middleware('auth:sanctum')->group(function () {
             Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
                 Route::post('add_quiz', 'add_quiz');
                 Route::post('edit_quiz', 'edit_quiz');
                 Route::post('delete_quiz', 'delete_quiz');
-
             });
         });
-            Route::middleware('auth:sanctum','checkIfStudent')->group(function () {
-                Route::post('show_all_to_student', 'show_all_to_student');
-                Route::post('take_quiz', 'take_quiz');
+        Route::middleware('auth:sanctum','checkIfStudent')->group(function () {
+            Route::post('show_all_to_student', 'show_all_to_student');
+            Route::post('take_quiz', 'take_quiz');
 
         });
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('show_all_to_teacher', 'show_all_to_teacher');
         });
+
     });
 });
 
