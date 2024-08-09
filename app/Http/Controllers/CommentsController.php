@@ -38,7 +38,7 @@ class CommentsController extends Controller
         $comment = Comment::create([
             'content' => $validatedData['content'],
             'video_id' => $validatedData['video_id'],
-            'user_id' => $user->id,  // Associate the comment with the authenticated user
+            'user_id' => $user->id,
         ]);
 
 
@@ -64,7 +64,6 @@ class CommentsController extends Controller
         }
         $user = Auth::user();
 
-        // Check if the authenticated user matches the user_id of the comment
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -98,7 +97,6 @@ class CommentsController extends Controller
         }
         $user = Auth::user();
 
-        // Check if the authenticated user matches the user_id of the comment
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -118,8 +116,8 @@ class CommentsController extends Controller
 
 
         $comments = Comment::where('video_id', $validatedData['video_id'])
-            ->whereNull('reply_to')  // Get only parent comments
-            ->with('replies.user')    // Eager load replies and their users
+            ->whereNull('reply_to')
+            ->with('replies.user')
             ->get();
 
         if ($comments->isEmpty()) {
@@ -159,13 +157,11 @@ class CommentsController extends Controller
             return response()->json(['error' => 'Comment not found'], 404);
         }
 
-        // Check if the authenticated user is the teacher
         $user = Auth::user();
         if ($user->role_id!=3) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Create a new comment as a reply to the original comment
         $reply = new Comment;
         $reply->content = $validatedData['content'];
         $reply->user_id = $user->id;
@@ -173,10 +169,7 @@ class CommentsController extends Controller
         $reply->reply_to = $commentId;
         $reply->save();
 
-        // Send a notification to the user who posted the original comment
-        // ... (Implement your notification logic here)
 
-        // Return the new reply in a format similar to the picture
         return response()->json([
             'Text' => $reply->content,
             'Id' => $reply->id,
