@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Comment;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\SendNotificationsService;
+
 
 class CommentsController extends Controller
 {
     use SendNotificationsService;
+
 
     public function __construct()
     {
@@ -24,27 +27,34 @@ class CommentsController extends Controller
             'video_id' => 'required|exists:videos,id',
         ]);
 
-          $user=Auth::user();
-          $fcm=$user->fcm;
+        $user = Auth::user();
+
+        $fcm=$user->fcm;
+
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $comment = Comment::create($validatedData);
-        if($comment){
-            $message = [
-                'title' => 'Notification Title',
-                'body' => 'Notification Body'
-            ];
-            $this->sendByFcm($fcm,$message);
-        }
-        return response()->json($comment, 201);
+        $comment = Comment::create([
+            'content' => $validatedData['content'],
+            'video_id' => $validatedData['video_id'],
+            'user_id' => $user->id,  // Associate the comment with the authenticated user
+        ]);
+
+
+
+        return response()->json([
+            'Text' => $comment->content,
+            'Id' => $comment->id,
+            'Student name' => $user->name,
+            'Replies' => []
+        ], 201);
     }
 
     public function update(Request $request)
     {
         $validatedData = $request->validate([
-            'id' => 'required|integer|exists:comments,id'
+            'id' => 'required|integer|exists:comments,id',
         ]);
 
         $comment = Comment::find($validatedData['id']);
@@ -52,9 +62,10 @@ class CommentsController extends Controller
         if (!$comment) {
             return response()->json(['error' => 'Comment not found'], 404);
         }
+        $user = Auth::user();
 
         // Check if the authenticated user matches the user_id of the comment
-        if (Auth::id() !== (int)$comment->user_id) {
+        if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -64,6 +75,12 @@ class CommentsController extends Controller
             'video_id' => 'required|exists:videos,id',
         ]);
 
+        if($user->role_id=3){
+            $validatedData = $request->validate([
+                'content' => 'sometimes|required|string|max:255',
+                'video_id' => 'sometimes|required|exists:videos,id',
+            ]);
+        }
         $comment->update($validatedData);
         return response()->json($comment);
     }
@@ -71,7 +88,7 @@ class CommentsController extends Controller
     public function destroy(Request $request)
     {
         $validatedData = $request->validate([
-            'id' => 'required|integer|exists:comments,id'
+            'id' => 'required|integer|exists:comments,id',
         ]);
 
         $comment = Comment::find($validatedData['id']);
@@ -79,9 +96,10 @@ class CommentsController extends Controller
         if (!$comment) {
             return response()->json(['error' => 'Comment not found'], 404);
         }
+        $user = Auth::user();
 
         // Check if the authenticated user matches the user_id of the comment
-        if (Auth::id() !== (int)$comment->user_id) {
+        if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -95,17 +113,75 @@ class CommentsController extends Controller
     public function getComments(Request $request)
     {
         $validatedData = $request->validate([
-            'video_id' => 'required|exists:videos,id'
+            'video_id' => 'required',
         ]);
 
-        $comments = Comment::whereHas('video', function ($query) use ($validatedData) {
-            $query->where('id', $validatedData['video_id']);
-        })->get();
+
+        $comments = Comment::where('video_id', $validatedData['video_id'])
+            ->whereNull('reply_to')  // Get only parent comments
+            ->with('replies.user')    // Eager load replies and their users
+            ->get();
 
         if ($comments->isEmpty()) {
-            return response()->json(['error' => 'Video not found or no comments found'], 404);
+            return response()->json(['error' => 'No comments found'], 404);
         }
 
-        return response()->json($comments);
+        $formattedComments = $comments->map(function ($comment) {
+            return [
+                'Text' => $comment->content,
+                'Id' => $comment->id,
+                'Student name' => $comment->user->name,
+                'Replies' => $comment->replies->map(function ($reply) {
+                    return [
+                        'Text' => $reply->content,
+                        'Id' => $reply->id,
+                        'Teacher name' => $reply->user->name,
+                    ];
+                })->toArray(),
+            ];
+        });
+
+        return response()->json($formattedComments);
+    }
+
+
+
+    public function teacherReply(Request $request)
+    {
+        $validatedData = $request->validate([
+            'content' => 'required|string|max:255',
+            'r'=>'required'
+        ]);
+        $commentId=$request->r;
+        $comment = Comment::find($commentId);
+
+        if (!$comment) {
+            return response()->json(['error' => 'Comment not found'], 404);
+        }
+
+        // Check if the authenticated user is the teacher
+        $user = Auth::user();
+        if ($user->role_id!=3) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Create a new comment as a reply to the original comment
+        $reply = new Comment;
+        $reply->content = $validatedData['content'];
+        $reply->user_id = $user->id;
+        $reply->video_id = $comment->video_id;
+        $reply->reply_to = $commentId;
+        $reply->save();
+
+        // Send a notification to the user who posted the original comment
+        // ... (Implement your notification logic here)
+
+        // Return the new reply in a format similar to the picture
+        return response()->json([
+            'Text' => $reply->content,
+            'Id' => $reply->id,
+            'Teacher name' => $user->name,
+
+        ], 201);
     }
 }

@@ -18,14 +18,15 @@ class CommentSeeder extends Seeder
             'user_id' => '1',
             'video_id'=>'1',
             'content' => 'hi',
-            
+            'reply_to'=>'2',
         ]);
         Comment::create([
             'id' => '2',
             'user_id' => '2',
             'video_id'=>'2',
             'content' => 'hi',
-            
+            'reply_to'=>'1',
+
         ]);
     }
 }

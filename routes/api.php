@@ -274,6 +274,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/update', 'update');
             Route::post('/destroy', 'destroy');
             Route::get('/getComments', 'getComments');
+            Route::post('/teacherReply','teacherReply');
         });
     });
 });
