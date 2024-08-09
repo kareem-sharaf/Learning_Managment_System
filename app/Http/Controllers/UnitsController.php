@@ -69,9 +69,10 @@ class UnitsController extends Controller
             'data' => $unit
         ]);
     }else{
-        $unit = Unit::where('subject_id', $subject_id)->get();
-        $message = "this is the all units";
+        $unit = Unit::where('subject_id', $subject_id)->with('lessons','lessons.videos','files','lessons.files','videos')->get();
+        $message = "this is the all units.";
         return response()->json([
+            'status' => false,
             'message' => $message,
             'data' => $unit
         ]);
