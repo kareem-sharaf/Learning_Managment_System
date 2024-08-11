@@ -21,7 +21,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FilesController;
-use App\Http\Controllers\QuizesController;
+use App\Http\Controllers\QuizzesController;
 use App\Http\Controllers\DemoController;
 
 /*
@@ -178,7 +178,7 @@ Route::group(['prefix' => 'subject'], function () {
 
 //  quiz routes
 Route::group(['prefix' => 'quiz'], function () {
-    Route::controller(QuizesController::class)->group(function () {
+    Route::controller(QuizzesController::class)->group(function () {
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
