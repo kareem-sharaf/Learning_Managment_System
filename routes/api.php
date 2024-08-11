@@ -230,7 +230,7 @@ Route::group(['prefix' => 'unit'], function () {
         });
         Route::middleware('auth:sanctum')->group(function () {
             Route::group(['middleware'] , function(){
-                Route::post('show_all_units', 'show_all_units');
+                Route::get('show_all_units', 'show_all_units');
                });
             });
     });
