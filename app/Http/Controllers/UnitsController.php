@@ -31,9 +31,9 @@ class UnitsController extends Controller
         $user=Auth::user();
         $user_id=$user->id;
         $role_id=$user->role_id;
-        $subject_id = $request->query('subject_id');
+        // $subject_id = $request->query('subject_id');
 
-        // $subject_id = $request->subject_id;
+        $subject_id = $request->subject_id;
 
         $input= $request->all();
         $unit = Unit::where('subject_id', $subject_id)->with('lessons','lessons.videos','files','lessons.files','videos')->get();
