@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Http\Request;
 
-class QuizesController extends Controller
+class QuizzesController extends Controller
 {
     //show all quizzes to teacher whether it's public or not.
     // 8 /8 /2024
