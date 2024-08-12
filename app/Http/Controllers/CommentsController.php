@@ -1,18 +1,14 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Comment;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\SendNotificationsService;
-
 
 class CommentsController extends Controller
 {
     use SendNotificationsService;
-
 
     public function __construct()
     {
@@ -23,16 +19,13 @@ class CommentsController extends Controller
     {
         $validatedData = $request->validate([
             'content' => 'required|string|max:255',
-            'user_id' => 'required|integer|exists:users,id',
             'lesson_id' => 'required|exists:lessons,id',
         ]);
 
         $user = Auth::user();
 
-        $fcm=$user->fcm;
-
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
 
         $comment = Comment::create([
@@ -41,13 +34,13 @@ class CommentsController extends Controller
             'user_id' => $user->id,
         ]);
 
-
-
         return response()->json([
-            'Text' => $comment->content,
-            'Id' => $comment->id,
-            'name' => $user->name,
-            'Replies' => []
+            'data' => [
+                'Text' => $comment->content,
+                'Id' => $comment->id,
+                'name' => $user->name,
+                'Replies' => []
+            ]
         ], 201);
     }
 
@@ -60,28 +53,30 @@ class CommentsController extends Controller
         $comment = Comment::find($validatedData['id']);
 
         if (!$comment) {
-            return response()->json(['error' => 'Comment not found'], 404);
+            return response()->json(['data' => ['error' => 'Comment not found']], 404);
         }
+
         $user = Auth::user();
 
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
 
-        $validatedData = $request->validate([
-            'content' => 'sometimes|required|string|max:255',
-            'user_id' => 'sometimes|required|integer|exists:users,id',
-            'lesson_id' => 'required|exists:lessons,id',
-        ]);
-
-        if($user->role_id=3){
-            $validatedData = $request->validate([
+        if ($user->role_id == 3) {
+            $request->validate([
                 'content' => 'sometimes|required|string|max:255',
                 'lesson_id' => 'sometimes|required|exists:lessons,id',
             ]);
+        } else {
+            $request->validate([
+                'content' => 'required|string|max:255',
+                'lesson_id' => 'required|exists:lessons,id',
+            ]);
         }
-        $comment->update($validatedData);
-        return response()->json($comment);
+
+        $comment->update($request->all());
+
+        return response()->json(['data' => $comment]);
     }
 
     public function destroy(Request $request)
@@ -93,35 +88,35 @@ class CommentsController extends Controller
         $comment = Comment::find($validatedData['id']);
 
         if (!$comment) {
-            return response()->json(['error' => 'Comment not found'], 404);
+            return response()->json(['data' => ['error' => 'Comment not found']], 404);
         }
+
         $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if (!$user || $comment->user_id !== $user->id) {
+            return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
 
         if ($comment->delete()) {
-            return response()->json(['message' => 'Comment deleted successfully'], 200);
+            return response()->json(['data' => ['message' => 'Comment deleted successfully']], 200);
         } else {
-            return response()->json(['message' => 'Comment not deleted'], 400);
+            return response()->json(['data' => ['message' => 'Comment not deleted']], 400);
         }
     }
 
     public function getComments(Request $request)
     {
         $validatedData = $request->validate([
-            'lesson_id' => 'required',
+            'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
-
 
         $comments = Comment::where('lesson_id', $validatedData['lesson_id'])
             ->whereNull('reply_to')
-            ->with('replies.user')
+            ->with(['user', 'replies.user'])
             ->get();
 
         if ($comments->isEmpty()) {
-            return response()->json(['error' => 'No comments found'], 404);
+            return response()->json(['data' => []], 200);
         }
 
         $formattedComments = $comments->map(function ($comment) {
@@ -139,42 +134,42 @@ class CommentsController extends Controller
             ];
         });
 
-        return response()->json($formattedComments);
+        return response()->json(['data' => $formattedComments], 200);
     }
-
-
 
     public function teacherReply(Request $request)
     {
         $validatedData = $request->validate([
             'content' => 'required|string|max:255',
-            'r'=>'required'
+            'r' => 'required|integer|exists:comments,id',
         ]);
-        $commentId=$request->r;
+
+        $commentId = $validatedData['r'];
         $comment = Comment::find($commentId);
 
         if (!$comment) {
-            return response()->json(['error' => 'Comment not found'], 404);
+            return response()->json(['data' => ['error' => 'Comment not found']], 404);
         }
 
         $user = Auth::user();
-        if ($user->role_id!=3) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+
+        if ($user->role_id != 3) {
+            return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
 
-        $reply = new Comment;
+        $reply = new Comment();
         $reply->content = $validatedData['content'];
         $reply->user_id = $user->id;
         $reply->lesson_id = $comment->lesson_id;
         $reply->reply_to = $commentId;
         $reply->save();
 
-
         return response()->json([
-            'Text' => $reply->content,
-            'Id' => $reply->id,
-            'name' => $user->name,
-
+            'data' => [
+                'Text' => $reply->content,
+                'Id' => $reply->id,
+                'name' => $user->name,
+            ]
         ], 201);
     }
 }
