@@ -32,6 +32,7 @@ class CommentsController extends Controller
             'content' => $validatedData['content'],
             'lesson_id' => $validatedData['lesson_id'],
             'user_id' => $user->id,
+            'user_image'=> $user->image_id
         ]);
 
         return response()->json([
@@ -39,6 +40,7 @@ class CommentsController extends Controller
                 'Text' => $comment->content,
                 'Id' => $comment->id,
                 'name' => $user->name,
+                'user_image'=> $user->image_id,
                 'Replies' => []
             ]
         ], 201);
@@ -83,6 +85,7 @@ class CommentsController extends Controller
                 'Text' => $comment->content,
                 'Id' => $comment->id,
                 'name' => $user->name,
+                'user_image'=> $user->image_id,
                 'Replies' => [] // Assuming no replies are returned here; modify if necessary
             ]
         ], 200);
@@ -132,11 +135,15 @@ class CommentsController extends Controller
                 'Text' => $comment->content,
                 'Id' => $comment->id,
                 'name' => $comment->user->name,
+                'user_image'=> $comment->user->image_id,
+
                 'Replies' => $comment->replies->map(function ($reply) {
                     return [
                         'Text' => $reply->content,
                         'Id' => $reply->id,
                         'name' => $reply->user->name,
+                        'user_image'=> $reply->user->image_id,
+
                     ];
                 })->toArray(),
             ];
@@ -177,6 +184,7 @@ class CommentsController extends Controller
                 'Text' => $reply->content,
                 'Id' => $reply->id,
                 'name' => $user->name,
+                'user_image'=> $user->image_id,
             ]
         ], 201);
     }
