@@ -43,42 +43,50 @@ class CommentsController extends Controller
             ]
         ], 201);
     }
-
     public function update(Request $request)
     {
         $validatedData = $request->validate([
             'id' => 'required|integer|exists:comments,id',
         ]);
-
+    
         $comment = Comment::find($validatedData['id']);
-
+    
         if (!$comment) {
             return response()->json(['data' => ['error' => 'Comment not found']], 404);
         }
-
+    
         $user = Auth::user();
-
+    
         if (!$user) {
             return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
-
+    
+        // Adjust validation based on the user's role
         if ($user->role_id == 3) {
             $request->validate([
                 'content' => 'sometimes|required|string|max:255',
-                'lesson_id' => 'sometimes|required|exists:lessons,id',
+                // 'lesson_id' => 'sometimes|required|exists:lessons,id',
             ]);
         } else {
             $request->validate([
                 'content' => 'required|string|max:255',
-                'lesson_id' => 'required|exists:lessons,id',
+                // 'lesson_id' => 'required|exists:lessons,id',
             ]);
         }
-
-        $comment->update($request->all());
-
-        return response()->json(['data' => $comment]);
+    
+        // Update the comment with the validated data
+        $comment->update($request->only(['content', 'lesson_id']));
+    
+        // Structure the response to match the store function
+        return response()->json([
+            'data' => [
+                'Text' => $comment->content,
+                'Id' => $comment->id,
+                'name' => $user->name,
+                'Replies' => [] // Assuming no replies are returned here; modify if necessary
+            ]
+        ], 200);
     }
-
     public function destroy(Request $request)
     {
         $validatedData = $request->validate([
