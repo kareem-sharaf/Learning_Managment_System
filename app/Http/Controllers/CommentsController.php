@@ -24,7 +24,7 @@ class CommentsController extends Controller
         $validatedData = $request->validate([
             'content' => 'required|string|max:255',
             'user_id' => 'required|integer|exists:users,id',
-            'video_id' => 'required|exists:videos,id',
+            'lesson_id' => 'required|exists:lessons,id',
         ]);
 
         $user = Auth::user();
@@ -37,7 +37,7 @@ class CommentsController extends Controller
 
         $comment = Comment::create([
             'content' => $validatedData['content'],
-            'video_id' => $validatedData['video_id'],
+            'lesson_id' => $validatedData['lesson_id'],
             'user_id' => $user->id,
         ]);
 
@@ -46,7 +46,7 @@ class CommentsController extends Controller
         return response()->json([
             'Text' => $comment->content,
             'Id' => $comment->id,
-            'Student name' => $user->name,
+            'name' => $user->name,
             'Replies' => []
         ], 201);
     }
@@ -71,13 +71,13 @@ class CommentsController extends Controller
         $validatedData = $request->validate([
             'content' => 'sometimes|required|string|max:255',
             'user_id' => 'sometimes|required|integer|exists:users,id',
-            'video_id' => 'required|exists:videos,id',
+            'lesson_id' => 'required|exists:lessons,id',
         ]);
 
         if($user->role_id=3){
             $validatedData = $request->validate([
                 'content' => 'sometimes|required|string|max:255',
-                'video_id' => 'sometimes|required|exists:videos,id',
+                'lesson_id' => 'sometimes|required|exists:lessons,id',
             ]);
         }
         $comment->update($validatedData);
@@ -111,11 +111,11 @@ class CommentsController extends Controller
     public function getComments(Request $request)
     {
         $validatedData = $request->validate([
-            'video_id' => 'required',
+            'lesson_id' => 'required',
         ]);
 
 
-        $comments = Comment::where('video_id', $validatedData['video_id'])
+        $comments = Comment::where('lesson_id', $validatedData['lesson_id'])
             ->whereNull('reply_to')
             ->with('replies.user')
             ->get();
@@ -128,12 +128,12 @@ class CommentsController extends Controller
             return [
                 'Text' => $comment->content,
                 'Id' => $comment->id,
-                'Student name' => $comment->user->name,
+                'name' => $comment->user->name,
                 'Replies' => $comment->replies->map(function ($reply) {
                     return [
                         'Text' => $reply->content,
                         'Id' => $reply->id,
-                        'Teacher name' => $reply->user->name,
+                        'name' => $reply->user->name,
                     ];
                 })->toArray(),
             ];
@@ -165,7 +165,7 @@ class CommentsController extends Controller
         $reply = new Comment;
         $reply->content = $validatedData['content'];
         $reply->user_id = $user->id;
-        $reply->video_id = $comment->video_id;
+        $reply->lesson_id = $comment->lesson_id;
         $reply->reply_to = $commentId;
         $reply->save();
 
@@ -173,7 +173,7 @@ class CommentsController extends Controller
         return response()->json([
             'Text' => $reply->content,
             'Id' => $reply->id,
-            'Teacher name' => $user->name,
+            'name' => $user->name,
 
         ], 201);
     }

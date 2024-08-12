@@ -16,14 +16,14 @@ class CommentSeeder extends Seeder
         Comment::create([
             'id' => '1',
             'user_id' => '1',
-            'video_id'=>'1',
+            'lesson_id'=>'1',
             'content' => 'hi',
             'reply_to'=>'2',
         ]);
         Comment::create([
             'id' => '2',
             'user_id' => '2',
-            'video_id'=>'2',
+            'lesson_id'=>'2',
             'content' => 'hi',
             'reply_to'=>'1',
 
