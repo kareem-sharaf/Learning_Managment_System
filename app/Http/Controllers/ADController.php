@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\AD;
 use App\Models\Category;
+use App\Models\Subject;
 use App\Models\Video;
 
 class ADController extends Controller
@@ -98,35 +99,57 @@ class ADController extends Controller
     //  show last 6 ads added
     public function showNewest()
     {
-        $newestAD = AD::orderBy('id', 'desc')
-            ->first();
-        if ($newestAD) {
-            $maxValue = $newestAD->id;
-            $newestADs = [];
-            for ($i = 0; $i < 6; $i++) {
-                $ad = AD::where('id', $maxValue)
-                    ->first();
+        $user = Auth::user();
 
-                if ($ad && $ad->isExpired == 0) {
-                    $newestADs[$i] = $ad;
-                    $maxValue--;
-                } else {
-                    $maxValue--;
-                    $i--;
-                }
-                if ($maxValue == 0)
-                    break;
-            }
-            return response()->json(
-                ['message' => $newestADs],
-                200
-            );
+        // Step 1: Get user's favorite categories
+        $favoriteCategories = $user->favorites()
+            ->where('favoritable_type', 'App\Models\Category')
+            ->pluck('favoritable_id');
+
+        // Step 2: Get newest ads based on user's favorite categories or not
+        if ($favoriteCategories->isEmpty()) {
+            // If no favorite categories, get the last 6 ads
+            $newestADs = AD::where('isExpired', 0)
+                ->orderBy('id', 'desc')
+                ->take(6)
+                ->get();
+        } else {
+            // If the user has favorite categories, get the last 10 ads that match those categories
+            $newestADs = AD::where('isExpired', 0)
+                ->whereIn('category_id', $favoriteCategories)
+                ->orderBy('id', 'desc')
+                ->take(10)
+                ->get();
         }
-        return response()->json(
-            ['error' => 'no new ads found'],
-            404
-        );
+
+        // Step 3: Get user's favorited subjects
+        $favoriteSubjects = $user->favorites()
+            ->where('favoritable_type', 'App\Models\Subject')
+            ->pluck('favoritable_id');
+
+        // Step 4: Get subjects based on user's favorite categories
+        if ($favoriteCategories->isNotEmpty()) {
+            // Get 10 new subjects that match favorite categories and are not already favorited
+            $newSubjects = Subject::whereIn('category_id', $favoriteCategories)
+                ->whereNotIn('id', $favoriteSubjects)
+                ->orderBy('id', 'desc')
+                ->take(10)
+                ->get();
+        } else {
+            // Get 6 random subjects from all available subjects that are not already favorited
+            $newSubjects = Subject::whereNotIn('id', $favoriteSubjects)
+                ->inRandomOrder()
+                ->take(6)
+                ->get();
+        }
+
+        // Prepare the response with both ads and subjects
+        return response()->json([
+            'newestAds' => $newestADs,
+            'newSubjects' => $newSubjects
+        ], 200);
     }
+
 
 // Update an ad
 public function update(Request $request)
