@@ -21,7 +21,7 @@ class UserVerificationController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'email' => 'required|email|unique:users|unique:user_verifications',
+            'email' => 'required|email',
             'role_id' => 'required|numeric'
         ]);
 
