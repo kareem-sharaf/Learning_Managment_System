@@ -78,11 +78,7 @@ class QuizzesController extends Controller
 
         return response()->json([
             'OpenQuizzes' => $openQuizzes,
-            'LockQuizzes' => $lockQuizzes->map(function ($quiz) {
-                return [
-                    'quiz' => $quiz,
-                ];
-            }),
+            'LockQuizzes' => $lockQuizzes
         ]);
     } else {
         return response()->json([
