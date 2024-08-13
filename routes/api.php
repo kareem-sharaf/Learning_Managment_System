@@ -160,11 +160,12 @@ Route::group(['prefix' => 'subject'], function () {
         Route::get('show_all_subjects', 'show_all_subjects');
         Route::get('all_subjects_in_year', 'all_subjects_in_year');
         Route::get('show_one_subject', 'show_one_subject');
-        Route::get('index', 'index');
+        // Route::get('index', 'index');
         Route::get('search', 'search');
         Route::get('search_in_subjects', 'search_in_subjects');
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('index', 'index');
         Route::group(['middleware' => 'checkIfTeacher:sanctum' ] , function(){
             Route::post('add_subject', 'add_subject');
             Route::post('edit_subject', 'edit_subject');

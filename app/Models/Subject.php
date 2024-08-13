@@ -15,7 +15,9 @@ class Subject extends Model
         'price',
         'video_id',
         'file_id',
-        'category_id'
+        'category_id',
+        'exist'
+
     ];
 
     public $timestamps=false;

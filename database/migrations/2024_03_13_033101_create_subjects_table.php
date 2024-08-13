@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('image_url')->nullable();
             $table->foreignId('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
             $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
+            $table->boolean('exist')->default(true);
         });
     }
     /**
