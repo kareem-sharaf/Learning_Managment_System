@@ -21,6 +21,7 @@ class Subject extends Model
     ];
 
     public $timestamps=false;
+
     public function users()
     {
         return $this->belongsToMany(User::class,'subscriptions');
@@ -55,5 +56,10 @@ class Subject extends Model
     public function videos()
     {
         return $this->hasMany(Video::class);
+    }
+    
+    public function files()
+    {
+        return $this->hasMany(Files::class);
     }
 }

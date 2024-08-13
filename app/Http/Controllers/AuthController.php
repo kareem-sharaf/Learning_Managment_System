@@ -503,4 +503,6 @@ class AuthController extends Controller
     {
         Artisan::call('db:seed', ['--class' => 'UserSeeder']);
     }
+
+    
 }
