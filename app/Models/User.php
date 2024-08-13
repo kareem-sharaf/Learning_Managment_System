@@ -34,9 +34,7 @@ class User extends Authenticatable
         'year_id',
         'image_id',
         'fcm',
-        'balance',
-        'exist'
-
+        'balance'
     ];
 
     public $timestamps = false;

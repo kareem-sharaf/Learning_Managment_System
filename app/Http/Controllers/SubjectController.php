@@ -136,7 +136,7 @@ class SubjectController extends Controller
                 $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $subject->id);
             })->get();
 
-            $categoryData['subjects']->push($subject); 
+            $categoryData['subjects']->push($subject);
         }
 
         $categoriesWithSubjects[] = $categoryData;
@@ -152,7 +152,7 @@ class SubjectController extends Controller
 
 //****************************************************************************************************************** */
 //search just in subjects.
-public function search_in_subjects(Request $request)
+    public function search_in_subjects(Request $request)
 {
     $year_id = $request->query('year_id');
     $name = $request->query('name');
@@ -163,6 +163,7 @@ public function search_in_subjects(Request $request)
         if($year_id){
             $subjects = Subject::where('name', 'like', '%' . $name . '%')
                 ->where('category_id', 1)
+                ->where('exist',true)
                 ->whereHas('years_users', function($q) use ($year_id) {
                     $q->where('teacher_subject_years.year_id', $year_id);
                 })
@@ -173,6 +174,7 @@ public function search_in_subjects(Request $request)
                 ->get();
         }else{
         $subjects = Subject::where('name', 'like', '%' . $name . '%')
+        ->where('exist',true)
         ->get();
     }
 
@@ -271,7 +273,7 @@ public function search_in_subjects(Request $request)
 }
 
 //************************************************************************************************************** */
-public function add_subject(Request $request)
+    public function add_subject(Request $request)
 {
     $user_id = Auth::id();
 
@@ -440,7 +442,7 @@ public function add_subject(Request $request)
 
 
     //***********************************************************************************************************************\\
- public function delete_subject(Request $request )
+    public function delete_subject(Request $request )
     {
         $user_id = Auth::id();
         $subject_id = $request->subject_id;
