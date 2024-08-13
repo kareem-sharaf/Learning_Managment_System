@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\AD;
 use App\Models\Category;
+use App\Models\Subject;
 use App\Models\Video;
 
 class ADController extends Controller
@@ -98,123 +99,148 @@ class ADController extends Controller
     //  show last 6 ads added
     public function showNewest()
     {
-        $newestAD = AD::orderBy('id', 'desc')
-            ->first();
-        if ($newestAD) {
-            $maxValue = $newestAD->id;
-            $newestADs = [];
-            for ($i = 0; $i < 6; $i++) {
-                $ad = AD::where('id', $maxValue)
-                    ->first();
+        $user = Auth::user();
 
-                if ($ad && $ad->isExpired == 0) {
-                    $newestADs[$i] = $ad;
-                    $maxValue--;
-                } else {
-                    $maxValue--;
-                    $i--;
-                }
-                if ($maxValue == 0)
-                    break;
-            }
-            return response()->json(
-                ['message' => $newestADs],
-                200
-            );
-        }
-        return response()->json(
-            ['error' => 'no new ads found'],
-            404
-        );
-    }
+        $favoriteCategories = $user->favorites()
+            ->where('favoritable_type', 'App\Models\Category')
+            ->pluck('favoritable_id');
 
-// Update an ad
-public function update(Request $request)
-{
-    $request->validate([
-        'ad_id' => 'required|exists:a_d_s,id|numeric',
-        'title' => 'string|max:255',
-        'description' => 'string',
-        'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
-        'video' => 'mimes:mp4,mov,avi,flv|max:204800',
-        'video_name' => 'string|max:255'
-    ]);
+        if ($favoriteCategories->isEmpty()) {
+            $newestADs = AD::where('isExpired', 0)
+                ->orderBy('id', 'desc')
+                ->take(6)
+                ->get();
+        } else {
+            $newestADs = AD::where('isExpired', 0)
+                ->whereIn('category_id', $favoriteCategories)
+                ->orderBy('id', 'desc')
+                ->take(10)
+                ->get();
 
-    $ad = AD::findOrFail($request->ad_id);
-
-    $adUpdated = false;
-    $videoUpdated = false;
-
-    if ($request->filled('title') && $ad->title !== $request->title) {
-        $ad->title = $request->title;
-        $adUpdated = true;
-    }
-
-    if ($request->filled('description') && $ad->description !== $request->description) {
-        $ad->description = $request->description;
-        $adUpdated = true;
-    }
-
-    if ($request->hasFile('image')) {
-        if ($ad->image_url) {
-            $oldImagePath = str_replace('/storage', 'public', $ad->image_url);
-            if (Storage::exists($oldImagePath)) {
-                Storage::delete($oldImagePath);
+            if ($newestADs->isEmpty()) {
+                $newestADs = AD::where('isExpired', 0)
+                    ->orderBy('id', 'desc')
+                    ->take(6)
+                    ->get();
             }
         }
+        $favoriteSubjects = $user->favorites()
+            ->where('favoritable_type', 'App\Models\Subject')
+            ->pluck('favoritable_id');
 
-        $imagePath = $request->file('image')->store('ad_images', 'public');
-        $ad->image_url = Storage::url($imagePath);
-        $adUpdated = true;
-    }
+        if ($favoriteCategories->isNotEmpty()) {
+            $newSubjects = Subject::whereIn('category_id', $favoriteCategories)
+                ->whereNotIn('id', $favoriteSubjects)
+                ->orderBy('id', 'desc')
+                ->take(10)
+                ->get();
 
-    if ($request->hasFile('video')) {
-        $video = $ad->video;
-
-        if ($video) {
-            $oldVideoPath = str_replace('/storage', 'public', $video->video);
-            if (Storage::exists($oldVideoPath)) {
-                Storage::delete($oldVideoPath);
+                if ($newSubjects->isEmpty()) {
+                $newSubjects = Subject::whereNotIn('id', $favoriteSubjects)
+                    ->inRandomOrder()
+                    ->take(6)
+                    ->get();
             }
         } else {
-            $video = new Video();
-            $video->ad_id = $ad->id;
+            $newSubjects = Subject::whereNotIn('id', $favoriteSubjects)
+                ->inRandomOrder()
+                ->take(6)
+                ->get();
+        }
+        return response()->json([
+            'newestAds' => $newestADs,
+            'newSubjects' => $newSubjects
+        ], 200);
+    }
+
+
+    // Update an ad
+    public function update(Request $request)
+    {
+        $request->validate([
+            'ad_id' => 'required|exists:a_d_s,id|numeric',
+            'title' => 'string|max:255',
+            'description' => 'string',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
+            'video' => 'mimes:mp4,mov,avi,flv|max:204800',
+            'video_name' => 'string|max:255'
+        ]);
+
+        $ad = AD::findOrFail($request->ad_id);
+
+        $adUpdated = false;
+        $videoUpdated = false;
+
+        if ($request->filled('title') && $ad->title !== $request->title) {
+            $ad->title = $request->title;
+            $adUpdated = true;
         }
 
-        $videoPath = $request->file('video')->store('videos', 'public');
-        $video->video = Storage::url($videoPath);
-        $videoUpdated = true;
-    }
-
-    if ($request->filled('video_name')) {
-        if (!$video) {
-            $video = new Video();
-            $video->ad_id = $ad->id;
-        }
-        $video->name = $request->video_name;
-        $videoUpdated = true;
-    }
-
-    if ($videoUpdated) {
-        $video->save();
-    }
-
-    if ($adUpdated || $videoUpdated) {
-        if ($ad->isDirty()) {
-            $ad->save();
+        if ($request->filled('description') && $ad->description !== $request->description) {
+            $ad->description = $request->description;
+            $adUpdated = true;
         }
 
-        return response()->json(
-            [
-                'message' => 'Ad updated successfully',
-                'ad' => $ad->load('videos')
-            ],
-            200
-        );
-    } else {
-        return response()->json(['error' => 'Nothing to update'], 400);
+        if ($request->hasFile('image')) {
+            if ($ad->image_url) {
+                $oldImagePath = str_replace('/storage', 'public', $ad->image_url);
+                if (Storage::exists($oldImagePath)) {
+                    Storage::delete($oldImagePath);
+                }
+            }
+
+            $imagePath = $request->file('image')->store('ad_images', 'public');
+            $ad->image_url = Storage::url($imagePath);
+            $adUpdated = true;
+        }
+
+        if ($request->hasFile('video')) {
+            $video = $ad->video;
+
+            if ($video) {
+                $oldVideoPath = str_replace('/storage', 'public', $video->video);
+                if (Storage::exists($oldVideoPath)) {
+                    Storage::delete($oldVideoPath);
+                }
+            } else {
+                $video = new Video();
+                $video->ad_id = $ad->id;
+            }
+
+            $videoPath = $request->file('video')->store('videos', 'public');
+            $video->video = Storage::url($videoPath);
+            $videoUpdated = true;
+        }
+
+        if ($request->filled('video_name')) {
+            if (!$video) {
+                $video = new Video();
+                $video->ad_id = $ad->id;
+            }
+            $video->name = $request->video_name;
+            $videoUpdated = true;
+        }
+
+        if ($videoUpdated) {
+            $video->save();
+        }
+
+        if ($adUpdated || $videoUpdated) {
+            if ($ad->isDirty()) {
+                $ad->save();
+            }
+
+            return response()->json(
+                [
+                    'message' => 'Ad updated successfully',
+                    'ad' => $ad->load('videos')
+                ],
+                200
+            );
+        } else {
+            return response()->json(['error' => 'Nothing to update'], 400);
+        }
     }
-}
 
     //  set the ad to be expired
     public function setExpired(Request $request)
