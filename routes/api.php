@@ -205,6 +205,8 @@ Route::group(['prefix' => 'subject'], function () {
 Route::group(['prefix' => 'quiz'], function () {
     Route::controller(QuizzesController::class)->group(function () {
         Route::post('show_all', 'show_all');
+        Route::post('show_all_to_student', 'show_all_to_student');
+        Route::post('show_all_to_teacher', 'show_all_to_teacher');
         Route::middleware('auth:sanctum')->group(function () {
             Route::group(['middleware'], function () {
                 Route::post('show_to_all', 'show_to_all');
