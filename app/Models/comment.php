@@ -11,7 +11,7 @@ class Comment extends Model
     protected $fillable = [
         'user_id',
 
-        'video_id',
+        'lesson_id',
         'content',
         'reply_to'
     ];
@@ -28,9 +28,9 @@ public function parentComment()
     {
         return $this->hasMany(Comment::class, 'reply_to');
     }
-public function video()
+public function lesson()
     {
-        return $this->belongsTo(Video::class);
+        return $this->belongsTo(Lesson::class);
     }
 
 }

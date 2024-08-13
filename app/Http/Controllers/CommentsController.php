@@ -1,18 +1,14 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Comment;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\SendNotificationsService;
-
 
 class CommentsController extends Controller
 {
     use SendNotificationsService;
-
 
     public function __construct()
     {
@@ -23,67 +19,77 @@ class CommentsController extends Controller
     {
         $validatedData = $request->validate([
             'content' => 'required|string|max:255',
-            'user_id' => 'required|integer|exists:users,id',
-            'video_id' => 'required|exists:videos,id',
+            'lesson_id' => 'required|exists:lessons,id',
         ]);
 
         $user = Auth::user();
 
-        $fcm=$user->fcm;
-
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
 
         $comment = Comment::create([
             'content' => $validatedData['content'],
-            'video_id' => $validatedData['video_id'],
+            'lesson_id' => $validatedData['lesson_id'],
             'user_id' => $user->id,
+            'user_image'=> $user->image_id
         ]);
 
-
-
         return response()->json([
-            'Text' => $comment->content,
-            'Id' => $comment->id,
-            'Student name' => $user->name,
-            'Replies' => []
+            'data' => [
+                'Text' => $comment->content,
+                'Id' => $comment->id,
+                'name' => $user->name,
+                'user_image'=> $user->image_id,
+                'Replies' => []
+            ]
         ], 201);
     }
-
     public function update(Request $request)
     {
         $validatedData = $request->validate([
             'id' => 'required|integer|exists:comments,id',
         ]);
-
+    
         $comment = Comment::find($validatedData['id']);
-
+    
         if (!$comment) {
-            return response()->json(['error' => 'Comment not found'], 404);
+            return response()->json(['data' => ['error' => 'Comment not found']], 404);
         }
+    
         $user = Auth::user();
-
+    
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
-
-        $validatedData = $request->validate([
-            'content' => 'sometimes|required|string|max:255',
-            'user_id' => 'sometimes|required|integer|exists:users,id',
-            'video_id' => 'required|exists:videos,id',
-        ]);
-
-        if($user->role_id=3){
-            $validatedData = $request->validate([
+    
+        // Adjust validation based on the user's role
+        if ($user->role_id == 3) {
+            $request->validate([
                 'content' => 'sometimes|required|string|max:255',
-                'video_id' => 'sometimes|required|exists:videos,id',
+                // 'lesson_id' => 'sometimes|required|exists:lessons,id',
+            ]);
+        } else {
+            $request->validate([
+                'content' => 'required|string|max:255',
+                // 'lesson_id' => 'required|exists:lessons,id',
             ]);
         }
-        $comment->update($validatedData);
-        return response()->json($comment);
+    
+        // Update the comment with the validated data
+        $comment->update($request->only(['content', 'lesson_id']));
+    
+        // Structure the response to match the store function
+        return response()->json([
+            'data' => [
+                'Text' => $comment->content,
+                'Id' => $comment->id,
+                'name' => $user->name,
+                'user_image'=> $user->image_id,
+                'Replies' => [] // Assuming no replies are returned here; modify if necessary
+            ]
+        ], 200);
     }
-
     public function destroy(Request $request)
     {
         $validatedData = $request->validate([
@@ -93,88 +99,93 @@ class CommentsController extends Controller
         $comment = Comment::find($validatedData['id']);
 
         if (!$comment) {
-            return response()->json(['error' => 'Comment not found'], 404);
+            return response()->json(['data' => ['error' => 'Comment not found']], 404);
         }
+
         $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if (!$user || $comment->user_id !== $user->id) {
+            return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
 
         if ($comment->delete()) {
-            return response()->json(['message' => 'Comment deleted successfully'], 200);
+            return response()->json(['data' => ['message' => 'Comment deleted successfully']], 200);
         } else {
-            return response()->json(['message' => 'Comment not deleted'], 400);
+            return response()->json(['data' => ['message' => 'Comment not deleted']], 400);
         }
     }
 
     public function getComments(Request $request)
     {
         $validatedData = $request->validate([
-            'video_id' => 'required',
+            'lesson_id' => 'required|integer|exists:lessons,id',
         ]);
 
-
-        $comments = Comment::where('video_id', $validatedData['video_id'])
+        $comments = Comment::where('lesson_id', $validatedData['lesson_id'])
             ->whereNull('reply_to')
-            ->with('replies.user')
+            ->with(['user', 'replies.user'])
             ->get();
 
         if ($comments->isEmpty()) {
-            return response()->json(['error' => 'No comments found'], 404);
+            return response()->json(['data' => []], 200);
         }
 
         $formattedComments = $comments->map(function ($comment) {
             return [
                 'Text' => $comment->content,
                 'Id' => $comment->id,
-                'Student name' => $comment->user->name,
+                'name' => $comment->user->name,
+                'user_image'=> $comment->user->image_id,
+
                 'Replies' => $comment->replies->map(function ($reply) {
                     return [
                         'Text' => $reply->content,
                         'Id' => $reply->id,
-                        'Teacher name' => $reply->user->name,
+                        'name' => $reply->user->name,
+                        'user_image'=> $reply->user->image_id,
+
                     ];
                 })->toArray(),
             ];
         });
 
-        return response()->json($formattedComments);
+        return response()->json(['data' => $formattedComments], 200);
     }
-
-
 
     public function teacherReply(Request $request)
     {
         $validatedData = $request->validate([
             'content' => 'required|string|max:255',
-            'r'=>'required'
+            'r' => 'required|integer|exists:comments,id',
         ]);
-        $commentId=$request->r;
+
+        $commentId = $validatedData['r'];
         $comment = Comment::find($commentId);
 
         if (!$comment) {
-            return response()->json(['error' => 'Comment not found'], 404);
+            return response()->json(['data' => ['error' => 'Comment not found']], 404);
         }
 
         $user = Auth::user();
-        if ($user->role_id!=3) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+
+        if ($user->role_id != 3) {
+            return response()->json(['data' => ['error' => 'Unauthorized']], 403);
         }
 
-        $reply = new Comment;
+        $reply = new Comment();
         $reply->content = $validatedData['content'];
         $reply->user_id = $user->id;
-        $reply->video_id = $comment->video_id;
+        $reply->lesson_id = $comment->lesson_id;
         $reply->reply_to = $commentId;
         $reply->save();
 
-
         return response()->json([
-            'Text' => $reply->content,
-            'Id' => $reply->id,
-            'Teacher name' => $user->name,
-
+            'data' => [
+                'Text' => $reply->content,
+                'Id' => $reply->id,
+                'name' => $user->name,
+                'user_image'=> $user->image_id,
+            ]
         ], 201);
     }
 }
