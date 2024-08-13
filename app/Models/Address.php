@@ -12,4 +12,9 @@ class Address extends Model
         'address'
     ];
     public $timestamps = false;
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

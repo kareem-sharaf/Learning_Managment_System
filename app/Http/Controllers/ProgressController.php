@@ -13,32 +13,49 @@ class ProgressController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
+        // Validate the incoming request
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
-            'video_id' => 'required|exists:videos,id',
+            'video_ids' => 'required|array',
+            'video_ids.*' => 'exists:videos,id',
         ]);
 
-        $completedVideos = $user->videos + 1;
-        $totalVideos = Video::where('subject_id', $request->subject_id)->count();
+        $progress = Progress::where('user_id', $user->id)
+                            ->where('subject_id', $request->subject_id)
+                            ->first();
+
+        $completedVideos = $progress ? json_decode($progress->completed_videos, true) : [];
+
+        if (!is_array($completedVideos)) {
+            $completedVideos = [];
+        }
+
+        $updatedVideos = array_unique(array_merge($completedVideos, $request->video_ids));
+
+        $updatedVideosJson = json_encode($updatedVideos);
 
         $progress = Progress::updateOrCreate(
             [
-                'user_id' => $request->user_id,
+                'user_id' => $user->id,
                 'subject_id' => $request->subject_id,
             ],
             [
-                'completed_videos' => $completedVideos,
+                'completed_videos' => $updatedVideosJson,
             ]
         );
 
+        $totalVideos = Video::where('subject_id', $request->subject_id)->count();
+
+        $progressPercentage = ($totalVideos > 0) ? (count($updatedVideos) / $totalVideos) * 100 : 0;
+
         return response()->json([
             'message' => 'Progress saved successfully',
-            'progress_percentage' => ($totalVideos > 0) ? ($completedVideos / $totalVideos) * 100 : 0,
+            'progress_percentage' => $progressPercentage,
             'status' => 200,
         ]);
     }
 
-    // Get the progress of a user in a specific subject
     public function getProgress($user_id, $subject_id)
     {
         $totalVideos = Video::where('subject_id', $subject_id)->count();

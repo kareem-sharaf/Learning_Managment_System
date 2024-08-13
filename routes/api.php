@@ -23,6 +23,8 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FilesController;
 use App\Http\Controllers\QuizzesController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ProgressController;
+
 
 
 /*
@@ -117,9 +119,11 @@ Route::group(['prefix' => 'year'], function () {
 //  role routes
 Route::group(['prefix' => 'role'], function () {
     Route::controller(RoleController::class)->group(function () {
-        Route::get('index', 'index');
         Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
+            Route::get('index', 'index');
+            Route::post('store', 'store');
             Route::post('update', 'update');
+            Route::post('destroy', 'destroy');
         });
     });
 });
@@ -135,7 +139,7 @@ Route::group(['prefix' => 'ad'], function () {
             Route::post('setExpired', 'setExpired');
             Route::post('destroy', 'destroy');
         });
-        Route::group(['middleware' => ['auth:sanctum', 'checkIfStudent']], function () {
+        Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::get('showNewest', 'showNewest');
         });
     });
@@ -151,12 +155,24 @@ Route::group(['prefix' => 'fav'], function () {
     });
 });
 
-//  fav routes
+//  bookmark routes
 Route::group(['prefix' => 'bookmark'], function () {
     Route::controller(BookmarkController::class)->group(function () {
         Route::group(['middleware' => ['auth:sanctum', 'checkIfStudent']], function () {
             Route::get('index', 'index');
             Route::post('toggle', 'toggle');
+        });
+    });
+});
+
+//  progress routes
+Route::group(['prefix' => 'progress'], function () {
+    Route::controller(ProgressController::class)->group(function () {
+        Route::group(['middleware' => ['auth:sanctum', 'checkIfStudent']], function () {
+            Route::get('index', 'index');
+            Route::post('store', 'store');
+            Route::post('update', 'update');
+            Route::post('destroy', 'destroy');
         });
     });
 });
@@ -181,7 +197,6 @@ Route::group(['prefix' => 'subject'], function () {
         });
     });
 });
-
 
 //  quiz routes
 Route::group(['prefix' => 'quiz'], function () {
@@ -221,9 +236,7 @@ Route::group(['prefix' => 'subscription'], function () {
     });
 });
 
-
 //  unit routes
-
 Route::group(['prefix' => 'unit'], function () {
     Route::controller(UnitsController::class)->group(function () {
         Route::get('show_all_units', 'show_all_units');

@@ -14,6 +14,7 @@ class Progress extends Model
         'subject_id',
         'completed_videos',
     ];
+    public $timestamps=false;
 
 
     public function user()
