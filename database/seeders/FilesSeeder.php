@@ -19,7 +19,7 @@ class FilesSeeder extends Seeder
             'unit_id' => '1',
             'subject_id' => '0',
             'lesson_id' => '0',
-            'content' => '2.pdf',
+            'file' => '2.pdf',
 
         ]);
         File::create([
@@ -28,7 +28,7 @@ class FilesSeeder extends Seeder
             'unit_id' => '2',
             'subject_id' => '0',
             'lesson_id' => '0',
-            'content' => '2.pdf',
+            'file' => '2.pdf',
 
         ]);
     }

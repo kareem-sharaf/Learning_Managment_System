@@ -13,12 +13,13 @@ use App\Models\Lesson;
 use App\Models\Unit;
 use App\Models\Subscription;
 use App\Models\Video;
+use App\Models\File;
 
  use App\Http\Responses\ApiSuccessResponse;
  use App\Http\Responses\ApiErrorResponse;
  use Illuminate\Support\Facades\Auth;
  use Illuminate\Support\Facades\Storage;
- use Illuminate\Support\Facades\File;
+//  use Illuminate\Support\Facades\File;
 
 
 use Illuminate\Http\Request;
@@ -285,7 +286,8 @@ class SubjectController extends Controller
         'image' => 'required|image|max:10240',
         'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
         'video_name' => 'nullable|string|max:255',
-        'file_id' => 'nullable|integer',
+        'file_name' => 'nullable|string|max:255',
+        'file' => 'nullable|file|max:20480',
         'years_content.*.year_id' => 'nullable|integer|exists:years,id',
     ]);
 
@@ -297,7 +299,6 @@ class SubjectController extends Controller
         'price' => $request->price,
         'description' => $request->description,
         'image_url' => $imageUrl,
-        'file_id' => $request->file_id,
         'category_id' => $request->category_id,
     ]);
 
@@ -311,6 +312,17 @@ class SubjectController extends Controller
             $video->save();
 
             $subject->video_id = $video->id;
+            $subject->save();
+        }
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('files', 'public');
+            $file = new File();
+            $file->file = Storage::url($filePath);
+            $file->name = $request->file_name;
+            $file->subject_id = $subject->id;
+            $file->save();
+
+            $subject->file_id = $file->id;
             $subject->save();
         }
 
@@ -332,6 +344,7 @@ class SubjectController extends Controller
         }
 
         $subject->load('videos');
+        $subject->load('files');
 
         return response()->json([
             'message' => 'Subject added successfully.',
@@ -354,6 +367,8 @@ class SubjectController extends Controller
         'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240|nullable',
         'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
         'video_name' => 'nullable|string|max:255',
+        'file.*' => 'nullable|file|max:204800',
+        'file_name.*' => 'nullable|string|max:255',
         'years_content' => 'array|nullable',
         'years_content.*.year_id' => 'integer|exists:years,id',
     ]);
@@ -418,6 +433,33 @@ class SubjectController extends Controller
 
         $video->save();
         $subject->video_id = $video->id;
+    }
+
+    if ($request->hasFile('file')) {
+        $file_id = $subject->file_id;
+        $file = File::find($file_id);
+        if ($file) {
+            // Delete old file
+            $oldfilePath = str_replace('/storage', 'public', $file->file);
+            if (Storage::exists($oldfilePath)) {
+                Storage::delete($oldfilePath);
+            }
+        } else {
+            // Create new file instance if it doesn't exist
+            $file = new File();
+            $file->subject_id = $subject->id;
+        }
+
+        // Store new file
+        $filePath = $request->file('file')->store('files', 'public');
+        $file->file = Storage::url($filePath);
+
+        if ($request->filled('file_name')) {
+            $file->name = $request->file_name;
+        }
+
+        $file->save();
+        $subject->file_id = $file->id;
     }
 
          $subject->update($subjectData);

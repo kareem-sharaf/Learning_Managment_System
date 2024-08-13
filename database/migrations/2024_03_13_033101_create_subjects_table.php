@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('category_id')->references('id')->on('categories')->cascadeOnDelete();
             $table->string('image_url')->nullable();
             $table->foreignId('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
-            $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
+            $table->foreignId('file_id')->nullable()->constrained('files')->cascadeOnDelete();
             $table->boolean('exist')->default(true);
         });
     }

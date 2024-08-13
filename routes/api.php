@@ -194,7 +194,7 @@ Route::group(['prefix' => 'subject'], function () {
             Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
                 Route::post('add_subject', 'add_subject');
                 Route::post('edit_subject', 'edit_subject');
-                Route::get('delete_subject/{subject_id}', 'delete_subject');
+                Route::post('delete_subject', 'delete_subject');
                 Route::get('index', 'index');
 
             });
