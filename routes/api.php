@@ -169,9 +169,8 @@ Route::group(['prefix' => 'bookmark'], function () {
 Route::group(['prefix' => 'progress'], function () {
     Route::controller(ProgressController::class)->group(function () {
         Route::group(['middleware' => ['auth:sanctum', 'checkIfStudent']], function () {
-            Route::get('index', 'index');
+            Route::get('index', 'indexPerUser');
             Route::post('store', 'store');
-            Route::post('update', 'update');
             Route::post('destroy', 'destroy');
         });
     });

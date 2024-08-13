@@ -22,6 +22,7 @@ class AuthController extends Controller
 
         return response()->json(['message'=>'Updated Successfully']);
     }
+    
     public function registerWeb(Request $request)
     {
         $UserVerification = UserVerification::find($request->user_id);

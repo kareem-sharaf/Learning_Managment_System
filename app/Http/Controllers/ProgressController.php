@@ -14,7 +14,6 @@ class ProgressController extends Controller
     {
         $user = Auth::user();
 
-        // Validate the incoming request
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'video_ids' => 'required|array',
@@ -75,16 +74,24 @@ class ProgressController extends Controller
     }
 
     // Get all progress for a user across all subjects
-    public function getAllProgress($user_id)
+    public function indexPerUser()
     {
+        $user = Auth::user();
         $progressData = [];
 
-        $progressRecords = Progress::where('user_id', $user_id)->get();
+        $progressRecords = Progress::where('user_id', $user->id)->get();
 
         foreach ($progressRecords as $progress) {
+
             $totalVideos = Video::where('subject_id', $progress->subject_id)->count();
-            $completedVideos = $progress->completed_videos;
-            $progressPercentage = ($totalVideos > 0) ? ($completedVideos / $totalVideos) * 100 : 0;
+
+            $completedVideos = json_decode($progress->completed_videos, true);
+
+            if (!is_array($completedVideos)) {
+                $completedVideos = [];
+            }
+
+            $progressPercentage = ($totalVideos > 0) ? (count($completedVideos) / $totalVideos) * 100 : 0;
 
             $progressData[] = [
                 'subject_id' => $progress->subject_id,
@@ -97,26 +104,7 @@ class ProgressController extends Controller
         return response()->json([
             'message' => 'All progress retrieved successfully',
             'data' => $progressData,
-            'status' => 200,
-        ]);
-    }
-
-    // Delete the progress of a user in a specific subject
-    public function deleteProgress($user_id, $subject_id)
-    {
-        $progress = Progress::where('user_id', $user_id)
-                            ->where('subject_id', $subject_id)
-                            ->first();
-
-        if ($progress) {
-            $progress->delete();
-            return response()->json([
-                'message' => 'Progress deleted successfully',
-                'status' => 200,
-            ]);
-        } else {
-            return response()->json(['error' => 'Progress not found'], 404);
-        }
+        ], 200);
     }
 }
 
