@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('content');
+            $table->string('file');
             $table->unsignedBigInteger('subject_id')->nullable()->constrained('subjects')->cascadeOnDelete();
             $table->unsignedBigInteger('unit_id')->nullable()->constrained('units')->cascadeOnDelete();
             $table->unsignedBigInteger('lesson_id')->nullable()->constrained('lessons')->cascadeOnDelete();

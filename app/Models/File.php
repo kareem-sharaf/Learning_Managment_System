@@ -10,7 +10,7 @@ class File extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'content',
+        'file',
         'subject_id',
         'unit_id',
         'lesson_id'];
@@ -24,7 +24,7 @@ public function unit()
 {
     return $this->belongsTo(Unit::class);
 }
-    public function lesson()
+public function lesson()
     {
         return $this->belongsTo(Lesson::class);
     }
