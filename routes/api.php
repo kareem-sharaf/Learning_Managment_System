@@ -238,8 +238,10 @@ Route::group(['prefix' => 'subscription'], function () {
 //  unit routes
 Route::group(['prefix' => 'unit'], function () {
     Route::controller(UnitsController::class)->group(function () {
-        Route::get('show_all_units', 'show_all_units');
         Route::post('search_to_unit', 'search_to_unit');
+        Route::group(['middleware' => ['auth:sanctum']], function () {
+            Route::post('show_all_units', 'show_all_units');
+        });
 
         Route::group(['middleware' => ['auth:sanctum', 'checkIfTeacher']], function () {
             Route::post('add_unit', 'add_unit');
