@@ -26,12 +26,12 @@ class Lesson extends Model
 
     public function videos()
     {
-        return $this->hasMany(Video::class, 'lesson_id');
+        return $this->hasMany(Video::class);
     }
 
     public function files()
     {
-        return $this->hasMany(File::class, 'lesson_id');
+        return $this->hasMany(File::class);
     }
     public function quizzes()
     {
