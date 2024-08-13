@@ -213,7 +213,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || $user['role'] == 4 || !Hash::check($request->password, $user->password)) {
+        if (!$user || $user['role_id'] == 4 || !Hash::check($request->password, $user->password)) {
             return response()->json(
                 ['message' => 'unauthenticated'],
                 400

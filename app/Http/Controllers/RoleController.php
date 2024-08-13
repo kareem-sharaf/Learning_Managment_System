@@ -19,30 +19,38 @@ class RoleController extends Controller
     //  index all roles
     public function index()
     {
-        $roles = Role::all();
-        if ($roles) {
+        $roles = Role::with(['users.address'])->get();
+
+        if ($roles->isEmpty()) {
             return response()->json(
-                ['roles' => $roles],
-                200
+                ['message' => 'No roles found'],
+                404
             );
         }
+
+        $rolesTransformed = $roles->map(function ($role) {
+            return [
+                'id' => $role->id,
+                'role' => $role->role,
+                'users' => $role->users->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'birth_date' => $user->birth_date,
+                        'email' => $user->email,
+                        'gender' => $user->gender,
+                        'address' => $user->address->address,
+                    ];
+                }),
+            ];
+        });
+
         return response()->json(
-            ['message' => 'no roles found'],
-            404
+            ['roles' => $rolesTransformed],
+            200
         );
     }
 
-    //  index roles for web
-    public function index_web()
-    {
-        $roles = Role::take(3)->get();
-
-        if ($roles->isEmpty()) {
-            return response()->json(['message' => 'No roles found'], 404);
-        }
-
-        return response()->json(['roles' => $roles], 200);
-    }
 
     //  store new role
     public function store(Request $request)

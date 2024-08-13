@@ -60,6 +60,16 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function address()
+    {
+        return $this->belongsTo(Address::class);
+    }
+
     public function messages()
     {
         return $this->hasMany(MessageModel::class);
@@ -100,8 +110,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
-
-
 
     public function quizzes()
     {
