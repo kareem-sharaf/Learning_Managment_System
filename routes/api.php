@@ -62,6 +62,10 @@ Route::group(['prefix' => 'auth'], function () {
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
         });
+
+        Route::group(['middleware' => ['auth:sanctum', 'checkIfManager']], function () {
+            Route::post('deleteUser', 'deleteUser');
+        });
     });
     Route::controller(UserVerificationController::class)->group(function () {
         Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
@@ -259,7 +263,10 @@ Route::group(['prefix' => 'profile'], function () {
         Route::get('show_teachers_in_subject', 'show_teachers_in_subject');
         Route::get('teachers_in_category/{category_id}', 'teachers_in_category');
         Route::get('search_in_teacher', 'search_in_teacher');
-        Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {});
+        Route::group(['middleware' => 'auth:sanctum'], function () {
+            Route::get('deleteProfile', 'deleteProfile');
+
+        });
     });
 });
 

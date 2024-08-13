@@ -36,8 +36,8 @@ class ADController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
             'category' => 'required|exists:categories,category',
             'subject_id' => 'exists:subjects',
-            'video' => 'mimes:mp4,mov,avi,flv|max:204800',
-            'video_name' => 'required|string|max:255'
+            'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
+            'video_name' => 'nullable|string|max:255'
         ]);
 
         $category = Category::where('category', $request->category)->first();
@@ -55,28 +55,30 @@ class ADController extends Controller
 
         $ad = AD::create($adData);
 
-        $videoPath = $request->file('video')->store('videos', 'public');
-        $videoUrl = Storage::url($videoPath);
+        if ($request->hasFile('video')) {
+            $videoPath = $request->file('video')->store('videos', 'public');
+            $videoUrl = Storage::url($videoPath);
 
-        // Create the video record
-        $video = Video::create([
-            'name' => $request->video_name,
-            'video' => $videoUrl,
-            'ad_id' => $ad->id
-        ]);
+            $video = Video::create([
+                'name' => $request->video_name,
+                'video' => $videoUrl,
+                'ad_id' => $ad->id
+            ]);
 
-        $ad->video_id = $video->id;
-        $ad->save();
+            $ad->video_id = $video->id;
+            $ad->save();
+        }
 
         return response()->json(
             [
-                'message' => 'AD and Video added successfully',
+                'message' => 'AD added successfully',
                 'ad' => $ad,
-                'video' => $video
+                'video' => isset($video) ? $video : null
             ],
             200
         );
     }
+
 
     //  show specific ad details
     public function show(Request $request)
@@ -101,7 +103,7 @@ class ADController extends Controller
     {
         $user = Auth::user();
 
-        $favoriteCategories = $user->favorites()
+        $favoriteCategories = $user->favorites
             ->where('favoritable_type', 'App\Models\Category')
             ->pluck('favoritable_id');
 
@@ -124,7 +126,7 @@ class ADController extends Controller
                     ->get();
             }
         }
-        $favoriteSubjects = $user->favorites()
+        $favoriteSubjects = $user->favorites
             ->where('favoritable_type', 'App\Models\Subject')
             ->pluck('favoritable_id');
 
@@ -153,7 +155,6 @@ class ADController extends Controller
         ], 200);
     }
 
-
     // Update an ad
     public function update(Request $request)
     {
@@ -170,6 +171,7 @@ class ADController extends Controller
 
         $adUpdated = false;
         $videoUpdated = false;
+        $video = $ad->video;
 
         if ($request->filled('title') && $ad->title !== $request->title) {
             $ad->title = $request->title;
@@ -195,8 +197,6 @@ class ADController extends Controller
         }
 
         if ($request->hasFile('video')) {
-            $video = $ad->video;
-
             if ($video) {
                 $oldVideoPath = str_replace('/storage', 'public', $video->video);
                 if (Storage::exists($oldVideoPath)) {
@@ -233,7 +233,7 @@ class ADController extends Controller
             return response()->json(
                 [
                     'message' => 'Ad updated successfully',
-                    'ad' => $ad->load('videos')
+                    'ad' => $ad->load('video')
                 ],
                 200
             );
@@ -241,6 +241,7 @@ class ADController extends Controller
             return response()->json(['error' => 'Nothing to update'], 400);
         }
     }
+
 
     //  set the ad to be expired
     public function setExpired(Request $request)
@@ -291,7 +292,7 @@ class ADController extends Controller
             $ad->delete();
 
             return response()->json(
-                ['message' => 'Ad and associated videos deleted successfully'],
+                ['message' => 'Ad and associated video deleted successfully'],
                 200
             );
         }

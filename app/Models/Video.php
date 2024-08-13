@@ -24,8 +24,7 @@ class Video extends Model
     {
         return $this->belongsTo(Lesson::class);
     }
-    
-    public function ads()
+    public function ad()
     {
         return $this->belongsTo(AD::class, 'ad_id');
     }

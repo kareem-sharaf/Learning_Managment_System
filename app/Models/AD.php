@@ -16,9 +16,9 @@ class AD extends Model
         'video_id',
         'isExpired'
     ];
-    public function videos()
+    public function video()
 {
-    return $this->hasMany(Video::class);
+    return $this->hasOne(Video::class, 'ad_id');
 }
 public function youtubeVideos()
     {

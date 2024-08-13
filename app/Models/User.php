@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Validation\Rule;
+
 
 class User extends Authenticatable
 {
@@ -59,6 +61,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+
+    public static function rules()
+    {
+        return [
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore('deleted_user@example.com', 'email'),
+            ],
+        ];
+    }
 
     public function role()
     {
