@@ -98,7 +98,7 @@ class SubjectController extends Controller
     foreach ($categories as $category) {
         $categoryData = [
             'category' => $category,
-            'subjects' => collect(), // استخدام Collection فارغ بدلاً من مصفوفة
+            'subjects' => collect(),
             'years' => []
         ];
 
@@ -110,22 +110,20 @@ class SubjectController extends Controller
                 ->get();
         } else if ($category->id == 1 && !$year_id) {
             $categoryData['years'] = Year::get();
-            $subjects = collect(); // استخدام Collection فارغ في هذه الحالة
+            $subjects = collect();
         } else {
             $subjects = Subject::where('category_id', $category->id)
                 ->get();
         }
 
         foreach ($subjects as $subject) {
-            // التحقق من قيمة exist للمادة
             if (!$subject->exist) {
-                // التحقق مما إذا كان المستخدم مسجلاً في المادة في جدول subscriptions
                 $subscription = Subscription::where('subject_id', $subject->id)
                     ->where('user_id', $user_id)
                     ->first();
 
                 if (!$subscription) {
-                    // إزالة المادة من القائمة إذا لم يكن المستخدم مسجلاً فيها
+
                     continue;
                 }
             }
@@ -138,7 +136,7 @@ class SubjectController extends Controller
                 $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $subject->id);
             })->get();
 
-            $categoryData['subjects']->push($subject); // إضافة المادة إلى الـ Collection
+            $categoryData['subjects']->push($subject); 
         }
 
         $categoriesWithSubjects[] = $categoryData;
