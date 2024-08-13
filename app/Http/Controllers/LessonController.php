@@ -3,68 +3,95 @@
 namespace App\Http\Controllers;
 
 use Alaouy\Youtube\Facades\Youtube;
-use App\Models\Files;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
+// use Illuminate\Support\Facades\File;
 use App\Models\Lesson;
 use App\Models\Video;
+use App\Models\File;
+
 use Illuminate\Support\Facades\Auth;
 
 
 class LessonController extends Controller
 {
+
     public function add_lesson(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'unit_id' => 'required',
-            'price' => 'required|numeric|min:0',
-            'description' => 'required|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-            'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800|',
-            'video_name' => 'nullable|string|max:255',
-        ]);
-    
-        $imagePath = $request->file('image')->store('lessons_images', 'public');
-    
-        $lesson = new Lesson();
-        $lesson->name = $request->name;
-        $lesson->price = $request->price;
-        $lesson->description = $request->description;
-        $lesson->unit_id = $request->unit_id;
-        $lesson->image = Storage::url($imagePath);
-        $lesson->teacher_id = Auth::id(); // Set teacher_id to the currently authenticated user
-    
-        if ($lesson->save()) {
-            if ($request->hasFile('video')) {
-                $videoPath = $request->file('video')->store('videos', 'public');
-                $video = new Video();
-                $video->video = Storage::url($videoPath);
-                $video->name = $request->video_name;
-                $video->lesson_id = $lesson->id;
-                $video->save();
-    
-                $lesson->video_id = $video->id;
-                $lesson->save();
-            }
-    
-            $lesson->load('videos');
-            return response()->json([
-                'message' => 'Lesson created successfully',
-                'data' => $lesson,
-                'status' => 200,
-            ]);
-        } else {
-            Storage::delete($imagePath);
-    
-            return response()->json([
-                'message' => 'Lesson creation failed',
-                'status' => 400,
-            ]);
+{
+
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'unit_id' => 'required',
+        'price' => 'required|numeric|min:0',
+        'description' => 'required|string|max:255',
+        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+        'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
+        'video_name' => 'nullable|string|max:255',
+        'file_name' => 'required|string|max:255',
+        'file' => 'required|file|max:20480',
+    ]);
+
+
+    $imagePath = $request->file('image')->store('lessons_images', 'public');
+
+
+    $lesson = new Lesson();
+    $lesson->name = $request->name;
+    $lesson->price = $request->price;
+    $lesson->description = $request->description;
+    $lesson->unit_id = $request->unit_id;
+    $lesson->image = Storage::url($imagePath);
+    $lesson->teacher_id = Auth::id();
+
+    if ($lesson->save()) {
+
+        // تخزين الفيديو إذا تم رفعه
+        if ($request->hasFile('video')) {
+            $videoPath = $request->file('video')->store('videos', 'public');
+            $video = new Video();
+            $video->video = Storage::url($videoPath);
+            $video->name = $request->video_name;
+            $video->lesson_id = $lesson->id;
+            $video->save();
+
+            $lesson->video_id = $video->id;
+            $lesson->save();
         }
+
+        // تخزين الملفات إذا تم رفعها
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('files', 'public');
+            $file = new File();
+            $file->content = Storage::url($filePath); // تأكد من استخدام الاسم الصحيح للعمود
+            $file->name = $request->file_name;
+            $file->lesson_id = $lesson->id;
+            $file->save();
+
+            $lesson->file_id = $file->id;
+            $lesson->save();
+        }
+
+        // تحميل الفيديوهات والملفات المرتبطة بالدرس
+        $lesson->load('videos', 'files');
+        return response()->json([
+            'message' => 'Lesson created successfully',
+            'data' => $lesson,
+            'status' => 200,
+        ]);
+    } else {
+        Storage::delete($imagePath);
+
+        return response()->json([
+            'message' => 'Lesson creation failed',
+            'status' => 400,
+        ]);
     }
-        public function update_lesson(Request $request)
+}
+
+
+
+
+    public function update_lesson(Request $request)
     {
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id|numeric',

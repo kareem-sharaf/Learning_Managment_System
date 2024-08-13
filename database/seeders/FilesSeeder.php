@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Files;
+use App\Models\File;
 
 class FilesSeeder extends Seeder
 {
@@ -13,7 +13,7 @@ class FilesSeeder extends Seeder
      */
     public function run(): void
     {
-        Files::create([
+        File::create([
             'id' => '1',
             'name' => 'part 1',
             'unit_id' => '1',
@@ -22,7 +22,7 @@ class FilesSeeder extends Seeder
             'content' => '2.pdf',
 
         ]);
-        Files::create([
+        File::create([
             'id' => '2',
             'name' => 'part 1',
             'unit_id' => '2',
