@@ -16,16 +16,13 @@ class ADController extends Controller
     public function index()
     {
         $ads = AD::all();
-        if ($ads->isNotEmpty()) {
+
             return response()->json(
                 ['message' => $ads],
                 200
             );
-        }
-        return response()->json(
-            ['message' => 'no ads has been found'],
-            404
-        );
+
+    
     }
 
     public function store(Request $request)

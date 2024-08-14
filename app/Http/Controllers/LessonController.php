@@ -16,7 +16,6 @@ class LessonController extends Controller
 {
     public function add_lesson(Request $request)
     {
-
         $request->validate([
             'name' => 'required|string|max:255',
             'unit_id' => 'required',
@@ -25,8 +24,8 @@ class LessonController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
             'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
             'video_name' => 'nullable|string|max:255',
-            'file_name' => 'required|string|max:255',
-            'file' => 'required|file|max:20480',
+            'file_name' => 'string|max:255',
+            'file' => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar|max:20480',
         ]);
 
 
@@ -103,12 +102,10 @@ class LessonController extends Controller
 
     $lesson = Lesson::findOrFail($request->lesson_id);
 
-    // التحقق من صلاحيات المستخدم
     if (Auth::id() !== $lesson->teacher_id && Auth::user()->role_id !== '2') {
         return response()->json(['error' => 'Unauthorized'], 403);
     }
 
-    // معالجة صورة الدرس
     if ($request->hasFile('image')) {
         if ($lesson->image) {
             $oldImagePath = str_replace('/storage', 'public', $lesson->image);
@@ -121,7 +118,6 @@ class LessonController extends Controller
         $lesson->image = Storage::url($imagePath);
     }
 
-    // معالجة الفيديوهات
     if ($request->hasFile('video')) {
         $video_id = $lesson->video_id;
         $video = Video::find($video_id);
@@ -132,12 +128,10 @@ class LessonController extends Controller
                 Storage::delete($oldVideoPath);
             }
         } else {
-            // Create new video instance if it doesn't exist
             $video = new Video();
             $video->lesson_id = $lesson->id;
         }
 
-        // Store new video
         $videoPath = $request->file('video')->store('videos', 'public');
         $video->video = Storage::url($videoPath);
 

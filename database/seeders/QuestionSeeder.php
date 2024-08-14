@@ -33,6 +33,11 @@ class QuestionSeeder extends Seeder
             ['text' => 'What is the capital of Canada?', 'mark' => 10, 'answers' => json_encode(['Toronto', 'Ottawa', 'Vancouver', 'Montreal']), 'correct_answer' => 'Ottawa', 'quiz_id' => 2],
             ['text' => 'What is the largest mammal?', 'mark' => 10, 'answers' => json_encode(['Elephant', 'Blue Whale', 'Giraffe', 'Hippopotamus']), 'correct_answer' => 'Blue Whale', 'quiz_id' => 2],
             ['text' => 'What is the main ingredient in sushi?', 'mark' => 10, 'answers' => json_encode(['Fish', 'Rice', 'Seaweed', 'Soy Sauce']), 'correct_answer' => 'Rice', 'quiz_id' => 2],
+            ['text' => 'What is the capital of France?', 'mark' => 10, 'answers' => json_encode(['Paris', 'London', 'Berlin', 'Madrid']), 'correct_answer' => 'Paris', 'quiz_id' => 5],
+            ['text' => 'What is the capital of France?', 'mark' => 10, 'answers' => json_encode(['Paris', 'London', 'Berlin', 'Madrid']), 'correct_answer' => 'Paris', 'quiz_id' => 5],
+            ['text' => 'What is the capital of France?', 'mark' => 10, 'answers' => json_encode(['Paris', 'London', 'Berlin', 'Madrid']), 'correct_answer' => 'Paris', 'quiz_id' => 6],
+            ['text' => 'What is the capital of France?', 'mark' => 10, 'answers' => json_encode(['Paris', 'London', 'Berlin', 'Madrid']), 'correct_answer' => 'Paris', 'quiz_id' => 6],
+
         ];
 
         foreach ($questions as $question) {

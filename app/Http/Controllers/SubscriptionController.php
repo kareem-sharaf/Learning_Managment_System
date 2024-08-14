@@ -55,6 +55,7 @@ class SubscriptionController extends Controller
                 $message = "The request added successfully.";
             }else{
                 $message = "not enough balance .";
+                return response()->json(['message' => 'not enough balance .'], 403);
             }
             } else {
                 $message = "The record already exists.";

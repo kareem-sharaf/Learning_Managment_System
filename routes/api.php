@@ -191,12 +191,11 @@ Route::group(['prefix' => 'subject'], function () {
         Route::get('search_in_subjects', 'search_in_subjects');
 
         Route::middleware('auth:sanctum')->group(function () {
+            Route::get('index', 'index');
             Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
                 Route::post('add_subject', 'add_subject');
                 Route::post('edit_subject', 'edit_subject');
                 Route::post('delete_subject', 'delete_subject');
-                Route::get('index', 'index');
-
             });
             Route::get('buy_subject', 'buy_subject');
         });
@@ -228,18 +227,21 @@ Route::group(['prefix' => 'quiz'], function () {
 //  subscription routes
 Route::group(['prefix' => 'subscription'], function () {
     Route::controller(SubscriptionController::class)->group(function () {
+        Route::middleware('auth:sanctum')->group(function () {
         Route::group(['middleware' => 'checkIfStudent:sanctum'], function () {
-            Route::get('buy_subject', 'buy_subject');
+            Route::post('buy_subject', 'buy_subject');
             Route::get('delete_request', 'delete_request');
             Route::get('show_all_requests_for_student', 'show_all_requests_for_student');
             Route::get('show_one_request_for_student', 'show_one_request_for_student');
         });
+
         Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
             Route::get('show_all_requests_for_teacher', 'show_all_requests_for_teacher');
             Route::get('show_one_request_for_teacher', 'show_one_request_for_teacher');
             Route::post('edit_request', 'edit_request');
             Route::get('delete_request', 'delete_request');
         });
+    });
     });
 });
 

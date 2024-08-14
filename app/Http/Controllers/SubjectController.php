@@ -87,68 +87,71 @@ class SubjectController extends Controller
     we show the all categories and subjects and teachers(role_id = 3)
     if category is educational if the user has year_id we show the subjects in the year else we show the years.*/
     public function index(Request $request)
-{
-    $user = auth::user();
-    $user_id = $user->id;
+    {
+        $user = auth()->user();  // Use auth() helper properly
+        $user_id = $user->id;
 
-    $year_id = $request->query('year_id');
-    $categories = Category::all();
+        $year_id = $request->query('year_id');
+        $categories = Category::all();
 
-    $categoriesWithSubjects = [];
+        $categoriesWithSubjects = [];
 
-    foreach ($categories as $category) {
-        $categoryData = [
-            'category' => $category,
-            'subjects' => collect(),
-            'years' => []
-        ];
+        foreach ($categories as $category) {
+            $categoryData = [
+                'category' => $category,
+                'subjects' => []
+            ];
 
-        if ($category->id == 1 && $year_id) {
-            $subjects = Subject::where('category_id', $category->id)
-                ->whereHas('years_users', function($query) use ($year_id) {
-                    $query->where('teacher_subject_years.year_id', $year_id);
-                })
-                ->get();
-        } else if ($category->id == 1 && !$year_id) {
-            $categoryData['years'] = Year::get();
-            $subjects = collect();
-        } else {
-            $subjects = Subject::where('category_id', $category->id)
-                ->get();
-        }
-
-        foreach ($subjects as $subject) {
-            if (!$subject->exist) {
-                $subscription = Subscription::where('subject_id', $subject->id)
-                    ->where('user_id', $user_id)
-                    ->first();
-
-                if (!$subscription) {
-
-                    continue;
-                }
+            if ($category->id == 1 && $year_id) {
+                $subjects = Subject::where('category_id', $category->id)
+                    ->whereHas('years_users', function($query) use ($year_id) {
+                        $query->where('teacher_subject_years.year_id', $year_id);
+                    })
+                    ->get();
+            } elseif ($category->id == 1 && !$year_id) {
+                $categoryData['years'] = Year::all();
+                $subjects = collect(); // No subjects to add in this case
+            } else {
+                $subjects = Subject::where('category_id', $category->id)->get();
             }
 
-            $subject->users = Subject::whereHas('years_users', function($query) use ($subject) {
-                $query->where('subject_id', $subject->id);
-            })->get();
+            foreach ($subjects as $subject) {
+                if (!$subject->exist) {
+                    $subscription = Subscription::where('subject_id', $subject->id)
+                        ->where('user_id', $user_id)
+                        ->first();
 
-            $subject->users = User::whereIn('id', function($query) use ($subject) {
-                $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $subject->id);
-            })->get();
+                    if (!$subscription) {
+                        continue;
+                    }
+                }
 
-            $categoryData['subjects']->push($subject);
+                // Get users associated with the subject and files
+                $subjectUsers = User::whereIn('id', function($query) use ($subject) {
+                    $query->select('user_id')
+                          ->from('teacher_subject_years')
+                          ->where('subject_id', $subject->id);
+                })->get();
+
+                $subject->users = $subjectUsers;
+                $subject->files = $subject->files;  // Attach files to the subject
+
+                $categoryData['subjects'][] = $subject; // Add the subject to the category
+            }
+
+            // Only add category data if subjects are present or years data exists
+            if (!empty($categoryData['subjects']) || isset($categoryData['years'])) {
+                $categoriesWithSubjects[] = $categoryData;
+            }
         }
 
-        $categoriesWithSubjects[] = $categoryData;
+        $message = "This is all the data";
+        return response()->json([
+            'message' => $message,
+            'data' => $categoriesWithSubjects
+        ]);
     }
 
-    $message = "this is the all data";
-    return response()->json([
-        'message' => $message,
-        'data' => $categoriesWithSubjects
-    ]);
-}
 
 
 //****************************************************************************************************************** */

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Files;
+use App\Models\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +16,7 @@ class FilesController extends Controller
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'content' => 'required|file|mimes:pdf,docx',
+            'file' => 'required|file|mimes:pdf,docx',
             'subject_id' => 'nullable|integer|exists:subjects,id',
             'unit_id' => 'nullable|integer|exists:units,id',
             'lesson_id' => 'nullable|integer|exists:lessons,id',
@@ -32,12 +32,12 @@ class FilesController extends Controller
 
         if (($sender_role_id == '2' || $sender_role_id == '3'||$sender_role_id == '1') ) {
 
-            $fileContent = $request->file('content');
+            $fileContent = $request->file('file');
             $filePath = $fileContent->storeAs('files', $fileContent->getClientOriginalName(), 'public');
 
-            $file = Files::create([
+            $file = File::create([
                 'name' => $validatedData['name'],
-                'content' => $filePath,
+                'file' => $filePath,
                 'subject_id' => $validatedData['subject_id'] ?? null,
                 'unit_id' => $validatedData['unit_id'] ?? null,
                 'lesson_id' => $validatedData['lesson_id'] ?? null,
@@ -60,10 +60,10 @@ class FilesController extends Controller
         $sender_role_id = $sender->role_id;
 
         $validatedData = $request->validate([
-            'id' => 'required|integer|exists:files,id'
+            'id' => 'required|integer|exists:File,id'
         ]);
 
-        $file = Files::find($validatedData['id']);
+        $file = File::find($validatedData['id']);
 
         if (!$file) {
             return response()->json(['error' => 'File not found'], 404);
@@ -89,7 +89,7 @@ class FilesController extends Controller
             if ($request->hasFile('content')) {
                 Storage::delete($file->content);
                 $fileContent = $request->file('content');
-                $filePath = $fileContent->storeAs('files', $fileContent->getClientOriginalName(), 'public');
+                $filePath = $fileContent->storeAs('File', $fileContent->getClientOriginalName(), 'public');
                 $file->content = $filePath;
             }
 
@@ -112,12 +112,12 @@ class FilesController extends Controller
         $sender_role_id = $sender->role_id;
 
         $validatedData = $request->validate([
-            'id' => 'required|integer|exists:files,id'
+            'id' => 'required|integer|exists:File,id'
         ]);
 
         if (($sender_role_id == '2' || $sender_role_id == '3'||$sender_role_id == '1') ) {
 
-            $file = Files::find($validatedData['id']);
+            $file = File::find($validatedData['id']);
 
             if (!$file) {
                 return response()->json(['error' => 'File not found'], 404);
