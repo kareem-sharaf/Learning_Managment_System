@@ -217,20 +217,23 @@ class SubjectController extends Controller
     $subjects = [];
 
     if ($name) {
-        $categories = Category::where('category', 'like', '%' . $name . '%')->get();
+        $categories = Category::where('category', 'like', '%' . $name . '%')
+        ->where('exist', true)->get();
 
         $teachers = User::where('name', 'like', '%' . $name . '%')
             ->where('role_id', 3)
             ->where('email', '!=', 'deleted_user@example.com')
             ->get();
 
-        $units = Unit::where('name', 'like', '%' . $name . '%')->get();
+        $units = Unit::where('name', 'like', '%' . $name . '%')
+        ->where('exist', true) ->get();
 
-        $lessons = Lesson::where('name', 'like', '%' . $name . '%')->get();
+        $lessons = Lesson::where('name', 'like', '%' . $name . '%')
+        ->where('exist', true) ->get();
 
         if ($year_id) {
             $subjects = Subject::where('name', 'like', '%' . $name . '%')
-                ->where('exist', true)  // تأكد من أن المواد التي exist=true فقط هي التي تظهر
+                ->where('exist', true)
                 ->where('category_id', 1)
                 ->whereHas('years_users', function ($q) use ($year_id) {
                     $q->where('teacher_subject_years.year_id', $year_id);
@@ -238,12 +241,12 @@ class SubjectController extends Controller
                 ->orWhere(function ($query) use ($name) {
                     $query->where('name', 'like', '%' . $name . '%')
                           ->where('category_id', '!=', 1)
-                          ->where('exist', true); // تأكد من أن المواد التي exist=true فقط هي التي تظهر
+                          ->where('exist', true);
                 })
                 ->get();
         } else {
             $subjects = Subject::where('name', 'like', '%' . $name . '%')
-                ->where('exist', true)  // تأكد من أن المواد التي exist=true فقط هي التي تظهر
+                ->where('exist', true)  
                 ->get();
         }
 
@@ -489,57 +492,33 @@ class SubjectController extends Controller
     //***********************************************************************************************************************\\
     public function delete_subject(Request $request )
     {
-        $user_id = Auth::id();
+        $user = Auth::user();
+        $user_id=$user->id;
+        $role_id=$user->role_id;
         $subject_id = $request->subject_id;
         $subject = Subject::find($subject_id);
         $teacher_subject=TeacherSubjectYear::where('user_id',$user_id)
         ->where('subject_id',$subject_id)->first();
+        if(($teacher_subject && $role_id==3) || $role_id==2 || $role_id==1){
+            if ($subject) {
+                $subject->update(['exist' => false]);
 
+                Unit::where('subject_id', $subject->id)
+                    ->update(['exist' => false]);
 
-        if ($subject->exist == false) {
-            $message = "The subject doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ]);
+                Lesson::whereIn('unit_id', function($query) use ($subject) {
+                    $query->select('id')
+                        ->from('units')
+                        ->where('subject_id', $subject->id);
+                })->update(['exist' => false]);
+
+                return response()->json(['message' => 'Subject and related items have been deleted successfuly.']);
+            } else {
+                return response()->json(['message' => 'Subject not found.'], 404);
+            }
+        }else{
+            return response()->json(['message' => 'you cannot delete this subject.'], 403);
         }
-        if($teacher_subject){
-
-        // if ($subject->image_url) {
-        //     $oldImagePath = str_replace('/storage', 'public', $subject->image_url);
-        //     if (Storage::exists($oldImagePath)) {
-        //         Storage::delete($oldImagePath);
-        //     }
-        // }
-
-
-        // $video_id = $subject->video_id;
-        // $video = Video::find($video_id);
-        // if ($video) {
-        //     // Delete old video
-        //     $oldVideoPath = str_replace('/storage', 'public', $video->video);
-        //     if (Storage::exists($oldVideoPath)) {
-        //         Storage::delete($oldVideoPath);
-
-        //     }
-        // }
-        // $video->delete();
-        // $subject->years_users()->detach();
-        // $subject->delete();
-
-        $subject->exist = false;
-        $subject->save();
-
-        $message = "The subject deleted successfully.";
-        return response()->json([
-            'message' => $message,
-        ]);
-     }else{
-        $message = "You can't delete the subject.";
-        return response()->json([
-            'message' => $message,
-        ]);
-     }
-
     }
 
     //***********************************************************************************************************************\\

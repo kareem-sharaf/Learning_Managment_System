@@ -21,14 +21,29 @@ class ProfileController extends Controller
     //********************************************************************************************** */
     public function show_all_teachers()
 {
+    $user=Auth::user();
     $teachers = User::where('email', '!=', 'deleted_user@example.com')
         ->where('role_id', 3)
         ->with(['subjects' => function ($query) {
-            $query->where('exist', true); // التصفية حسب عمود exist في جدول المواد
+            $query->where('exist', true);
         }])
         ->get();
 
     $message = "This is the list of all teachers.";
+    return response()->json([
+        'message' => $message,
+        'data' => $teachers,
+    ]);
+}
+    //********************************************************************************************** */
+    public function show_all_students()
+{
+    $user=Auth::user();
+    $teachers = User::where('email', '!=', 'deleted_user@example.com')
+        ->where('role_id', 4)
+        ->get();
+
+    $message = "This is the list of all students.";
     return response()->json([
         'message' => $message,
         'data' => $teachers,

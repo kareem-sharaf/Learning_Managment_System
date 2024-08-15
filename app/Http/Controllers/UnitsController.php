@@ -272,12 +272,6 @@ public function edit_unit(Request $request)
     {
         $user_id = Auth::id();
         $unit = Unit::find($request->unit_id);
-        if (!$unit) {
-            $message = "The unit doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ], 404);
-        }
         $subject_id = $unit->subject_id;
         $SubjectTeacher = TeacherSubjectYear::where('user_id', $user_id)
                                         ->where('subject_id', $subject_id)
@@ -288,32 +282,16 @@ public function edit_unit(Request $request)
             'message' => 'you cannot delete this unit.',
         ], 404);
      }
-        if ($unit->image_url) {
-            $oldImagePath = str_replace('/storage', 'public', $unit->image_url);
-            if (Storage::exists($oldImagePath)) {
-                Storage::delete($oldImagePath);
-            }
-        }
 
-        $video_id = $unit->video_id;
-        $video = Video::find($video_id);
-        if ($video) {
-            // Delete old video
-            $oldVideoPath = str_replace('/storage', 'public', $video->video);
-            if (Storage::exists($oldVideoPath)) {
-                Storage::delete($oldVideoPath);
+     if ($unit) {
+         $unit->update(['exist' => false]);
+         Lesson::where('unit_id', $unit->id)
+               ->update(['exist' => false]);
 
-            }
-        }
-
-        $video->delete();
-        $unit->delete();
-
-        $message = "The unit deleted successfully.";
-        return response()->json([
-            'message' => $message,
-            'data' => $unit,
-        ]);
+         return response()->json(['message' => 'Unit and related lessons have been deleted successfuly.']);
+     } else {
+         return response()->json(['message' => 'Unit not found.'], 404);
+     }
     }
 }
 //******************************************************************************************************************************************* */

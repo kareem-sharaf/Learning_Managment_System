@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('mark');
             $table->boolean('status');
             $table->date('date');
-            // $table->timestamps();
+            $table->timestamps();
         });
     }
 

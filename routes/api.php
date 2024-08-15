@@ -192,7 +192,7 @@ Route::group(['prefix' => 'subject'], function () {
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('index', 'index');
-            Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
+            Route::group(['middleware' => 'CheckIfManagerOrAdminOrTeacher:sanctum'], function () {
                 Route::post('add_subject', 'add_subject');
                 Route::post('edit_subject', 'edit_subject');
                 Route::post('delete_subject', 'delete_subject');
@@ -259,10 +259,10 @@ Route::group(['prefix' => 'unit'], function () {
             Route::post('show_all_units', 'show_all_units');
         });
 
-        Route::group(['middleware' => ['auth:sanctum', 'checkIfTeacher']], function () {
+        Route::group(['middleware' => ['auth:sanctum', 'CheckIfManagerOrAdminOrTeacher']], function () {
             Route::post('add_unit', 'add_unit');
             Route::post('edit_unit', 'edit_unit');
-            Route::delete('delete_unit/{unit_id}', 'delete_unit');
+            Route::post('delete_unit', 'delete_unit');
         });
     });
 });
@@ -271,25 +271,27 @@ Route::group(['prefix' => 'unit'], function () {
 //  profile routes
 Route::group(['prefix' => 'profile'], function () {
     Route::controller(ProfileController::class)->group(function () {
-        Route::get('show_all_teachers', 'show_all_teachers');
+
         Route::post('teachers_in_category', 'teachers_in_category');
         Route::post('show_one_teacher', 'show_one_teacher');
         Route::post('show_one_student', 'show_one_student');
 
         Route::get('show_teachers_in_subject', 'show_teachers_in_subject');
-        Route::get('search_in_teacher', 'search_in_teacher');
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('deleteProfile', 'deleteProfile');
-
+            Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
+                Route::get('show_all_teachers', 'show_all_teachers');
+                Route::get('show_all_students', 'show_all_students');
+                  });
+            });
         });
     });
-});
 
 
 //  lessons routes
 Route::prefix('lessons')->group(function () {
     Route::controller(LessonController::class)->group(function () {
-        Route::middleware(['auth:sanctum', 'checkIfTeacher'])->group(function () {
+        Route::middleware(['auth:sanctum', 'CheckIfManagerOrAdminOrTeacher'])->group(function () {
             Route::post('/add', 'add_lesson');
             Route::post('/update', 'update_lesson');
             Route::post('/delete', 'delete_lesson');
