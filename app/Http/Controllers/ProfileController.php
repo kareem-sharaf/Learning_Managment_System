@@ -144,7 +144,6 @@ class ProfileController extends Controller
 
         switch ($user->role_id) {
             case 4: // Student
-                // Delete the student record entirely
                 $user->delete();
                 return response()->json(['message' => 'Profile deleted successfully'], 200);
 
@@ -153,6 +152,15 @@ class ProfileController extends Controller
                     'email' => 'deleted_user@example.com',
                 ]);
                 return response()->json(['message' => 'Teacher profile marked as deleted'], 200);
+
+            case 1: // Manager
+                $otherManagersCount = User::where('role_id', 1)->where('id', '!=', $user_id)->count();
+                if ($otherManagersCount > 0) {
+                    $user->delete();
+                    return response()->json(['message' => 'Manager profile deleted successfully'], 200);
+                } else {
+                    return response()->json(['message' => 'Cannot delete yourself as the only manager'], 403);
+                }
 
             default:
                 return response()->json(['message' => 'You are not allowed to delete this profile'], 403);

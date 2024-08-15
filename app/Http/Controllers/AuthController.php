@@ -17,10 +17,10 @@ use App\Mail\EmailVerification;
 
 class AuthController extends Controller
 {
-
     public function updateFcmToken(Request $request)
     {
-        Auth::user()->update(['fcm' => $request->fcm]);
+        $user = User::find(Auth::user()->id);
+        $user->update(['fcm' => $request->fcm]);
 
         return response()->json(['message' => 'Updated Successfully']);
     }
@@ -35,7 +35,6 @@ class AuthController extends Controller
                 401
             );
         }
-
         $request->validate([
             'name' => 'required|string|min:4',
             'password' => [
@@ -440,8 +439,51 @@ class AuthController extends Controller
             ['message' => 'Successfully logged out']
         );
     }
+    // index users
+    public function indexUsers()
+    {
+        $currentUser = Auth::user();
 
-    //  delete user
+        if (!$currentUser) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Determine query based on the user's role
+        if ($currentUser->role_id === 1) {
+            // Fetch all users with related address and role (but hide ids)
+            $users = User::with(['address', 'role'])
+                ->select('name', 'email', 'address_id', 'role_id')
+                ->get()
+                ->map(function ($user) {
+                    return [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'address' => $user->address->address,
+                        'role' => $user->role->role,
+                    ];
+                });
+        } elseif ($currentUser->role_id === 2) {
+            // Fetch only teachers and students with related address and role (but hide ids)
+            $users = User::with(['address', 'role'])
+                ->select('name', 'email', 'address_id', 'role_id')
+                ->whereIn('role_id', [3, 4])
+                ->get()
+                ->map(function ($user) {
+                    return [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'address' => $user->address->address,
+                        'role' => $user->role->role,
+                    ];
+                });
+        } else {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        return response()->json($users, 200);
+    }
+
+    // delete user
     public function deleteUser(Request $request)
     {
         $currentUser = Auth::user();
@@ -463,16 +505,7 @@ class AuthController extends Controller
         }
 
         if ($userToDelete->id === $currentUser->id) {
-
-            $otherManagersCount = User::where('role_id', 1)->where('id', '!=', $currentUser->id)->count();
-
-            if ($otherManagersCount > 0) {
-
-                $userToDelete->delete();
-                return response()->json(['message' => 'Manager deleted successfully'], 200);
-            } else {
-                return response()->json(['message' => 'Cannot delete yourself as the only manager'], 403);
-            }
+            return response()->json(['message' => 'You cannot delete yourself'], 403);
         }
 
         switch ($userToDelete->role_id) {
@@ -498,11 +531,10 @@ class AuthController extends Controller
         }
     }
 
+
     //     seed users
     public function seedUsers(Request $request)
     {
         Artisan::call('db:seed', ['--class' => 'UserSeeder']);
     }
-
-
 }

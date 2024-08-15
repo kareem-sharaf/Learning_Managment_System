@@ -58,17 +58,18 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('resendEmail', 'resendEmail');
         Route::post('setPassword', 'setPassword');
         Route::get('indexAddressYears', 'indexAddressYears');
-
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('logout', 'logout');
         });
-
         Route::group(['middleware' => ['auth:sanctum', 'checkIfManager']], function () {
             Route::post('deleteUser', 'deleteUser');
         });
+        Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
+            Route::get('indexUsers', 'indexUsers');
+        });
     });
     Route::controller(UserVerificationController::class)->group(function () {
-        Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
+        Route::group(['middleware' => ['auth:sanctum', 'checkIfManager']], function () {
             Route::post('createUserWeb', 'createUserWeb');
         });
         Route::post('createUser', 'createUser');
