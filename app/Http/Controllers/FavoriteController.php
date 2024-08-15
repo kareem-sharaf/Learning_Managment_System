@@ -66,7 +66,7 @@ class FavoriteController extends Controller
 
         if ($existingFavorite) {
             $existingFavorite->delete();
-            return response()->json(['message' => 'Successfully deleted'], 400);
+            return response()->json(['message' => 'Successfully deleted'], 200);
         }
 
         $favorite = new Favorite([
