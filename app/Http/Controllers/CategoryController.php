@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Subject;
+use App\Models\Unit;
+use App\Models\Lesson;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
@@ -185,21 +189,35 @@ class CategoryController extends Controller
     public function destroy(Request $request)
     {
         $user = Auth::user();
-        $category = Category::where('category', $request->category)->first();
+        $category_id=$request->category_id;
+        $category = Category::find($category_id);
 
-        if (!$category) {
-            return response()->json(
-                ['message' => 'Category not found!'],
-                404
-            );
+        if ($category) {
+            $category->update(['exist' => false]);
+
+            Subject::where('category_id', $category->id)
+                   ->update(['exist' => false]);
+
+            Unit::whereIn('subject_id', function($query) use ($category) {
+                $query->select('id')
+                      ->from('subjects')
+                      ->where('category_id', $category->id);
+            })->update(['exist' => false]);
+
+            Lesson::whereIn('unit_id', function($query) use ($category) {
+                $query->select('id')
+                      ->from('units')
+                      ->whereIn('subject_id', function($query) use ($category) {
+                          $query->select('id')
+                                ->from('subjects')
+                                ->where('category_id', $category->id);
+                      });
+            })->update(['exist' => false]);
+
+            return response()->json(['message' => 'Category and related items have been deleted successfuly.']);
+        } else {
+            return response()->json(['message' => 'Category not found.'], 404);
         }
-
-        $category->delete();
-
-        return response()->json(
-            ['message' => 'Category deleted successfully'],
-            200
-        );
     }
 
     //  force delete category

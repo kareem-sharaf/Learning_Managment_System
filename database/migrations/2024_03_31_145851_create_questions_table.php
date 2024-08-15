@@ -18,7 +18,7 @@ return new class extends Migration
             $table->char('correct_answer');
             $table->integer('mark');
             $table->foreignId('quiz_id')->constrained('quizzes')->onDelete('cascade');
-            // $table->timestamps();
+            $table->timestamps();
         });
     }
 
