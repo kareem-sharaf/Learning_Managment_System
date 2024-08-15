@@ -16,7 +16,8 @@ class Lesson extends Model
         'price',
         'video_id',
         'file_id',
-        'teacher_id'
+        'teacher_id',
+        'exist'
     ];
 
     public function unit()

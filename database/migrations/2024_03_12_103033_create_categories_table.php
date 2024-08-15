@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('category')->unique();
             $table->string('image_url')->nullable();
+
             $table->softDeletes();
+            $table->boolean('exist')->default(true);
+
         });
     }
 

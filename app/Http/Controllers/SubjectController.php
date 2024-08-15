@@ -210,71 +210,71 @@ class SubjectController extends Controller
 {
     $year_id = $request->query('year_id');
     $name = $request->query('name');
-    $categories= [];
-    $teachers= [];
-    $units= [];
-    $lessons= [];
-    $subjects= [];
-    if($name){
+    $categories = [];
+    $teachers = [];
+    $units = [];
+    $lessons = [];
+    $subjects = [];
 
-    $categories = Category::where('category', 'like', '%' . $name . '%')
-        ->get();
+    if ($name) {
+        $categories = Category::where('category', 'like', '%' . $name . '%')->get();
 
-    $teachers = User::where('name', 'like', '%' . $name . '%')
-    ->where('role_id',3)
-        ->get();
-
-    $units = Unit::where('name', 'like', '%' . $name . '%')
+        $teachers = User::where('name', 'like', '%' . $name . '%')
+            ->where('role_id', 3)
+            ->where('email', '!=', 'deleted_user@example.com')
             ->get();
 
-    $lessons = Lesson::where('name', 'like', '%' . $name . '%')
-            ->get();
+        $units = Unit::where('name', 'like', '%' . $name . '%')->get();
 
-        if($year_id){
+        $lessons = Lesson::where('name', 'like', '%' . $name . '%')->get();
+
+        if ($year_id) {
             $subjects = Subject::where('name', 'like', '%' . $name . '%')
+                ->where('exist', true)  // تأكد من أن المواد التي exist=true فقط هي التي تظهر
                 ->where('category_id', 1)
-                ->whereHas('years_users', function($q) use ($year_id) {
+                ->whereHas('years_users', function ($q) use ($year_id) {
                     $q->where('teacher_subject_years.year_id', $year_id);
                 })
-                ->orWhere(function($query) use ($name) {
+                ->orWhere(function ($query) use ($name) {
                     $query->where('name', 'like', '%' . $name . '%')
-                          ->where('category_id', '!=', 1);
+                          ->where('category_id', '!=', 1)
+                          ->where('exist', true); // تأكد من أن المواد التي exist=true فقط هي التي تظهر
                 })
                 ->get();
-        }else{
-        $subjects = Subject::where('name', 'like', '%' . $name . '%')
-        ->get();
+        } else {
+            $subjects = Subject::where('name', 'like', '%' . $name . '%')
+                ->where('exist', true)  // تأكد من أن المواد التي exist=true فقط هي التي تظهر
+                ->get();
+        }
+
+        foreach ($subjects as $item) {
+            $item->users = User::whereIn('id', function ($query) use ($item) {
+                $query->select('user_id')
+                      ->from('teacher_subject_years')
+                      ->where('subject_id', $item->id);
+            })->get();
+        }
+
+        return response()->json([
+            'message' => "These are the items.",
+            'categories' => $categories,
+            'teachers' => $teachers,
+            'units' => $units,
+            'lessons' => $lessons,
+            'subjects' => $subjects,
+        ]);
+    } else {
+        return response()->json([
+            'message' => "These are the items.",
+            'categories' => $categories,
+            'teachers' => $teachers,
+            'units' => $units,
+            'lessons' => $lessons,
+            'subjects' => $subjects,
+        ]);
     }
-
-    foreach ($subjects as $item) {
-        $item->users = Subject::whereHas('years_users', function($query) use ($item) {
-            $query->where('subject_id', $item->id);
-        })->get();
-
-        $item->users = User::whereIn('id', function($query) use ($item) {
-            $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $item->id);
-        })->get();
-    }
-
-    return response()->json([
-        'message' => "These are the items.",
-        'categories' => $categories,
-        'teachers' =>$teachers,
-        'units' =>$units,
-        'lessons' =>$lessons,
-        'subjects' =>$subjects,
-    ]);
- }else{
-    return response()->json([
-        'message' => "These are the items.",
-        'categories' => $categories,
-        'teachers' =>$teachers,
-        'units' =>$units,
-        'lessons' =>$lessons,
-        'subjects' =>$subjects,
-    ]);
- }
 }
+
 
 //************************************************************************************************************** */
     public function add_subject(Request $request)

@@ -29,7 +29,7 @@ return new class extends Migration
             $table->integer('points')->default(0);
             $table->string('fcm')->nullable();
             $table->integer('balance')->default(0);
-            $table->boolean('exist')->default(true);
+            // $table->boolean('exist')->default(true);
             $table->rememberToken();
             // $table->timestamps();
         });

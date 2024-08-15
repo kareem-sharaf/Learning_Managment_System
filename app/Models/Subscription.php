@@ -17,4 +17,8 @@ class Subscription extends Model
     public $timestamps = false;
 
     use HasFactory;
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class, 'subject_id');
+    }
 }

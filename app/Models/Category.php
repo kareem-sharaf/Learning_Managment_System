@@ -13,6 +13,7 @@ class Category extends Model
     protected $fillable = [
         'category',
         'image_url',
+        'exist'
     ];
 
     public $timestamps = false;

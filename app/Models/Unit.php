@@ -16,6 +16,7 @@ class Unit extends Model
         'video_id',
         'file_id',
         'subject_id',
+        'exist'
     ];
     public $timestamps=false;
 

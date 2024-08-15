@@ -10,49 +10,50 @@ use Illuminate\Support\Facades\Auth;
 class FilesController extends Controller
 {
     public function store(Request $request)
-    {
-        $sender = Auth::user();
-        $sender_role_id = $sender->role_id;
+{
+    $sender = Auth::user();
+    $sender_role_id = $sender->role_id;
 
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'file' => 'required|file|mimes:pdf,docx',
-            'subject_id' => 'nullable|integer|exists:subjects,id',
-            'unit_id' => 'nullable|integer|exists:units,id',
-            'lesson_id' => 'nullable|integer|exists:lessons,id',
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'file' => 'required|file|mimes:pdf,docx',
+        'subject_id' => 'nullable|integer|exists:subjects,id',
+        'unit_id' => 'nullable|integer|exists:units,id',
+        'lesson_id' => 'nullable|integer|exists:lessons,id',
+    ]);
+
+    $count = collect([$validatedData['subject_id'], $validatedData['unit_id'], $validatedData['lesson_id']])
+        ->filter()
+        ->count();
+
+    if ($count > 1) {
+        return response()->json(['error' => 'Only one of subject_id, unit_id, or lesson_id must be selected'], 422);
+    }
+
+    if (in_array($sender_role_id, ['1', '2', '3'])) {
+
+        $fileContent = $request->file('file');
+        $filePath = $fileContent->storeAs('files', $fileContent->getClientOriginalName(), 'public');
+
+        $file = File::create([
+            'name' => $validatedData['name'],
+            'file' => $filePath,
+            'subject_id' => $validatedData['subject_id'] ?? null,
+            'unit_id' => $validatedData['unit_id'] ?? null,
+            'lesson_id' => $validatedData['lesson_id'] ?? null,
         ]);
 
-        $count = collect([$validatedData['subject_id'], $validatedData['unit_id'], $validatedData['lesson_id']])
-            ->filter()
-            ->count();
+        $fileUrl = Storage::url($filePath);
 
-        if ($count > 1) {
-            return response()->json(['error' => 'Only one of subject_id, unit_id, or lesson_id must be selected'], 422);
-        }
-
-        if (($sender_role_id == '2' || $sender_role_id == '3'||$sender_role_id == '1') ) {
-
-            $fileContent = $request->file('file');
-            $filePath = $fileContent->storeAs('files', $fileContent->getClientOriginalName(), 'public');
-
-            $file = File::create([
-                'name' => $validatedData['name'],
-                'file' => $filePath,
-                'subject_id' => $validatedData['subject_id'] ?? null,
-                'unit_id' => $validatedData['unit_id'] ?? null,
-                'lesson_id' => $validatedData['lesson_id'] ?? null,
-            ]);
-
-            $fileUrl = Storage::url($filePath);
-
-            return response()->json([
-                'file' => $file,
-                'file_url' => $fileUrl
-            ], 201);
-        }
-
-        return response()->json(['error' => 'Unauthorized'], 403);
+        return response()->json([
+            'file' => $file,
+            'file_url' => $fileUrl
+        ], 201);
     }
+
+    return response()->json(['error' => 'Unauthorized'], 403);
+}
+
 
     public function update(Request $request)
     {

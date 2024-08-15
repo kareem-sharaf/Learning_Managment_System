@@ -37,7 +37,7 @@ class User extends Authenticatable
         'image_id',
         'fcm',
         'balance',
-        'exist'
+        // 'exist'
 
     ];
 
@@ -133,5 +133,15 @@ class User extends Authenticatable
     public function createdQuizzes()
     {
         return $this->hasMany(Quiz::class, 'teacher_id');
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'user_id');
+    }
+
+    public function studentExams()
+    {
+        return $this->hasMany(StudentExam::class, 'user_id');
     }
 }
