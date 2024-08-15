@@ -21,7 +21,9 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->foreignId('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
             $table->foreignId('file_id')->nullable()->constrained('files')->cascadeOnDelete();
-            $table->timestamps();
+            $table->boolean('exist')->default(true);
+
+            // $table->timestamps();
         });
     }
 

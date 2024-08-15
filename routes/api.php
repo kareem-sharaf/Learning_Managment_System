@@ -210,18 +210,24 @@ Route::group(['prefix' => 'quiz'], function () {
         Route::post('show_all_to_student', 'show_all_to_student');
         Route::post('show_all_to_teacher', 'show_all_to_teacher');
         Route::middleware('auth:sanctum')->group(function () {
-            Route::group(['middleware'], function () {
-                Route::post('show_to_all', 'show_to_all');
+
+            Route::group(['middleware' => 'checkIfStudent:sanctum'], function () {
+                Route::post('take_quiz', 'take_quiz');
             });
-        });
-        Route::middleware('auth:sanctum')->group(function () {
+
             Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
                 Route::get('show_one_to_teacher', 'show_one_to_teacher');
                 Route::post('add_quiz', 'add_quiz');
                 Route::post('edit_quiz', 'edit_quiz');
                 Route::get('delete_quiz/{quiz_id}', 'delete_quiz');
             });
+
+            Route::group(['middleware'], function () {
+                Route::post('show_to_all', 'show_to_all');
+            });
+
         });
+
     });
 });
 
@@ -232,7 +238,7 @@ Route::group(['prefix' => 'subscription'], function () {
         Route::group(['middleware' => 'checkIfStudent:sanctum'], function () {
             Route::post('buy_subject', 'buy_subject');
             Route::get('delete_request', 'delete_request');
-            Route::get('show_all_requests_for_student', 'show_all_requests_for_student');
+            Route::get('show_all_courses_for_student', 'show_all_courses_for_student');
             Route::get('show_one_request_for_student', 'show_one_request_for_student');
         });
 
@@ -266,11 +272,12 @@ Route::group(['prefix' => 'unit'], function () {
 //  profile routes
 Route::group(['prefix' => 'profile'], function () {
     Route::controller(ProfileController::class)->group(function () {
-        Route::get('show_one_teacher', 'show_one_teacher');
-        Route::get('show_one_student', 'show_one_student');
         Route::get('show_all_teachers', 'show_all_teachers');
+        Route::post('teachers_in_category', 'teachers_in_category');
+        Route::post('show_one_teacher', 'show_one_teacher');
+        Route::post('show_one_student', 'show_one_student');
+
         Route::get('show_teachers_in_subject', 'show_teachers_in_subject');
-        Route::get('teachers_in_category/{category_id}', 'teachers_in_category');
         Route::get('search_in_teacher', 'search_in_teacher');
         Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('deleteProfile', 'deleteProfile');
@@ -302,6 +309,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/update', 'update');
             Route::post('/destroy', 'destroy');
             Route::get('/getComments', 'getComments');
+            Route::post('/teacherReply', 'teacherReply');
         });
     });
 });
