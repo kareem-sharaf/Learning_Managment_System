@@ -445,12 +445,10 @@ class AuthController extends Controller
         $currentUser = Auth::user();
 
         if (!$currentUser) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
         }
 
-        // Determine query based on the user's role
         if ($currentUser->role_id === 1) {
-            // Fetch all users with related address and role (but hide ids)
             $users = User::with(['address', 'role'])
                 ->select('name', 'email', 'address_id', 'role_id')
                 ->get()
@@ -463,7 +461,6 @@ class AuthController extends Controller
                     ];
                 });
         } elseif ($currentUser->role_id === 2) {
-            // Fetch only teachers and students with related address and role (but hide ids)
             $users = User::with(['address', 'role'])
                 ->select('name', 'email', 'address_id', 'role_id')
                 ->whereIn('role_id', [3, 4])
@@ -477,10 +474,10 @@ class AuthController extends Controller
                     ];
                 });
         } else {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return response()->json(['status' => 'error', 'message' => 'Forbidden'], 403);
         }
 
-        return response()->json($users, 200);
+        return response()->json(['status' => 'success', 'data' => $users], 200);
     }
 
     // delete user
@@ -489,7 +486,7 @@ class AuthController extends Controller
         $currentUser = Auth::user();
 
         if ($currentUser->role_id !== 1) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $request->validate([
@@ -497,34 +494,37 @@ class AuthController extends Controller
         ]);
 
         $userId = $request->input('user_id');
+
         $userToDelete = User::find($userId);
 
         if (!$userToDelete) {
-            return response()->json(['status' => 'error', 'message' => 'User not found'], 404);
+            return response()->json(['message' => 'User not found'], 404);
         }
 
         if ($userToDelete->id === $currentUser->id) {
-            return response()->json(['status' => 'error', 'message' => 'You cannot delete yourself'], 403);
+            return response()->json(['message' => 'You cannot delete yourself'], 403);
         }
 
         switch ($userToDelete->role_id) {
-            case 1: // Manager
+            case 1: // Another Manager
                 $userToDelete->delete();
-                return response()->json(['status' => 'success', 'message' => 'Manager deleted successfully'], 200);
+                return response()->json(['message' => 'Manager deleted successfully'], 200);
 
             case 2: // Admin
                 $userToDelete->delete();
-                return response()->json(['status' => 'success', 'message' => 'Admin deleted successfully'], 200);
+                return response()->json(['message' => 'Admin deleted successfully'], 200);
 
             case 3: // Teacher
-                $userToDelete->update(['email' => 'deleted_user@example.com']);
-                return response()->json(['status' => 'success', 'message' => 'Teacher marked as deleted'], 200);
+                $userToDelete->update([
+                    'email' => 'deleted_user@example.com',
+                ]);
+                return response()->json(['message' => 'Teacher marked as deleted'], 200);
 
             case 4: // Student
-                return response()->json(['status' => 'error', 'message' => 'You are not allowed to delete a student'], 403);
+                return response()->json(['message' => 'You are not allowed to delete a student'], 403);
 
             default:
-                return response()->json(['status' => 'error', 'message' => 'Invalid role'], 400);
+                return response()->json(['message' => 'Invalid role'], 400);
         }
     }
 
