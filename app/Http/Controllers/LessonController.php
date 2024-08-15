@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Alaouy\Youtube\Facades\Youtube;
 use App\Models\File;
+use App\Models\Unit;
+use App\Models\TeacherSubjectYear;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 // use Illuminate\Support\Facades\File;
@@ -16,6 +19,7 @@ class LessonController extends Controller
 {
     public function add_lesson(Request $request)
     {
+        $user=Auth::user();
         $request->validate([
             'name' => 'required|string|max:255',
             'unit_id' => 'required',
@@ -86,180 +90,148 @@ class LessonController extends Controller
     }
 
     public function update_lesson(Request $request)
-{
-    $request->validate([
-        'lesson_id' => 'required|exists:lessons,id|numeric',
-        'name' => 'nullable|string|max:255',
-        'unit_id' => 'nullable|exists:units,id',
-        'price' => 'nullable|numeric|min:0',
-        'description' => 'nullable|string|max:255',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
-        'video.*' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
-        'video_name.*' => 'nullable|string|max:255',
-        'file.*' => 'nullable|file|max:204800',
-        'file_name.*' => 'nullable|string|max:255',
-    ]);
-
-    $lesson = Lesson::findOrFail($request->lesson_id);
-
-    if (Auth::id() !== $lesson->teacher_id && Auth::user()->role_id !== '2') {
-        return response()->json(['error' => 'Unauthorized'], 403);
-    }
-
-    if ($request->hasFile('image')) {
-        if ($lesson->image) {
-            $oldImagePath = str_replace('/storage', 'public', $lesson->image);
-            if (Storage::exists($oldImagePath)) {
-                Storage::delete($oldImagePath);
-            }
-        }
-
-        $imagePath = $request->file('image')->store('lessons_images', 'public');
-        $lesson->image = Storage::url($imagePath);
-    }
-
-    if ($request->hasFile('video')) {
-        $video_id = $lesson->video_id;
-        $video = Video::find($video_id);
-        if ($video) {
-            // Delete old video
-            $oldVideoPath = str_replace('/storage', 'public', $video->video);
-            if (Storage::exists($oldVideoPath)) {
-                Storage::delete($oldVideoPath);
-            }
-        } else {
-            $video = new Video();
-            $video->lesson_id = $lesson->id;
-        }
-
-        $videoPath = $request->file('video')->store('videos', 'public');
-        $video->video = Storage::url($videoPath);
-
-        if ($request->filled('video_name')) {
-            $video->name = $request->video_name;
-        }
-
-        $video->save();
-        $lesson->video_id = $video->id;
-    }
-
-
-
-
-
-
-
-
-    if ($request->hasFile('file')) {
-        $file_id = $lesson->file_id;
-        $file = File::find($file_id);
-        if ($file) {
-            // Delete old file
-            $oldfilePath = str_replace('/storage', 'public', $file->file);
-            if (Storage::exists($oldfilePath)) {
-                Storage::delete($oldfilePath);
-            }
-        } else {
-            // Create new file instance if it doesn't exist
-            $file = new File();
-            $file->lesson_id = $lesson->id;
-        }
-
-        // Store new file
-        $filePath = $request->file('file')->store('files', 'public');
-        $file->file = Storage::url($filePath);
-
-        if ($request->filled('file_name')) {
-            $file->name = $request->file_name;
-        }
-
-        $file->save();
-        $lesson->file_id = $file->id;
-    }
-
-    // تحديث معلومات الدرس
-    if ($request->filled('name')) {
-        $lesson->name = $request->name;
-    }
-    if ($request->filled('price')) {
-        $lesson->price = $request->price;
-    }
-    if ($request->filled('description')) {
-        $lesson->description = $request->description;
-    }
-    if ($request->filled('unit_id')) {
-        $lesson->unit_id = $request->unit_id;
-    }
-
-    $lesson->save();
-    $lesson->load('videos', 'files');
-
-    return response()->json([
-        'message' => 'Lesson updated successfully',
-        'data' => $lesson,
-        'status' => 200,
-    ]);
-}
-
-
-
-
-
-    public function delete_lesson(Request $request)
     {
+        $user=Auth::user();
+
         $request->validate([
             'lesson_id' => 'required|exists:lessons,id|numeric',
+            'name' => 'nullable|string|max:255',
+            'unit_id' => 'nullable|exists:units,id',
+            'price' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'video.*' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
+            'video_name.*' => 'nullable|string|max:255',
+            'file.*' => 'nullable|file|max:204800',
+            'file_name.*' => 'nullable|string|max:255',
         ]);
 
         $lesson = Lesson::findOrFail($request->lesson_id);
 
-        // Check if the current user is the owner of the lesson or an admin
         if (Auth::id() !== $lesson->teacher_id && Auth::user()->role_id !== '2') {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $video_id = $lesson->video_id;
-        $video = Video::find($video_id);
-        if ($video) {
-            // Delete old video
-            $oldVideoPath = str_replace('/storage', 'public', $video->video);
-            if (Storage::exists($oldVideoPath)) {
-                Storage::delete($oldVideoPath);
-
+        if ($request->hasFile('image')) {
+            if ($lesson->image) {
+                $oldImagePath = str_replace('/storage', 'public', $lesson->image);
+                if (Storage::exists($oldImagePath)) {
+                    Storage::delete($oldImagePath);
+                }
             }
-        }
-        $video->delete();
 
-
-
-        $file_id = $lesson->file_id;
-        $file = File::find($file_id);
-        if ($file) {
-            // Delete old file
-            $oldfilePath = str_replace('/storage', 'public', $file->file);
-            if (Storage::exists($oldfilePath)) {
-                Storage::delete($oldfilePath);
-
-            }
-        }
-        $file->delete();
-        if ($lesson->image) {
-            $imagePath = str_replace('/storage', 'public', $lesson->image);
-            if (Storage::exists($imagePath)) {
-                Storage::delete($imagePath);
-            }
+            $imagePath = $request->file('image')->store('lessons_images', 'public');
+            $lesson->image = Storage::url($imagePath);
         }
 
-        if ($lesson->delete()) {
-            return response()->json([
-                'message' => 'Lesson and associated files deleted successfully',
-                'status' => 200,
-            ]);
+        if ($request->hasFile('video')) {
+            $video_id = $lesson->video_id;
+            $video = Video::find($video_id);
+            if ($video) {
+                // Delete old video
+                $oldVideoPath = str_replace('/storage', 'public', $video->video);
+                if (Storage::exists($oldVideoPath)) {
+                    Storage::delete($oldVideoPath);
+                }
+            } else {
+                $video = new Video();
+                $video->lesson_id = $lesson->id;
+            }
+
+            $videoPath = $request->file('video')->store('videos', 'public');
+            $video->video = Storage::url($videoPath);
+
+            if ($request->filled('video_name')) {
+                $video->name = $request->video_name;
+            }
+
+            $video->save();
+            $lesson->video_id = $video->id;
+        }
+
+
+
+
+
+
+
+
+        if ($request->hasFile('file')) {
+            $file_id = $lesson->file_id;
+            $file = File::find($file_id);
+            if ($file) {
+                // Delete old file
+                $oldfilePath = str_replace('/storage', 'public', $file->file);
+                if (Storage::exists($oldfilePath)) {
+                    Storage::delete($oldfilePath);
+                }
+            } else {
+                // Create new file instance if it doesn't exist
+                $file = new File();
+                $file->lesson_id = $lesson->id;
+            }
+
+            // Store new file
+            $filePath = $request->file('file')->store('files', 'public');
+            $file->file = Storage::url($filePath);
+
+            if ($request->filled('file_name')) {
+                $file->name = $request->file_name;
+            }
+
+            $file->save();
+            $lesson->file_id = $file->id;
+        }
+
+        // تحديث معلومات الدرس
+        if ($request->filled('name')) {
+            $lesson->name = $request->name;
+        }
+        if ($request->filled('price')) {
+            $lesson->price = $request->price;
+        }
+        if ($request->filled('description')) {
+            $lesson->description = $request->description;
+        }
+        if ($request->filled('unit_id')) {
+            $lesson->unit_id = $request->unit_id;
+        }
+
+        $lesson->save();
+        $lesson->load('videos', 'files');
+
+        return response()->json([
+            'message' => 'Lesson updated successfully',
+            'data' => $lesson,
+            'status' => 200,
+        ]);
+    }
+
+    public function delete_lesson(Request $request)
+    {
+        $user=Auth::user();
+        $user_id=$user->id;
+        $lesson_id=$request->lesson_id;
+        $lesson = Lesson::find($lesson_id);
+        $unit_id=$lesson->unit_id;
+        $unit = Unit::find($unit_id);
+        $subject_id = $unit->subject_id;
+        $SubjectTeacher = TeacherSubjectYear::where('user_id', $user_id)
+                                        ->where('subject_id', $subject_id)
+                                        ->first();
+
+     if (!$SubjectTeacher) {
+        return response()->json([
+            'message' => 'you cannot delete this unit.',
+        ], 404);
+     }
+
+        if ($lesson) {
+            $lesson->update(['exist' => false]);
+
+            return response()->json(['message' => 'Lesson has been deleted successfuly.']);
         } else {
-            return response()->json([
-                'message' => 'Lesson not deleted',
-                'status' => 400,
-            ]);
+            return response()->json(['message' => 'Lesson not found.'], 404);
         }
     }
 

@@ -69,5 +69,8 @@ class Kernel extends HttpKernel
         'checkIfAdmin' => \App\Http\Middleware\checkIfAdmin::class,
         'checkIfStudent' => \App\Http\Middleware\checkIfStudent::class,
         'checkIfManagerOrAdmin' => \App\Http\Middleware\CheckIfManagerOrAdmin::class,
+        'CheckIfManagerOrAdminOrTeacher' => \App\Http\Middleware\CheckIfManagerOrAdminOrTeacher::class,
+
+
     ];
 }

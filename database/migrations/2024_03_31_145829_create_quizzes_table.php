@@ -21,7 +21,7 @@ class CreateQuizzesTable extends Migration
             $table->boolean('public');
             $table->morphs('type');
             $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
-            // $table->timestamps();
+            $table->timestamps();
         });
     }
 

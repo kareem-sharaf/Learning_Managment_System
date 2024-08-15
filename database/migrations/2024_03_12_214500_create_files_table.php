@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('unit_id')->nullable()->constrained('units')->cascadeOnDelete();
             $table->unsignedBigInteger('lesson_id')->nullable()->constrained('lessons')->cascadeOnDelete();
 
-            // $table->timestamps();
+            $table->timestamps();
         });
     }
 

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('file_id')->nullable()->constrained('files')->cascadeOnDelete();
             $table->boolean('exist')->default(true);
 
-            // $table->timestamps();
+            $table->timestamps();
         });
     }
 
