@@ -20,10 +20,10 @@ public function user()
     return $this->belongsTo(User::class);
 }
 
-public function parentComment()
-    {
-        return $this->belongsTo(Comment::class, 'reply_to');
-    }
+// public function parentComment()
+//     {
+//         return $this->belongsTo(Comment::class, 'reply_to');
+//     }
     public function replies()
     {
         return $this->hasMany(Comment::class, 'reply_to');

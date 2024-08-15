@@ -9,7 +9,7 @@ trait SendNotificationsService
 {
     public function sendByFcm(string $fcm, array $message)
     {
-        $apiUrl = 'https://fcm.googleapis.com/v1/projects/firbase-project-version1/messages:send';
+        $apiUrl = 'https://fcm.googleapis.com/v1/projects/lms-project-622e0/messages:send';
         $access_token = Cache::remember('access_token', now()->addHour(), function () use ($apiUrl) {
             $credentialsFilePath = storage_path('app/fcm.json');
             $client = new \Google_Client();
