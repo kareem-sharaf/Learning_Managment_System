@@ -85,7 +85,7 @@ class CommentsController extends Controller
                 'Id' => $comment->id,
                 'name' => $user->name,
                 'user_image'=> $user->image_id,
-                'Replies' => [] 
+                'Replies' => []
             ]
         ], 200);
     }
@@ -161,6 +161,8 @@ class CommentsController extends Controller
         $commentId = $validatedData['r'];
         $comment = Comment::find($commentId);
 
+
+
         if (!$comment) {
             return response()->json(['data' => ['error' => 'Comment not found']], 404);
         }
@@ -178,7 +180,7 @@ class CommentsController extends Controller
         $reply->reply_to = $commentId;
         $reply->save();
 
-        $originalUser = User::find($comment->user_id);
+        $originalUser = User::find($comment->reply_to);
         $fcm = $originalUser->fcm;
 
         $message = [
@@ -189,6 +191,7 @@ class CommentsController extends Controller
                 'reply_id' => $reply->id,
                 'lesson_id' => $comment->lesson_id,
                 'teacher_id' => $user->id,
+
             ]
         ];
         $this->sendByFcm($fcm, $message);
@@ -199,6 +202,7 @@ class CommentsController extends Controller
                 'Id' => $reply->id,
                 'name' => $user->name,
                 'user_image' => $user->image_id,
+                'fcm'=>$user->fcm
 
             ]
         ], 201);
