@@ -456,8 +456,8 @@ class AuthController extends Controller
                     return [
                         'name' => $user->name,
                         'email' => $user->email,
-                        'address' => $user->address->address,
-                        'role' => $user->role->role,
+                        'address' => $user->address ? $user->address->address : 'No Address',
+                        'role' => $user->role ? $user->role->role : 'No Role',
                     ];
                 });
         } elseif ($currentUser->role_id === 2) {
@@ -469,8 +469,8 @@ class AuthController extends Controller
                     return [
                         'name' => $user->name,
                         'email' => $user->email,
-                        'address' => $user->address->address,
-                        'role' => $user->role->role,
+                        'address' => $user->address ? $user->address->address : 'No Address',
+                        'role' => $user->role ? $user->role->role : 'No Role',
                     ];
                 });
         } else {
@@ -479,6 +479,7 @@ class AuthController extends Controller
 
         return response()->json(['status' => 'success', 'data' => $users], 200);
     }
+
 
     // delete user
     public function deleteUser(Request $request)
