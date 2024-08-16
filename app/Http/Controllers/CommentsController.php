@@ -85,7 +85,7 @@ class CommentsController extends Controller
                 'Id' => $comment->id,
                 'name' => $user->name,
                 'user_image'=> $user->image_id,
-                'Replies' => [] 
+                'Replies' => []
             ]
         ], 200);
     }
@@ -178,7 +178,7 @@ class CommentsController extends Controller
         $reply->reply_to = $commentId;
         $reply->save();
 
-        $originalUser = User::find($comment->user_id);
+        $originalUser = User::find($comment->reply_to);
         $fcm = $originalUser->fcm;
 
         $message = [
