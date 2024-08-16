@@ -155,7 +155,9 @@ class UserVerificationController extends Controller
 
         if ($user && $user->verificationCode === $request->verificationCode) {
 
-            $user->delete();
+            $user->verificationCode = null;
+            $user->verified = 1;
+            $user->save();
 
             return response()->json(
                 [

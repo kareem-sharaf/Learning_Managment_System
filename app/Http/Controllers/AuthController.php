@@ -19,8 +19,8 @@ class AuthController extends Controller
 {
     public function updateFcmToken(Request $request)
     {
-        $user = User::find(Auth::user()->id);
-        $user->update(['fcm' => $request->fcm]);
+        // $user = User::find(Auth::user()->id);
+        Auth::user()->update(['fcm' => $request->fcm]);
 
         return response()->json(['message' => 'Updated Successfully']);
     }
