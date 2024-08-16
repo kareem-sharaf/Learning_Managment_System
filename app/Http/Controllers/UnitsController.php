@@ -80,11 +80,7 @@ class UnitsController extends Controller
         ]);
     }
 }
-
-
-
 //************************************************************************************************************** */
-
     public function search_to_unit(Request $request)
     {
         $validator = Validator::make($request->all(), [

@@ -30,6 +30,10 @@ class DatabaseSeeder extends Seeder
             MessageSeeder::class,
             QuizSeeder::class,
             QuestionSeeder::class,
+            ProgressSeeder::class,
+            StudentExamsSeeder::class,
+            SubscriptionSeeder::class,
+
                 ]);
     }
 }

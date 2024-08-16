@@ -102,7 +102,7 @@ class SubscriptionController extends Controller
     $subjects = Subscription::where('user_id', $user_id)
                             ->with('subject')
                             ->get()
-                            ->pluck('subject'); 
+                            ->pluck('subject');
 
     return response()->json([
         'message' => "These are the courses the student is subscribed to.",

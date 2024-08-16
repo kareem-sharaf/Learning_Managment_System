@@ -13,8 +13,8 @@ class Unit extends Model
         'name',
         'description',
         'image_url',
-        'video_id',
-        'file_id',
+        // 'video_id',
+        // 'file_id',
         'subject_id',
         'exist'
     ];
