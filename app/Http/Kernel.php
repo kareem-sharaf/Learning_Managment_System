@@ -40,7 +40,7 @@ class Kernel extends HttpKernel
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
@@ -68,6 +68,9 @@ class Kernel extends HttpKernel
         'checkIfManager' => \App\Http\Middleware\checkIfManager::class,
         'checkIfAdmin' => \App\Http\Middleware\checkIfAdmin::class,
         'checkIfStudent' => \App\Http\Middleware\checkIfStudent::class,
+        'checkIfManagerOrAdmin' => \App\Http\Middleware\CheckIfManagerOrAdmin::class,
+        'CheckIfManagerOrAdminOrTeacher' => \App\Http\Middleware\CheckIfManagerOrAdminOrTeacher::class,
 
-      ];
+
+    ];
 }

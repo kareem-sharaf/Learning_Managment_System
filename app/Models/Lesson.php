@@ -15,7 +15,9 @@ class Lesson extends Model
         'image',
         'price',
         'video_id',
-        'teacher_id'
+        'file_id',
+        'teacher_id',
+        'exist'
     ];
 
     public function unit()
@@ -23,13 +25,14 @@ class Lesson extends Model
         return $this->belongsTo(Unit::class);
     }
 
-    public function files()
-    {
-        return $this->hasMany(Files::class);
-    }
     public function videos()
     {
         return $this->hasMany(Video::class);
+    }
+
+    public function files()
+    {
+        return $this->hasMany(File::class);
     }
     public function quizzes()
     {

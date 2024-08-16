@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Validation\Rule;
+
 
 class User extends Authenticatable
 {
@@ -34,7 +36,9 @@ class User extends Authenticatable
         'year_id',
         'image_id',
         'fcm',
-        'balance'
+        'balance',
+        // 'exist'
+
     ];
 
     public $timestamps = false;
@@ -57,6 +61,28 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+
+    public static function rules()
+    {
+        return [
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore('deleted_user@example.com', 'email'),
+            ],
+        ];
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function address()
+    {
+        return $this->belongsTo(Address::class);
+    }
 
     public function messages()
     {
@@ -99,8 +125,6 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
-
-
     public function quizzes()
     {
         return $this->belongsToMany(Quiz::class, 'student_exams', 'user_id', 'quize_id');
@@ -109,5 +133,15 @@ class User extends Authenticatable
     public function createdQuizzes()
     {
         return $this->hasMany(Quiz::class, 'teacher_id');
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'user_id');
+    }
+
+    public function studentExams()
+    {
+        return $this->hasMany(StudentExam::class, 'user_id');
     }
 }

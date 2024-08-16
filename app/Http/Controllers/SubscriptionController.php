@@ -55,6 +55,7 @@ class SubscriptionController extends Controller
                 $message = "The request added successfully.";
             }else{
                 $message = "not enough balance .";
+                return response()->json(['message' => 'not enough balance .'], 403);
             }
             } else {
                 $message = "The record already exists.";
@@ -66,58 +67,49 @@ class SubscriptionController extends Controller
         }
     }
     //***********************************************************************************************************************\\
-    public function show_all_requests_for_teacher()
-    {
-        $user = Auth::user();
-        $user_id = $user->id;
-        $subscriptions = Subscription::where('teacher_id', $user_id)->get();
-        $subscriptionsWithData = [];
+    // public function show_all_requests_for_teacher()
+    // {
+    //     $user = Auth::user();
+    //     $user_id = $user->id;
+    //     $subscriptions = Subscription::where('teacher_id', $user_id)->get();
+    //     $subscriptionsWithData = [];
 
-        foreach ($subscriptions as $subscription) {
-            $subject = Subject::find($subscription->subject_id);
-            $user = User::find($subscription->user_id);
+    //     foreach ($subscriptions as $subscription) {
+    //         $subject = Subject::find($subscription->subject_id);
+    //         $user = User::find($subscription->user_id);
 
-            $subscriptionData = [
-                'subscription' => $subscription,
-                'subject' => $subject,
-                'user' => $user
-            ];
+    //         $subscriptionData = [
+    //             'subscription' => $subscription,
+    //             'subject' => $subject,
+    //             'user' => $user
+    //         ];
 
-            $subscriptionsWithData[] = $subscriptionData;
-        }
+    //         $subscriptionsWithData[] = $subscriptionData;
+    //     }
 
-        return [
-            'message' => "This is the all requests.",
-            'Subscriptions' => $subscriptionsWithData,
-        ];
+    //     return [
+    //         'message' => "This is the all requests.",
+    //         'Subscriptions' => $subscriptionsWithData,
+    //     ];
 
-    }
+    // }
     //***********************************************************************************************************************\\
-    public function show_all_requests_for_student()
-    {
-        $user = Auth::user();
-        $user_id = $user->id;
-        $subscriptions = Subscription::where('user_id', $user_id)->get();
-        $subscriptionsWithData = [];
+    public function show_all_courses_for_student()
+{
+    $user = Auth::user();
+    $user_id = $user->id;
 
-        foreach ($subscriptions as $subscription) {
-            $subject = Subject::find($subscription->subject_id);
-            $user = User::find($subscription->teacher_id);
+    $subjects = Subscription::where('user_id', $user_id)
+                            ->with('subject')
+                            ->get()
+                            ->pluck('subject'); 
 
-            $subscriptionData = [
-                'subscription' => $subscription,
-                'subject' => $subject,
-                'user' => $user
-            ];
+    return response()->json([
+        'message' => "These are the courses the student is subscribed to.",
+        'subjects' => $subjects,
+    ]);
+}
 
-            $subscriptionsWithData[] = $subscriptionData;
-        }
 
-        return [
-            'message' => "This is the all requests.",
-            'Subscriptions' => $subscriptionsWithData,
-        ];
-
-    }
     //***********************************************************************************************************************\\
  }

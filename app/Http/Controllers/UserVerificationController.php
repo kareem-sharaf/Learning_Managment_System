@@ -21,7 +21,7 @@ class UserVerificationController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'email' => 'required|email|unique:users|unique:user_verifications',
+            'email' => 'required|email',
             'role_id' => 'required|numeric'
         ]);
 
@@ -55,7 +55,7 @@ class UserVerificationController extends Controller
             );
         } else {
 
-            if ($user->role_id == 1 || ($user->role_id == 2 && ($request->role_id == 2 || $request->role_id == 3))) {
+            if ($user->role_id == 1 || $user->role_id == 2) {
                 $newUser = new UserVerification([
                     'email' => $request->email,
                     'role_id' => $request->role_id,

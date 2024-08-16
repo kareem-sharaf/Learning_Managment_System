@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('isExpired')->default(0);
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
             $table->foreignId('video_id')->nullable()->constrained('videos')->cascadeOnDelete();
-            $table->timestamps();
+            // $table->timestamps();
         });
     }
 

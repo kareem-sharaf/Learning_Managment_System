@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('feedbacks', function (Blueprint $table) {
             $table->id();
-            $table->string('category')->unique();
-            $table->string('image_url')->nullable();
-
-            $table->softDeletes();
-            $table->boolean('exist')->default(true);
-
+            $table->decimal('sentiment', 2, 1)->check('sentiment >= 1.0 AND sentiment <= 5.0');
+            $table->text('reason');
+            $table->boolean('type');
+            $table->timestamps();
         });
     }
 
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('feedbacks');
     }
 };

@@ -16,6 +16,7 @@ class Unit extends Model
         'video_id',
         'file_id',
         'subject_id',
+        'exist'
     ];
     public $timestamps=false;
 
@@ -30,7 +31,7 @@ class Unit extends Model
     }
     public function files()
     {
-        return $this->hasMany(Files::class);
+        return $this->hasMany(File::class);
     }
     public function videos()
     {

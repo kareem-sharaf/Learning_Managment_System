@@ -17,11 +17,14 @@ use App\Mail\EmailVerification;
 
 class AuthController extends Controller
 {
-    public function updateFcmToken(Request $request){
-        Auth::user()->update(['fcm'=>$request->fcm]);
+    public function updateFcmToken(Request $request)
+    {
+        $user = User::find(Auth::user()->id);
+        $user->update(['fcm' => $request->fcm]);
 
-        return response()->json(['message'=>'Updated Successfully']);
+        return response()->json(['message' => 'Updated Successfully']);
     }
+
     public function registerWeb(Request $request)
     {
         $UserVerification = UserVerification::find($request->user_id);
@@ -32,7 +35,6 @@ class AuthController extends Controller
                 401
             );
         }
-
         $request->validate([
             'name' => 'required|string|min:4',
             'password' => [
@@ -78,7 +80,7 @@ class AuthController extends Controller
 
         $UserVerification = UserVerification::find($request->user_id);
 
-        if(!$UserVerification){
+        if (!$UserVerification) {
             return response()->json(
                 ['message' => 'not found'],
                 404
@@ -213,7 +215,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || $user['role'] == 4 || !Hash::check($request->password, $user->password)) {
+        if (!$user || $user['role_id'] == 4 || !Hash::check($request->password, $user->password)) {
             return response()->json(
                 ['message' => 'unauthenticated'],
                 400
@@ -437,6 +439,95 @@ class AuthController extends Controller
             ['message' => 'Successfully logged out']
         );
     }
+    // index users
+    public function indexUsers()
+    {
+        $currentUser = Auth::user();
+
+        if (!$currentUser) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        }
+
+        if ($currentUser->role_id === 1) {
+            $users = User::with(['address', 'role'])
+                ->select('name', 'email', 'address_id', 'role_id')
+                ->get()
+                ->map(function ($user) {
+                    return [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'address' => $user->address->address,
+                        'role' => $user->role->role,
+                    ];
+                });
+        } elseif ($currentUser->role_id === 2) {
+            $users = User::with(['address', 'role'])
+                ->select('name', 'email', 'address_id', 'role_id')
+                ->whereIn('role_id', [3, 4])
+                ->get()
+                ->map(function ($user) {
+                    return [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'address' => $user->address->address,
+                        'role' => $user->role->role,
+                    ];
+                });
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Forbidden'], 403);
+        }
+
+        return response()->json(['status' => 'success', 'data' => $users], 200);
+    }
+
+    // delete user
+    public function deleteUser(Request $request)
+    {
+        $currentUser = Auth::user();
+
+        if ($currentUser->role_id !== 1) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $userId = $request->input('user_id');
+
+        $userToDelete = User::find($userId);
+
+        if (!$userToDelete) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($userToDelete->id === $currentUser->id) {
+            return response()->json(['message' => 'You cannot delete yourself'], 403);
+        }
+
+        switch ($userToDelete->role_id) {
+            case 1: // Another Manager
+                $userToDelete->delete();
+                return response()->json(['message' => 'Manager deleted successfully'], 200);
+
+            case 2: // Admin
+                $userToDelete->delete();
+                return response()->json(['message' => 'Admin deleted successfully'], 200);
+
+            case 3: // Teacher
+                $userToDelete->update([
+                    'email' => 'deleted_user@example.com',
+                ]);
+                return response()->json(['message' => 'Teacher marked as deleted'], 200);
+
+            case 4: // Student
+                return response()->json(['message' => 'You are not allowed to delete a student'], 403);
+
+            default:
+                return response()->json(['message' => 'Invalid role'], 400);
+        }
+    }
+
 
     //     seed users
     public function seedUsers(Request $request)

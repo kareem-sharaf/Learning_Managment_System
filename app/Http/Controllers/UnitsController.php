@@ -13,11 +13,12 @@ use App\Models\Lesson;
 use App\Models\Unit;
 use App\Models\Subscription;
 use App\Models\Video;
+use App\Models\File;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
+// use Illuminate\Support\Facades\File;
 
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
@@ -27,57 +28,59 @@ class UnitsController extends Controller
 {
     //******************************************************************************************* */
     public function show_all_units(Request $request)
-    {
-        $user=Auth::user();
-        $user_id=$user->id;
-        $role_id=$user->role_id;
+{
+    $user = Auth::user();
 
-        $subject_id = $request->subject_id;
+    // تأكد من أن المستخدم مسجل دخوله
+    if (!$user) {
+        return response()->json(['error' => 'User not authenticated'], 401);
+    }
 
-        $input= $request->all();
-        $unit = Unit::where('subject_id', $subject_id)->with('lessons','lessons.videos','files','lessons.files','videos')->get();
-        // $subject_id = $unit->subject_id;
-        if($role_id==4 ){
-        $isSubscription = Subscription::where('user_id',$user_id)
-                                        ->where('subject_id',$subject_id)
-                                        ->first();
-        if($isSubscription){
-            $Subscriped=true;
-        }else{
-            $Subscriped=false;
-        }
+    $user_id = $user->id;
+    $role_id = $user->role_id;
 
-        $message = "this is the all units";
+    // تأكد من وجود subject_id في الطلب
+    // $subject_id = $request->query('subject_id');
+    $subject_id = $request->subject_id;
+
+    if (!$subject_id) {
+        return response()->json(['error' => 'Subject ID is required'], 400);
+    }
+
+    // استعلام الوحدات مع الدروس والفيديوهات والملفات
+    $unit = Unit::where('subject_id', $subject_id)
+        ->with('lessons', 'lessons.videos', 'files', 'lessons.files', 'videos')
+        ->get();
+
+    if ($role_id == 4) {
+        $isSubscription = Subscription::where('user_id', $user_id)
+            ->where('subject_id', $subject_id)
+            ->exists();  // استخدام exists بدلاً من first
+
         return response()->json([
-            'isSubscription' => $Subscriped,
-            'message' => $message,
+            'isSubscription' => $isSubscription,
+            'message' => 'This is all units',
             'data' => $unit
         ]);
-    }elseif($role_id == 3){
-        $Owner = TeacherSubjectYear::where('user_id',$user_id)
-                                        ->where('subject_id',$subject_id)
-                                        ->first();
-        if($Owner){
-            $isOwner=true;
-        }else{
-            $isOwner=false;
-        }
-        $message = "this is the all units";
+    } elseif ($role_id == 3) {
+        $isOwner = TeacherSubjectYear::where('user_id', $user_id)
+            ->where('subject_id', $subject_id)
+            ->exists();  // استخدام exists بدلاً من first
+
         return response()->json([
             'isOwner' => $isOwner,
-            'message' => $message,
+            'message' => 'This is all units',
             'data' => $unit
         ]);
-    }else{
-        $unit = Unit::where('subject_id', $subject_id)->with('lessons','lessons.videos','files','lessons.files','videos')->get();
-        $message = "this is the all units.";
+    } else {
         return response()->json([
             'status' => false,
-            'message' => $message,
+            'message' => 'This is all units.',
             'data' => $unit
         ]);
     }
-    }
+}
+
 
 
 //************************************************************************************************************** */
@@ -269,12 +272,6 @@ public function edit_unit(Request $request)
     {
         $user_id = Auth::id();
         $unit = Unit::find($request->unit_id);
-        if (!$unit) {
-            $message = "The unit doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ], 404);
-        }
         $subject_id = $unit->subject_id;
         $SubjectTeacher = TeacherSubjectYear::where('user_id', $user_id)
                                         ->where('subject_id', $subject_id)
@@ -285,32 +282,16 @@ public function edit_unit(Request $request)
             'message' => 'you cannot delete this unit.',
         ], 404);
      }
-        if ($unit->image_url) {
-            $oldImagePath = str_replace('/storage', 'public', $unit->image_url);
-            if (Storage::exists($oldImagePath)) {
-                Storage::delete($oldImagePath);
-            }
-        }
 
-        $video_id = $unit->video_id;
-        $video = Video::find($video_id);
-        if ($video) {
-            // Delete old video
-            $oldVideoPath = str_replace('/storage', 'public', $video->video);
-            if (Storage::exists($oldVideoPath)) {
-                Storage::delete($oldVideoPath);
+     if ($unit) {
+         $unit->update(['exist' => false]);
+         Lesson::where('unit_id', $unit->id)
+               ->update(['exist' => false]);
 
-            }
-        }
-
-        $video->delete();
-        $unit->delete();
-
-        $message = "The unit deleted successfully.";
-        return response()->json([
-            'message' => $message,
-            'data' => $unit,
-        ]);
+         return response()->json(['message' => 'Unit and related lessons have been deleted successfuly.']);
+     } else {
+         return response()->json(['message' => 'Unit not found.'], 404);
+     }
     }
 }
 //******************************************************************************************************************************************* */

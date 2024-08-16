@@ -13,12 +13,13 @@ use App\Models\Lesson;
 use App\Models\Unit;
 use App\Models\Subscription;
 use App\Models\Video;
+use App\Models\File;
 
  use App\Http\Responses\ApiSuccessResponse;
  use App\Http\Responses\ApiErrorResponse;
  use Illuminate\Support\Facades\Auth;
  use Illuminate\Support\Facades\Storage;
- use Illuminate\Support\Facades\File;
+//  use Illuminate\Support\Facades\File;
 
 
 use Illuminate\Http\Request;
@@ -87,6 +88,9 @@ class SubjectController extends Controller
     if category is educational if the user has year_id we show the subjects in the year else we show the years.*/
     public function index(Request $request)
     {
+        $user = auth()->user();  // Use auth() helper properly
+        $user_id = $user->id;
+
         $year_id = $request->query('year_id');
         $categories = Category::all();
 
@@ -95,46 +99,64 @@ class SubjectController extends Controller
         foreach ($categories as $category) {
             $categoryData = [
                 'category' => $category,
-                'subjects' => [],
-                'years' => []
+                'subjects' => []
             ];
 
             if ($category->id == 1 && $year_id) {
-                $categoryData['subjects'] = Subject::where('category_id', $category->id)
-                ->whereHas('years_users', function($query) use ($year_id) {
-                    $query->where('teacher_subject_years.year_id', $year_id);
-                })
-                ->get();
-            }else if($category->id == 1 && !$year_id){
-                $categoryData['years'] = Year::get();
-            } else {
-                $categoryData['subjects'] = Subject::where('category_id', $category->id)
-                    // ->whereNotIn('category_id', [1])
+                $subjects = Subject::where('category_id', $category->id)
+                    ->whereHas('years_users', function($query) use ($year_id) {
+                        $query->where('teacher_subject_years.year_id', $year_id);
+                    })
                     ->get();
+            } elseif ($category->id == 1 && !$year_id) {
+                $categoryData['years'] = Year::all();
+                $subjects = collect(); // No subjects to add in this case
+            } else {
+                $subjects = Subject::where('category_id', $category->id)->get();
             }
 
-            foreach ($categoryData['subjects'] as $subject) {
-                $subject->users = Subject::whereHas('years_users', function($query) use ($subject) {
-                    $query->where('subject_id', $subject->id);
+            foreach ($subjects as $subject) {
+                if (!$subject->exist) {
+                    $subscription = Subscription::where('subject_id', $subject->id)
+                        ->where('user_id', $user_id)
+                        ->first();
+
+                    if (!$subscription) {
+                        continue;
+                    }
+                }
+
+                // Get users associated with the subject and files
+                $subjectUsers = User::whereIn('id', function($query) use ($subject) {
+                    $query->select('user_id')
+                          ->from('teacher_subject_years')
+                          ->where('subject_id', $subject->id);
                 })->get();
 
-                $subject->users = User::whereIn('id', function($query) use ($subject) {
-                    $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $subject->id);
-                })->get();
+                $subject->users = $subjectUsers;
+                $subject->files = $subject->files;  // Attach files to the subject
+
+                $categoryData['subjects'][] = $subject; // Add the subject to the category
             }
 
-            $categoriesWithSubjects[] = $categoryData;
+            // Only add category data if subjects are present or years data exists
+            if (!empty($categoryData['subjects']) || isset($categoryData['years'])) {
+                $categoriesWithSubjects[] = $categoryData;
+            }
         }
 
-        $message = "this is the all data";
+        $message = "This is all the data";
         return response()->json([
             'message' => $message,
             'data' => $categoriesWithSubjects
         ]);
     }
+
+
+
 //****************************************************************************************************************** */
 //search just in subjects.
-public function search_in_subjects(Request $request)
+    public function search_in_subjects(Request $request)
 {
     $year_id = $request->query('year_id');
     $name = $request->query('name');
@@ -145,6 +167,7 @@ public function search_in_subjects(Request $request)
         if($year_id){
             $subjects = Subject::where('name', 'like', '%' . $name . '%')
                 ->where('category_id', 1)
+                ->where('exist',true)
                 ->whereHas('years_users', function($q) use ($year_id) {
                     $q->where('teacher_subject_years.year_id', $year_id);
                 })
@@ -155,6 +178,7 @@ public function search_in_subjects(Request $request)
                 ->get();
         }else{
         $subjects = Subject::where('name', 'like', '%' . $name . '%')
+        ->where('exist',true)
         ->get();
     }
 
@@ -186,74 +210,77 @@ public function search_in_subjects(Request $request)
 {
     $year_id = $request->query('year_id');
     $name = $request->query('name');
-    $categories= [];
-    $teachers= [];
-    $units= [];
-    $lessons= [];
-    $subjects= [];
-    if($name){
+    $categories = [];
+    $teachers = [];
+    $units = [];
+    $lessons = [];
+    $subjects = [];
 
-    $categories = Category::where('category', 'like', '%' . $name . '%')
-        ->get();
+    if ($name) {
+        $categories = Category::where('category', 'like', '%' . $name . '%')
+        ->where('exist', true)->get();
 
-    $teachers = User::where('name', 'like', '%' . $name . '%')
-    ->where('role_id',3)
-        ->get();
-
-    $units = Unit::where('name', 'like', '%' . $name . '%')
+        $teachers = User::where('name', 'like', '%' . $name . '%')
+            ->where('role_id', 3)
+            ->where('email', '!=', 'deleted_user@example.com')
             ->get();
 
-    $lessons = Lesson::where('name', 'like', '%' . $name . '%')
-            ->get();
+        $units = Unit::where('name', 'like', '%' . $name . '%')
+        ->where('exist', true) ->get();
 
-        if($year_id){
+        $lessons = Lesson::where('name', 'like', '%' . $name . '%')
+        ->where('exist', true) ->get();
+
+        if ($year_id) {
             $subjects = Subject::where('name', 'like', '%' . $name . '%')
+                ->where('exist', true)
                 ->where('category_id', 1)
-                ->whereHas('years_users', function($q) use ($year_id) {
+                ->whereHas('years_users', function ($q) use ($year_id) {
                     $q->where('teacher_subject_years.year_id', $year_id);
                 })
-                ->orWhere(function($query) use ($name) {
+                ->orWhere(function ($query) use ($name) {
                     $query->where('name', 'like', '%' . $name . '%')
-                          ->where('category_id', '!=', 1);
+                          ->where('category_id', '!=', 1)
+                          ->where('exist', true);
                 })
                 ->get();
-        }else{
-        $subjects = Subject::where('name', 'like', '%' . $name . '%')
-        ->get();
+        } else {
+            $subjects = Subject::where('name', 'like', '%' . $name . '%')
+                ->where('exist', true)  
+                ->get();
+        }
+
+        foreach ($subjects as $item) {
+            $item->users = User::whereIn('id', function ($query) use ($item) {
+                $query->select('user_id')
+                      ->from('teacher_subject_years')
+                      ->where('subject_id', $item->id);
+            })->get();
+        }
+
+        return response()->json([
+            'message' => "These are the items.",
+            'categories' => $categories,
+            'teachers' => $teachers,
+            'units' => $units,
+            'lessons' => $lessons,
+            'subjects' => $subjects,
+        ]);
+    } else {
+        return response()->json([
+            'message' => "These are the items.",
+            'categories' => $categories,
+            'teachers' => $teachers,
+            'units' => $units,
+            'lessons' => $lessons,
+            'subjects' => $subjects,
+        ]);
     }
-
-    foreach ($subjects as $item) {
-        $item->users = Subject::whereHas('years_users', function($query) use ($item) {
-            $query->where('subject_id', $item->id);
-        })->get();
-
-        $item->users = User::whereIn('id', function($query) use ($item) {
-            $query->select('user_id')->from('teacher_subject_years')->where('subject_id', $item->id);
-        })->get();
-    }
-
-    return response()->json([
-        'message' => "These are the items.",
-        'categories' => $categories,
-        'teachers' =>$teachers,
-        'units' =>$units,
-        'lessons' =>$lessons,
-        'subjects' =>$subjects,
-    ]);
- }else{
-    return response()->json([
-        'message' => "These are the items.",
-        'categories' => $categories,
-        'teachers' =>$teachers,
-        'units' =>$units,
-        'lessons' =>$lessons,
-        'subjects' =>$subjects,
-    ]);
- }
 }
 
+
 //************************************************************************************************************** */
-public function add_subject(Request $request)
+    public function add_subject(Request $request)
 {
     $user_id = Auth::id();
 
@@ -265,7 +292,8 @@ public function add_subject(Request $request)
         'image' => 'required|image|max:10240',
         'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
         'video_name' => 'nullable|string|max:255',
-        'file_id' => 'nullable|integer',
+        'file_name' => 'nullable|string|max:255',
+        'file' => 'nullable|file|max:20480',
         'years_content.*.year_id' => 'nullable|integer|exists:years,id',
     ]);
 
@@ -277,7 +305,6 @@ public function add_subject(Request $request)
         'price' => $request->price,
         'description' => $request->description,
         'image_url' => $imageUrl,
-        'file_id' => $request->file_id,
         'category_id' => $request->category_id,
     ]);
 
@@ -291,6 +318,17 @@ public function add_subject(Request $request)
             $video->save();
 
             $subject->video_id = $video->id;
+            $subject->save();
+        }
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('files', 'public');
+            $file = new File();
+            $file->file = Storage::url($filePath);
+            $file->name = $request->file_name;
+            $file->subject_id = $subject->id;
+            $file->save();
+
+            $subject->file_id = $file->id;
             $subject->save();
         }
 
@@ -312,6 +350,7 @@ public function add_subject(Request $request)
         }
 
         $subject->load('videos');
+        $subject->load('files');
 
         return response()->json([
             'message' => 'Subject added successfully.',
@@ -334,6 +373,8 @@ public function add_subject(Request $request)
         'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240|nullable',
         'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
         'video_name' => 'nullable|string|max:255',
+        'file.*' => 'nullable|file|max:204800',
+        'file_name.*' => 'nullable|string|max:255',
         'years_content' => 'array|nullable',
         'years_content.*.year_id' => 'integer|exists:years,id',
     ]);
@@ -400,6 +441,33 @@ public function add_subject(Request $request)
         $subject->video_id = $video->id;
     }
 
+    if ($request->hasFile('file')) {
+        $file_id = $subject->file_id;
+        $file = File::find($file_id);
+        if ($file) {
+            // Delete old file
+            $oldfilePath = str_replace('/storage', 'public', $file->file);
+            if (Storage::exists($oldfilePath)) {
+                Storage::delete($oldfilePath);
+            }
+        } else {
+            // Create new file instance if it doesn't exist
+            $file = new File();
+            $file->subject_id = $subject->id;
+        }
+
+        // Store new file
+        $filePath = $request->file('file')->store('files', 'public');
+        $file->file = Storage::url($filePath);
+
+        if ($request->filled('file_name')) {
+            $file->name = $request->file_name;
+        }
+
+        $file->save();
+        $subject->file_id = $file->id;
+    }
+
          $subject->update($subjectData);
 
         $subject->years_users()->detach();
@@ -422,56 +490,35 @@ public function add_subject(Request $request)
 
 
     //***********************************************************************************************************************\\
- public function delete_subject(Request $request )
+    public function delete_subject(Request $request )
     {
-        $user_id = Auth::id();
+        $user = Auth::user();
+        $user_id=$user->id;
+        $role_id=$user->role_id;
         $subject_id = $request->subject_id;
         $subject = Subject::find($subject_id);
         $teacher_subject=TeacherSubjectYear::where('user_id',$user_id)
         ->where('subject_id',$subject_id)->first();
+        if(($teacher_subject && $role_id==3) || $role_id==2 || $role_id==1){
+            if ($subject) {
+                $subject->update(['exist' => false]);
 
+                Unit::where('subject_id', $subject->id)
+                    ->update(['exist' => false]);
 
-        if (!$subject) {
-            $message = "The subject doesn't exist.";
-            return response()->json([
-                'message' => $message,
-            ]);
-        }
-        if($teacher_subject){
+                Lesson::whereIn('unit_id', function($query) use ($subject) {
+                    $query->select('id')
+                        ->from('units')
+                        ->where('subject_id', $subject->id);
+                })->update(['exist' => false]);
 
-        if ($subject->image_url) {
-            $oldImagePath = str_replace('/storage', 'public', $subject->image_url);
-            if (Storage::exists($oldImagePath)) {
-                Storage::delete($oldImagePath);
+                return response()->json(['message' => 'Subject and related items have been deleted successfuly.']);
+            } else {
+                return response()->json(['message' => 'Subject not found.'], 404);
             }
+        }else{
+            return response()->json(['message' => 'you cannot delete this subject.'], 403);
         }
-
-
-        $video_id = $subject->video_id;
-        $video = Video::find($video_id);
-        if ($video) {
-            // Delete old video
-            $oldVideoPath = str_replace('/storage', 'public', $video->video);
-            if (Storage::exists($oldVideoPath)) {
-                Storage::delete($oldVideoPath);
-
-            }
-        }
-        $video->delete();
-        $subject->years_users()->detach();
-        $subject->delete();
-
-        $message = "The subject deleted successfully.";
-        return response()->json([
-            'message' => $message,
-        ]);
-     }else{
-        $message = "You can't delete the subject.";
-        return response()->json([
-            'message' => $message,
-        ]);
-     }
-
     }
 
     //***********************************************************************************************************************\\
