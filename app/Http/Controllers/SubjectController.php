@@ -151,9 +151,6 @@ class SubjectController extends Controller
             'data' => $categoriesWithSubjects
         ]);
     }
-
-
-
 //****************************************************************************************************************** */
 //search just in subjects.
     public function search_in_subjects(Request $request)
@@ -246,7 +243,7 @@ class SubjectController extends Controller
                 ->get();
         } else {
             $subjects = Subject::where('name', 'like', '%' . $name . '%')
-                ->where('exist', true)  
+                ->where('exist', true)
                 ->get();
         }
 

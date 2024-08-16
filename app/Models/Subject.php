@@ -13,8 +13,8 @@ class Subject extends Model
         'description',
         'image_url',
         'price',
-        'video_id',
-        'file_id',
+        // 'video_id',
+        // 'file_id',
         'category_id',
         'exist'
 

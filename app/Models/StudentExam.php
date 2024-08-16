@@ -11,7 +11,7 @@ class StudentExam extends Model
 
     protected $fillable = [
     'user_id',
-    'quize_id',
+    'quiz_id',
     'mark',
     'status',
     'date'
