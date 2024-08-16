@@ -55,7 +55,7 @@ class UserVerificationController extends Controller
             );
         } else {
 
-            if ($user->role_id == 1 || $user->role_id == 2) {
+            if ($user->role_id == 1) {
                 $newUser = new UserVerification([
                     'email' => $request->email,
                     'role_id' => $request->role_id,
@@ -155,9 +155,7 @@ class UserVerificationController extends Controller
 
         if ($user && $user->verificationCode === $request->verificationCode) {
 
-            $user->verificationCode = null;
-            $user->verified = 1;
-            $user->save();
+            $user->delete();
 
             return response()->json(
                 [
