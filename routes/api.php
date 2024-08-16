@@ -84,12 +84,14 @@ Route::group(['prefix' => 'category'], function () {
         Route::get('index', 'index');
         Route::get('search', 'search');
         Route::post('show', 'show');
-        Route::get('showSoftDeleted', 'showSoftDeleted');
-        Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
+        Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdminOrTeacher']], function () {
             Route::post('store', 'store');
             Route::post('update', 'update');
-            Route::post('forceDelete', 'forceDelete');
             Route::post('destroy', 'destroy');
+            Route::get('showSoftDeleted', 'showSoftDeleted');
+        });
+        Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
+            Route::post('forceDelete', 'forceDelete');
         });
     });
 });
@@ -106,7 +108,6 @@ Route::group(['prefix' => 'stage'], function () {
         Route::post('search', 'search');
     });
 });
-
 
 //  years routes
 Route::group(['prefix' => 'year'], function () {
@@ -225,9 +226,7 @@ Route::group(['prefix' => 'quiz'], function () {
             Route::group(['middleware'], function () {
                 Route::post('show_to_all', 'show_to_all');
             });
-
         });
-
     });
 });
 
@@ -235,20 +234,20 @@ Route::group(['prefix' => 'quiz'], function () {
 Route::group(['prefix' => 'subscription'], function () {
     Route::controller(SubscriptionController::class)->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
-        Route::group(['middleware' => 'checkIfStudent:sanctum'], function () {
-            Route::post('buy_subject', 'buy_subject');
-            Route::get('delete_request', 'delete_request');
-            Route::get('show_all_courses_for_student', 'show_all_courses_for_student');
-            Route::get('show_one_request_for_student', 'show_one_request_for_student');
-        });
+            Route::group(['middleware' => 'checkIfStudent:sanctum'], function () {
+                Route::post('buy_subject', 'buy_subject');
+                Route::get('delete_request', 'delete_request');
+                Route::get('show_all_courses_for_student', 'show_all_courses_for_student');
+                Route::get('show_one_request_for_student', 'show_one_request_for_student');
+            });
 
-        Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
-            Route::get('show_all_requests_for_teacher', 'show_all_requests_for_teacher');
-            Route::get('show_one_request_for_teacher', 'show_one_request_for_teacher');
-            Route::post('edit_request', 'edit_request');
-            Route::get('delete_request', 'delete_request');
+            Route::group(['middleware' => 'checkIfTeacher:sanctum'], function () {
+                Route::get('show_all_requests_for_teacher', 'show_all_requests_for_teacher');
+                Route::get('show_one_request_for_teacher', 'show_one_request_for_teacher');
+                Route::post('edit_request', 'edit_request');
+                Route::get('delete_request', 'delete_request');
+            });
         });
-    });
     });
 });
 
@@ -283,10 +282,10 @@ Route::group(['prefix' => 'profile'], function () {
             Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
                 Route::get('show_all_teachers', 'show_all_teachers');
                 Route::get('show_all_students', 'show_all_students');
-                  });
             });
         });
     });
+});
 
 
 //  lessons routes
