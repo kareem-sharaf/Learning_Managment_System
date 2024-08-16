@@ -20,6 +20,11 @@ class FavoriteController extends Controller
                 404
             );
         }
+
+
+        if ($user->device_id == null) {
+            return response()->json(['message' => 'the device_id is null'], 403);
+        }
         $favorites = $user->favorites;
         if ($favorites->isNotEmpty()) {
             return response()->json(
@@ -36,6 +41,12 @@ class FavoriteController extends Controller
     public function toggle(Request $request)
     {
         $user = Auth::user();
+
+
+        if ($user->device_id == null) {
+            return response()->json(['message' => 'the device_id is null'], 403);
+        }
+
         $request->validate([
             'category' => 'string|exists:categories,category|nullable',
             'teacher' => 'string|exists:users,name|nullable',

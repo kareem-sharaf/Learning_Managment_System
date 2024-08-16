@@ -13,6 +13,10 @@ use App\Models\User;
 use App\Models\Year;
 use App\Models\Address;
 use App\Models\Stage;
+use App\Models\Subject;
+use App\Models\Unit;
+use App\Models\Lesson;
+
 use App\Mail\EmailVerification;
 
 class AuthController extends Controller
@@ -450,27 +454,39 @@ class AuthController extends Controller
 
         if ($currentUser->role_id === 1) {
             $users = User::with(['address', 'role'])
-                ->select('name', 'email', 'address_id', 'role_id')
+                ->select('name', 'email', 'address_id', 'role_id','id')
                 ->get()
                 ->map(function ($user) {
                     return [
                         'name' => $user->name,
                         'email' => $user->email,
+<<<<<<< HEAD
                         'address' => $user->address ? $user->address->address : 'No Address',
                         'role' => $user->role ? $user->role->role : 'No Role',
+=======
+                        'address' => $user->address->address,
+                        'role' => $user->role->role,
+                        'id' =>$user->id,
+>>>>>>> kareem_sharaf
                     ];
                 });
         } elseif ($currentUser->role_id === 2) {
             $users = User::with(['address', 'role'])
-                ->select('name', 'email', 'address_id', 'role_id')
+                ->select('name', 'email', 'address_id', 'role_id','id')
                 ->whereIn('role_id', [3, 4])
                 ->get()
                 ->map(function ($user) {
                     return [
                         'name' => $user->name,
                         'email' => $user->email,
+<<<<<<< HEAD
                         'address' => $user->address ? $user->address->address : 'No Address',
                         'role' => $user->role ? $user->role->role : 'No Role',
+=======
+                        'address' => $user->address->address,
+                        'role' => $user->role->role,
+                        'id' =>$user->id,
+>>>>>>> kareem_sharaf
                     ];
                 });
         } else {
@@ -483,51 +499,76 @@ class AuthController extends Controller
 
     // delete user
     public function deleteUser(Request $request)
-    {
-        $currentUser = Auth::user();
+{
+    $currentUser = Auth::user();
 
-        if ($currentUser->role_id !== 1) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+    if ($currentUser->role_id !== 1) { // التحقق من أن المستخدم الحالي هو مدير
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
 
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
+    $request->validate([
+        'user_id' => 'required|exists:users,id',
+    ]);
 
-        $userId = $request->input('user_id');
+    $userId = $request->input('user_id');
+    $userToDelete = User::find($userId);
 
-        $userToDelete = User::find($userId);
+    if (!$userToDelete) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
 
-        if (!$userToDelete) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
+    if ($userToDelete->id == $currentUser->id) {
+        return response()->json(['message' => 'You cannot delete yourself'], 403);
+    }
 
-        if ($userToDelete->id === $currentUser->id) {
-            return response()->json(['message' => 'You cannot delete yourself'], 403);
-        }
-
-        switch ($userToDelete->role_id) {
-            case 1: // Another Manager
+    switch ($userToDelete->role_id) {
+        case 1: // Manager
+            $otherManagersCount = User::where('role_id', 1)->where('id', '!=', $userId)->count();
+            if ($otherManagersCount > 0) {
                 $userToDelete->delete();
                 return response()->json(['message' => 'Manager deleted successfully'], 200);
+            } else {
+                return response()->json(['message' => 'Cannot delete the only remaining manager'], 403);
+            }
 
-            case 2: // Admin
-                $userToDelete->delete();
-                return response()->json(['message' => 'Admin deleted successfully'], 200);
+        case 2: // Admin
+            $userToDelete->delete();
+            return response()->json(['message' => 'Admin deleted successfully'], 200);
 
-            case 3: // Teacher
-                $userToDelete->update([
-                    'email' => 'deleted_user@example.com',
-                ]);
-                return response()->json(['message' => 'Teacher marked as deleted'], 200);
+        case 3: // Teacher
+            $subjects = $userToDelete->subjects()->get();
+            foreach ($subjects as $subject) {
+                // Update the exist column for the subject
+                $subject->update(['exist' => false]);
 
-            case 4: // Student
-                return response()->json(['message' => 'You are not allowed to delete a student'], 403);
+                // Update the exist column for related units
+                Unit::where('subject_id', $subject->id)
+                    ->update(['exist' => false]);
 
-            default:
-                return response()->json(['message' => 'Invalid role'], 400);
-        }
+                // Update the exist column for related lessons
+                Lesson::whereIn('unit_id', function($query) use ($subject) {
+                    $query->select('id')
+                        ->from('units')
+                        ->where('subject_id', $subject->id);
+                })->update(['exist' => false]);
+            }
+
+            // Mark the teacher's profile as deleted by updating the email
+            $userToDelete->update([
+                'email' => 'deleted_user@example.com',
+            ]);
+
+            return response()->json(['message' => 'Teacher marked as deleted and related subjects, units, and lessons updated'], 200);
+
+        case 4: // Student
+            $userToDelete->delete();
+            return response()->json(['message' => 'Student deleted successfully'], 200);
+
+        default:
+            return response()->json(['message' => 'Invalid role'], 400);
     }
+}
+
 
 
     //     seed users

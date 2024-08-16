@@ -84,7 +84,7 @@ Route::group(['prefix' => 'category'], function () {
         Route::get('index', 'index');
         Route::get('search', 'search');
         Route::post('show', 'show');
-        Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdminOrTeacher']], function () {
+        Route::group(['middleware' => ['auth:sanctum', 'CheckIfManagerOrAdminOrTeacher']], function () {
             Route::post('store', 'store');
             Route::post('update', 'update');
             Route::post('destroy', 'destroy');
