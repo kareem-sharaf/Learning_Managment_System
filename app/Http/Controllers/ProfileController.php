@@ -10,6 +10,8 @@ use App\Models\Year;
 use App\Models\TeacherSubjectYear;
 use App\Models\SubjectYear;
 use App\Models\User;
+use App\Models\Unit;
+use App\Models\Lesson;
 
 
 use Illuminate\Http\Request;
@@ -157,44 +159,60 @@ class ProfileController extends Controller
     //****************************************************************************************************** */
 
     public function deleteProfile()
-    {
-        $user_id = Auth::id();
-        $user = User::where('id', $user_id)->first();
+{
+    $user_id = Auth::id();
+    $user = User::where('id', $user_id)->first();
 
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        switch ($user->role_id) {
-            case 4: // Student
-                $user->delete();
-                return response()->json(['message' => 'Profile deleted successfully'], 200);
-
-            case 3: // Teacher
-                $subjects = $user->subjects()->wherePivot('user_id', $user_id)->get();
-                foreach ($subjects as $subject) {
-                    $subject->update(['exist' => false]);
-                }
-
-                // Mark the teacher's profile as deleted by updating the email
-                $user->update([
-                    'email' => 'deleted_user@example.com',
-                ]);
-                return response()->json(['message' => 'Teacher profile marked as deleted'], 200);
-            case 2: // Admin
-                $user->delete();
-                return response()->json(['message' => 'Profile deleted successfully'], 200);
-            case 1: // Manager
-                $otherManagersCount = User::where('role_id', 1)->where('id', '!=', $user_id)->count();
-                if ($otherManagersCount > 0) {
-                    $user->delete();
-                    return response()->json(['message' => 'Manager profile deleted successfully'], 200);
-                } else {
-                    return response()->json(['message' => 'Cannot delete yourself as the only manager'], 403);
-                }
-
-            default:
-                return response()->json(['message' => 'You are not allowed to delete this profile'], 403);
-        }
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
+
+    switch ($user->role_id) {
+        case 4: // Student
+            $user->delete();
+            return response()->json(['message' => 'Profile deleted successfully'], 200);
+
+        case 3: // Teacher
+            $subjects = $user->subjects()->wherePivot('user_id', $user_id)->get();
+            foreach ($subjects as $subject) {
+                // Update the exist column for the subject
+                $subject->update(['exist' => false]);
+
+                // Update the exist column for related units
+                Unit::where('subject_id', $subject->id)
+                    ->update(['exist' => false]);
+
+                // Update the exist column for related lessons
+                Lesson::whereIn('unit_id', function($query) use ($subject) {
+                    $query->select('id')
+                        ->from('units')
+                        ->where('subject_id', $subject->id);
+                })->update(['exist' => false]);
+            }
+
+            // Mark the teacher's profile as deleted by updating the email
+            $user->update([
+                'email' => 'deleted_user@example.com',
+            ]);
+
+            return response()->json(['message' => 'Teacher profile marked as deleted and related subjects, units, and lessons updated'], 200);
+
+        case 2: // Admin
+            $user->delete();
+            return response()->json(['message' => 'Profile deleted successfully'], 200);
+
+        case 1: // Manager
+            $otherManagersCount = User::where('role_id', 1)->where('id', '!=', $user_id)->count();
+            if ($otherManagersCount > 0) {
+                $user->delete();
+                return response()->json(['message' => 'Manager profile deleted successfully'], 200);
+            } else {
+                return response()->json(['message' => 'Cannot delete yourself as the only manager'], 403);
+            }
+
+        default:
+            return response()->json(['message' => 'You are not allowed to delete this profile'], 403);
+    }
+}
+
 }

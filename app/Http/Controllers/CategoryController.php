@@ -18,7 +18,7 @@ class CategoryController extends Controller
     //  index all categories
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::where('exist', true)->get();
         if ($categories) {
             return response()->json(
                 [
