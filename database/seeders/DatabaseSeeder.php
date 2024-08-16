@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             ProgressSeeder::class,
             StudentExamsSeeder::class,
             SubscriptionSeeder::class,
+            ADSeeder::class,
 
                 ]);
     }

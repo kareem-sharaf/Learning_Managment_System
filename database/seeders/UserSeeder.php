@@ -139,5 +139,47 @@ class UserSeeder extends Seeder
             'balance' => 500000,
 
         ]);
+        User::create([
+            'name' => "saaaa",
+            'email' => "user9@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('passwordD1'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 4,
+            'fcm'=>"fdgd"
+,
+            'balance' => 500000,
+
+        ]);
+        User::create([
+            'name' => "mooo",
+            'email' => "user10@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('passwordD1'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 4,
+            'fcm'=>"fdgd"
+,
+            'balance' => 500000,
+
+        ]);
+        User::create([
+            'name' => "booo",
+            'email' => "user11@example.com",
+            'address_id' => 1,
+            'image_id' => 1,
+            'password' => Hash::make('passwordD1'),
+            'birth_date' => "2003/5/11",
+            'gender' => 0,
+            'role_id' => 4,
+            'fcm'=>"fdgd"
+,
+            'balance' => 500000,
+
+        ]);
     }
 }
