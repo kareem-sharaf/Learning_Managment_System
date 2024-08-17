@@ -460,14 +460,9 @@ class AuthController extends Controller
                     return [
                         'name' => $user->name,
                         'email' => $user->email,
-<<<<<<< Updated upstream
                         'address' => $user->address->address,
                         'role' => $user->role->role,
                         'id' =>$user->id,
-=======
-                        'address' => $user->address ? $user->address->address : 'No Address',
-                        'role' => $user->role ? $user->role->role : 'No Role',
->>>>>>> Stashed changes
                     ];
                 });
         } elseif ($currentUser->role_id === 2) {
@@ -479,15 +474,9 @@ class AuthController extends Controller
                     return [
                         'name' => $user->name,
                         'email' => $user->email,
-<<<<<<< Updated upstream
                         'address' => $user->address->address,
                         'role' => $user->role->role,
                         'id' =>$user->id,
-=======
-                        'address' => $user->address ? $user->address->address : 'No Address',
-                        'role' => $user->role ? $user->role->role : 'No Role',
-
->>>>>>> Stashed changes
                     ];
                 });
         } else {
