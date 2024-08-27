@@ -12,7 +12,7 @@ class Category extends Model
     use SoftDeletes;
     protected $fillable = [
         'category',
-        'image_url',
+        'image',
         'exist'
     ];
 

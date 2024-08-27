@@ -7,7 +7,7 @@ use App\Models\Category;
 use App\Models\Subject;
 use App\Models\Unit;
 use App\Models\Lesson;
-
+use Illuminate\Support\str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
@@ -20,13 +20,7 @@ class CategoryController extends Controller
     {
         $categories = Category::where('exist', true)->get();
         if ($categories) {
-            return response()->json(
-                [
-                    'message' => 'success',
-                    'Categories:' => $categories
-                ],
-                200
-            );
+            return response()->json($categories,200);
         }
         return response()->json(
             ['message' => 'no categories found!'],
@@ -92,21 +86,16 @@ class CategoryController extends Controller
     //  store new category
     public function store(Request $request)
     {
-        $user = Auth::user();
+        // $user = Auth::user();
         $request->validate([
             'category' => 'required|string|unique:categories',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-
+            'image' => 'required|image'
         ]);
 
-        $imagePath = $request->file('image')->store('category_images', 'public');
+        $imageName = Str::random() . '.' . $request->image->getClientOriginalExtension();
+        Storage::disk('public')->putFileAs('categories/image', $request->image, $imageName);
+        $category=Category::create($request->post()+ ['image'=> $imageName]);
 
-        $imageUrl = Storage::url($imagePath);
-
-        $category = Category::create([
-            'category' => $request->category,
-            'image_url' => $imageUrl,
-        ]);
 
         return response()->json(
             [
@@ -122,12 +111,12 @@ class CategoryController extends Controller
     {
         $user = Auth::user();
         $request->validate([
-            'category' => 'required|string|exists:categories,category',
-            'new_category' => 'string|unique:categories,category',
+            'category_id' => 'required|integer|exists:categories,id',
+            'category' => 'string|unique:categories,category',
             'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240'
         ]);
 
-        $category = Category::where('category', $request->category)
+        $category = Category::where('id', $request->category_id)
             ->first();
 
         if (!$category) {
@@ -137,8 +126,8 @@ class CategoryController extends Controller
             );
         }
 
-        if ($request->has('new_category')) {
-            $category->category = $request->new_category;
+        if ($request->has('category')) {
+            $category->category = $request->category;
         }
 
         if ($request->hasFile('image')) {
