@@ -2,24 +2,21 @@
 namespace App\Http\Responses;
 
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\Response;
 
 class ApiErrorResponse implements Responsable
 {
-
     public function __construct(
         protected string $message,
-        // protected Throwable $e ,
-        protected int $code=Response::HTTP_INTERNAL_SERVER_ERROR,
-        protected array $headers =[],
-    ){}
+        protected int $code = Response::HTTP_INTERNAL_SERVER_ERROR,
+        protected array $headers = [],
+    ) {}
 
-
-    public function toResponse($request){
-
+    public function toResponse($request)
+    {
         return response()->json([
-             'message' => $this->message,
-            // 'data' => $this->e
-        ], $this->code , $this->headers);
+            'message' => $this->message,
+        ], $this->code, $this->headers);
     }
 }
 

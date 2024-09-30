@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('email_sent_at');
             $table->string('device_id')->unique()->nullable();
             $table->string('verificationCode')->nullable();
-            $table->integer('image_id')->nullable();
+            $table->string('image')->nullable();
             $table->date('birth_date')->nullable();
             $table->boolean('gender')->nullable();
             $table->string('password')->nullable();

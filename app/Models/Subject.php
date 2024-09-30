@@ -11,7 +11,7 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'description',
-        'image_url',
+        'image',
         'price',
         // 'video_id',
         // 'file_id',

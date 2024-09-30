@@ -32,7 +32,7 @@ use App\Http\Controllers\ProgressController;
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
+| Here is where you can register API  for your application. These
 | routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "api" middleware group. Make something great!
 |
@@ -84,12 +84,12 @@ Route::group(['prefix' => 'category'], function () {
         Route::get('index', 'index');
         Route::get('search', 'search');
         Route::post('show', 'show');
-        // Route::group(['middleware' => ['auth:sanctum', 'CheckIfManagerOrAdminOrTeacher']], function () {
+        Route::group(['middleware' => ['auth:sanctum', 'CheckIfManagerOrAdminOrTeacher']], function () {
             Route::post('store', 'store');
-            Route::post('update', 'update');
+            Route::post('update/{id}', 'update');
             Route::post('destroy', 'destroy');
             Route::get('showSoftDeleted', 'showSoftDeleted');
-        // });
+        });
         Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
             Route::post('forceDelete', 'forceDelete');
         });
@@ -109,11 +109,14 @@ Route::group(['prefix' => 'stage'], function () {
     });
 });
 
+
+
 //  years routes
 Route::group(['prefix' => 'year'], function () {
     Route::controller(YearController::class)->group(function () {
+        Route::get('index', 'index');
+
         Route::group(['middleware' => ['auth:sanctum', 'checkIfManagerOrAdmin']], function () {
-            Route::get('index', 'index');
             Route::post('store', 'store');
             Route::post('update', 'update');
             Route::post('destroy', 'destroy');
@@ -185,16 +188,16 @@ Route::group(['prefix' => 'progress'], function () {
 //  subject routes
 Route::group(['prefix' => 'subject'], function () {
     Route::controller(SubjectController::class)->group(function () {
-        Route::get('show_all_subjects', 'show_all_subjects');
+        Route::post('show_all_subjects', 'show_all_subjects');
         Route::get('all_subjects_in_year', 'all_subjects_in_year');
         Route::get('show_one_subject', 'show_one_subject');
-        // Route::get('index', 'index');
-        Route::get('search', 'search');
+        Route::Post('search', 'search');
         Route::get('search_in_subjects', 'search_in_subjects');
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('index', 'index');
             Route::group(['middleware' => 'CheckIfManagerOrAdminOrTeacher:sanctum'], function () {
+                Route::post('index', 'index');
                 Route::post('add_subject', 'add_subject');
                 Route::post('edit_subject', 'edit_subject');
                 Route::post('delete_subject', 'delete_subject');
@@ -296,8 +299,12 @@ Route::prefix('lessons')->group(function () {
             Route::post('/update', 'update_lesson');
             Route::post('/delete', 'delete_lesson');
         });
-        Route::post('/get', 'getLessonsByUnitId');
-        Route::post('/getid', 'getLessonById');
+        Route::middleware(['auth:sanctum'])->group(function () {
+            Route::post('/get', 'getLessonsByUnitId');
+            Route::post('/show', 'getLessonById');
+        });
+
+
     });
 });
 

@@ -33,29 +33,57 @@ class SubjectController extends Controller
     //**********************************************************************************************\/
     /*show all subjects in the category and in case the category is educational we will
      need year_id and if we don't have year_id we will show the years.*/
-  public function show_all_subjects(Request $request)
-  {
-      $category_id = $request->query('category_id');
-      $year_id = $request->query('year_id');
-      $subject=null;
-      $year=null;
-      if($category_id==1 && $year_id){
-        $subject = Subject::whereHas('years_users', function($q) use ($year_id) {
-            $q->where('teacher_subject_years.year_id', $year_id);
+     public function show_all_subjects(Request $request)
+{
+    $category_id = $request->category_id;
+    $year_id = $request->year_id;
+    $subjects = [];
+    $years = [];
+
+    if ($category_id == 1 && $year_id) {
+        // Get subjects with associated users for the specified year
+        $subjects = Subject::whereHas('years_users', function($query) use ($year_id) {
+            $query->where('teacher_subject_years.year_id', $year_id);
+        })->where('exist', true)->get();
+    } elseif ($category_id == 1 && !$year_id) {
+        // No year_id selected, return available years
+        $years = Year::all();
+    } else {
+        // Get subjects based on category
+        $subjects = Subject::where('category_id', $category_id)->where('exist', true)->get();
+    }
+
+    // Fetch users for each subject and attach files if available
+    foreach ($subjects as $subject) {
+        // Get users associated with the subject (based on the `teacher_subject_years` relationship)
+        $subjectUsers = User::whereIn('id', function($query) use ($subject) {
+            $query->select('user_id')
+                  ->from('teacher_subject_years')
+                  ->where('subject_id', $subject->id);
         })->get();
-      }else if($category_id==1 && !$year_id){
-        $year = Year::get();
-      } else {
-        $subject = Subject::where('category_id', $category_id)
-      ->get();
-      }
-    $message='this is the all subjects in the category.';
+
+        // Attach users and files to the subject
+        $subject->users = $subjectUsers;
+        $subject->files = $subject->files;  // Assuming the subject model has a `files` relationship
+
+        // Attach subject image URL (ensure the image column holds a valid URL)
+        $subject->image_url = $subject->image;
+
+        // Attach user profile images if they have them
+        foreach ($subject->users as $user) {
+            $user->profile_image_url = $user->profile_image ? url($user->profile_image) : null;
+        }
+    }
+
+    // Return response with subjects and years
     return response()->json([
-        'message' => $message,
-        'data' => $subject,
-        'year' => $year,
+        'message' => 'This is all subjects in the category.',
+        'data' => $subjects,
+        'years' => $years,
     ]);
-  }
+}
+
+
     //*********************************************************************************************** */
     /*user can choose the year and show the subjects. */
     public function all_subjects_in_year(Request $request)
@@ -88,10 +116,10 @@ class SubjectController extends Controller
     if category is educational if the user has year_id we show the subjects in the year else we show the years.*/
     public function index(Request $request)
     {
-        $user = auth()->user();  // Use auth() helper properly
+        $user = auth()->user(); 
         $user_id = $user->id;
 
-        $year_id = $request->query('year_id');
+        $year_id = $request->year_id;
         $categories = Category::all();
 
         $categoriesWithSubjects = [];
@@ -110,7 +138,7 @@ class SubjectController extends Controller
                     ->get();
             } elseif ($category->id == 1 && !$year_id) {
                 $categoryData['years'] = Year::all();
-                $subjects = collect(); // No subjects to add in this case
+                $subjects = collect();
             } else {
                 $subjects = Subject::where('category_id', $category->id)->get();
             }
@@ -205,8 +233,8 @@ class SubjectController extends Controller
     in case the user has year_id will see just one subject in his year else he will see all subjects.*/
     public function search(Request $request)
 {
-    $year_id = $request->query('year_id');
-    $name = $request->query('name');
+    $year_id = $request->year_id;
+    $name = $request->name;
     $categories = [];
     $teachers = [];
     $units = [];
@@ -277,10 +305,11 @@ class SubjectController extends Controller
 
 
 //************************************************************************************************************** */
-    public function add_subject(Request $request)
+public function add_subject(Request $request)
 {
     $user_id = Auth::id();
 
+    // Validate request
     $request->validate([
         'category_id' => 'required|integer|exists:categories,id',
         'name' => 'required|string|max:255',
@@ -291,21 +320,26 @@ class SubjectController extends Controller
         'video_name' => 'nullable|string|max:255',
         'file_name' => 'nullable|string|max:255',
         'file' => 'nullable|file|max:20480',
-        'years_content.*.year_id' => 'nullable|integer|exists:years,id',
+        'year_id' => 'nullable|integer|exists:years,id',
     ]);
 
-    $imagePath = $request->file('image')->store('subject_images', 'public');
-    $imageUrl = Storage::url($imagePath);
+    // Handle image upload and store it in 'subject_images'
+    $image = $request->file('image');
+    $imageName = time() . '.' . $image->getClientOriginalExtension();
+    $image->move(public_path('subject_images'), $imageName);
+    $imageUrl = url('subject_images/' . $imageName);
 
+    // Create the subject
     $subject = new Subject([
         'name' => $request->name,
         'price' => $request->price,
         'description' => $request->description,
-        'image_url' => $imageUrl,
+        'image' => $imageUrl,
         'category_id' => $request->category_id,
     ]);
 
     if ($subject->save()) {
+        // Handle video upload
         if ($request->hasFile('video')) {
             $videoPath = $request->file('video')->store('videos', 'public');
             $video = new Video();
@@ -317,6 +351,8 @@ class SubjectController extends Controller
             $subject->video_id = $video->id;
             $subject->save();
         }
+
+        // Handle file upload
         if ($request->hasFile('file')) {
             $filePath = $request->file('file')->store('files', 'public');
             $file = new File();
@@ -329,18 +365,17 @@ class SubjectController extends Controller
             $subject->save();
         }
 
-        if ($request->category_id == 1) { // If the category is educational
-            if ($request->has('years_content')) {
-                $yearsContent = $request->years_content;
-                foreach ($yearsContent as $year) {
-                    $existingYear = Year::find($year['year_id']);
-                    if (!$existingYear) {
-                        return response()->json(['message' => 'Year not found.'], 404);
-                    }
-                    $subject->years_users()->attach($user_id, ['year_id' => $year['year_id']]);
+        // Handle year association if category is educational
+        if ($request->category_id == 1) {
+            if ($request->has('year_id')) {
+                $yearId = $request->year_id;
+                $existingYear = Year::find($yearId);
+                if (!$existingYear) {
+                    return response()->json(['message' => 'Year not found.'], 404);
                 }
-            }else{
-                return response()->json(['message' => 'you need to year.'], 404);
+                $subject->years_users()->attach($user_id, ['year_id' => $yearId]);
+            } else {
+                return response()->json(['message' => 'You need to specify a year.'], 404);
             }
         } else {
             $subject->years_users()->attach($user_id);
@@ -357,10 +392,14 @@ class SubjectController extends Controller
 
     return response()->json(['message' => 'Failed to add subject.'], 500);
 }
+
+
     //***********************************************************************************************************************\\
     public function edit_subject(Request $request)
 {
     $user_id = Auth::id();
+
+    // Validate request
     $request->validate([
         'subject_id' => 'required|integer|exists:subjects,id',
         'category_id' => 'integer|exists:categories,id|nullable',
@@ -372,53 +411,43 @@ class SubjectController extends Controller
         'video_name' => 'nullable|string|max:255',
         'file.*' => 'nullable|file|max:204800',
         'file_name.*' => 'nullable|string|max:255',
-        'years_content' => 'array|nullable',
-        'years_content.*.year_id' => 'integer|exists:years,id',
     ]);
 
-    $subject_id = $request->subject_id;
+    // Find subject
+    $subject = Subject::find($request->subject_id);
 
-    $SubjectTeacher = TeacherSubjectYear::where('user_id', $user_id)
-                                        ->where('subject_id', $subject_id)
-                                        ->first();
-    if (!$SubjectTeacher) {
-        return response()->json([
-            'message' => 'you can not edit this subject.',
-        ], 404);
-    }
-
-    $subject = Subject::find($subject_id);
     if (!$subject) {
-        return response()->json([
-            'message' => 'Subject not found.',
-        ], 404);
+        return response()->json(['message' => 'Subject not found.'], 404);
     }
 
-    $subjectData = $request->only(['name', 'price', 'description', 'category_id', 'video_id', 'file_id']);
+    $subjectData = $request->only(['name', 'price', 'description', 'category_id']);
 
+    // Handle image upload
     if ($request->hasFile('image')) {
         // Delete old image
-        if ($subject->image_url) {
-            $oldImagePath = str_replace('/storage', 'public', $subject->image_url);
-            if (Storage::exists($oldImagePath)) {
-                Storage::delete($oldImagePath);
+        if ($subject->image) {
+            $oldImagePath = public_path('subject_images/' . basename($subject->image));
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
             }
         }
 
         // Store new image
-        $imagePath = $request->file('image')->store('subject_images', 'public');
-        $subject->image_url = Storage::url($imagePath);
+        $image = $request->file('image');
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+        $image->move(public_path('subject_images'), $imageName);
+        $subject->image = url('subject_images/' . $imageName);
     }
 
-
+    // Handle video upload
     if ($request->hasFile('video')) {
-        $video_id = $subject->video_id;
-        $video = Video::find($video_id);
+        $video = Video::find($subject->video_id);
+
         if ($video) {
             // Delete old video
-            $oldVideoPath = str_replace('/storage', 'public', $video->video);
-            if (Storage::exists($oldVideoPath)) {
-                Storage::delete($oldVideoPath);
+            $oldVideoPath = public_path('videos/' . basename($video->video));
+            if (file_exists($oldVideoPath)) {
+                unlink($oldVideoPath);
             }
         } else {
             // Create new video instance if it doesn't exist
@@ -438,14 +467,15 @@ class SubjectController extends Controller
         $subject->video_id = $video->id;
     }
 
+    // Handle file upload
     if ($request->hasFile('file')) {
-        $file_id = $subject->file_id;
-        $file = File::find($file_id);
+        $file = File::find($subject->file_id);
+
         if ($file) {
             // Delete old file
-            $oldfilePath = str_replace('/storage', 'public', $file->file);
-            if (Storage::exists($oldfilePath)) {
-                Storage::delete($oldfilePath);
+            $oldFilePath = public_path('files/' . basename($file->file));
+            if (file_exists($oldFilePath)) {
+                unlink($oldFilePath);
             }
         } else {
             // Create new file instance if it doesn't exist
@@ -465,25 +495,15 @@ class SubjectController extends Controller
         $subject->file_id = $file->id;
     }
 
-         $subject->update($subjectData);
+    // Update subject data
+    $subject->update($subjectData);
 
-        $subject->years_users()->detach();
-
-        $yearsContent = $request->years_content ?? [];
-
-        if ($request->category_id == 1) {
-            foreach ($yearsContent as $year) {
-                $subject->years_users()->attach($user_id, ['year_id' => $year['year_id']]);
-            }
-        } else {
-            $subject->years_users()->attach($user_id);
-        }
-
-        return response()->json([
-            'message' => 'Subject updated successfully',
-            'data' => $subject,
-        ], 200);
+    return response()->json([
+        'message' => 'Subject updated successfully',
+        'data' => $subject,
+    ], 200);
 }
+
 
 
     //***********************************************************************************************************************\\

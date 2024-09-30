@@ -15,15 +15,18 @@ class CategorySeeder extends Seeder
     {
         Category::create([
             'id' => 1,
-            'category' => 'educational'
+            'category' => 'educational',
+            'image' =>'http://127.0.0.1:8000/category_images/1725098376.jpg'
         ]);
         Category::create([
             'id' => 2,
-            'category' => 'languages'
+            'category' => 'languages',
+            'image' =>'http://127.0.0.1:8000/category_images/1725098376.jpg'
         ]);
         Category::create([
             'id' => 3,
-            'category' => 'programming'
+            'category' => 'programming',
+            'image' =>'http://127.0.0.1:8000/category_images/1725098376.jpg'
         ]);
     }
 }

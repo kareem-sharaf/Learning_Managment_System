@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->string('image_url')->nullable();
+            $table->string('image')->nullable();
             // $table->unsignedBigInteger('video_id')->nullable()->references('id')->on('videos')->onDelete('cascade');
             // $table->unsignedBigInteger('file_id')->nullable()->references('id')->on('files')->onDelete('cascade');
             $table->unsignedBigInteger('subject_id')->references('id')->on('subjects')->onDelete('cascade');

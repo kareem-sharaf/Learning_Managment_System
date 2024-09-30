@@ -34,7 +34,7 @@ class User extends Authenticatable
         'role_id',
         'stage_id',
         'year_id',
-        'image_id',
+        'image',
         'fcm',
         'balance',
         // 'exist'

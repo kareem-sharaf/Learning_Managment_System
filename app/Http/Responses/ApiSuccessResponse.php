@@ -2,12 +2,13 @@
 namespace App\Http\Responses;
 
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\Response;
 
 class ApiSuccessResponse implements Responsable
 {
 
     public function __construct(
-         protected string $message,
+        protected string $message,
         protected mixed $data,
         protected int $code=Response::HTTP_OK,
         protected array $headers =[],

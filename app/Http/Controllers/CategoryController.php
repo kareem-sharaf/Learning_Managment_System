@@ -7,153 +7,159 @@ use App\Models\Category;
 use App\Models\Subject;
 use App\Models\Unit;
 use App\Models\Lesson;
+use App\Models\User;
+
 use Illuminate\Support\str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
+use App\Http\Requests\CategoryRequest;
+use App\Services\CategoryService;
+
+use App\Http\Responses\ApiSuccessResponse;
+use App\Http\Responses\ApiErrorResponse;
+
 class CategoryController extends Controller
 {
+    protected $categoryService;
+
+    public function __construct(CategoryService $categoryService)
+    {
+        $this->categoryService = $categoryService;
+    }
+
+
+
+
     //  index all categories
     public function index()
-    {
-        $categories = Category::where('exist', true)->get();
-        if ($categories) {
-            return response()->json($categories,200);
-        }
-        return response()->json(
-            ['message' => 'no categories found!'],
-            404
-        );
-    }
+{
+    return $this->categoryService->index();
+}
 
     //  show the subjects of a specific category
     public function show(Request $request)
-    {
-        $category = Category::where('category', $request->category)->first();
+{
+    $category_id = $request->category_id;
+    $year_id = $request->year_id;
 
-        if (!$category) {
-            return response()->json(
-                ['message' => 'Category not found!'],
-                404
-            );
-        }
-
-        $subjects = $category->subjects;
-        if (!$subjects) {
-            return response()->json(
-                ['message' => 'No subjects found in this Category!'],
-                404
-            );
-        }
-
-        return response()->json(
-            [
-                'message' => 'Subjects of this category:',
-                'subjects' => $subjects
-            ],
-            200
-        );
+    $category = $this->getCategory($category_id);
+    if (!$category) {
+        return response()->json(['message' => 'Category not found!'], 404);
     }
 
-    //  search in categories
-    public function search(Request $request)
-    {
-        $categoryName = $request->query('category');
-
-        $categories = Category::query();
-
-        if ($categoryName) {
-            $categories->where('category', 'like', '%' . $categoryName . '%');
-        }
-
-        $result = $categories->get();
-
-        if ($result->isNotEmpty()) {
-            return response()->json(
-                ['message' => $result],
-                200
-            );
-        }
-
-        return response()->json(
-            ['message' => 'No categories found!'],
-            404
-        );
+    if (!$this->validateCategoryYear($category_id, $year_id)) {
+        return response()->json(['message' => 'Please select a year!'], 400);
     }
 
-    //  store new category
-    public function store(Request $request)
-    {
-        // $user = Auth::user();
-        $request->validate([
-            'category' => 'required|string|unique:categories',
-            'image' => 'required|image'
-        ]);
-
-        $imageName = Str::random() . '.' . $request->image->getClientOriginalExtension();
-        Storage::disk('public')->putFileAs('categories/image', $request->image, $imageName);
-        $category=Category::create($request->post()+ ['image'=> $imageName]);
-
-
-        return response()->json(
-            [
-                'message' => 'Categories created successfully',
-                'category' => $category
-            ],
-            201
-        );
+    $subjects = $this->getSubjects($category_id, $year_id, $category);
+    if ($subjects->isEmpty()) {
+        return response()->json(['message' => 'No subjects found in this category!'], 404);
     }
 
-    // update category
-    public function update(Request $request)
+    $subjects_with_users = $this->attachUsersToSubjects($subjects);
+
+    return response()->json([
+        'message' => 'Category and its subjects with users:',
+        'category' => $category,
+        'subjects' => $subjects_with_users,
+    ], 200);
+}
+
+
+
+private function getCategory($category_id)
+{
+    return Category::where('id', $category_id)->first();
+}
+
+private function validateCategoryYear($category_id, $year_id)
+{
+    if ($category_id == 1 && !$year_id) {
+        return false;
+    }
+    return true;
+}
+
+private function getSubjects($category_id, $year_id, $category)
+{
+    if ($category_id == 1 && $year_id) {
+        return Subject::where('category_id', $category->id)
+            ->whereHas('years_users', function ($query) use ($year_id) {
+                $query->where('teacher_subject_years.year_id', $year_id);
+            })
+            ->where('exist', true)
+            ->get();
+    }
+
+    return Subject::where('category_id', $category_id)
+        ->where('exist', true)
+        ->get();
+}
+
+private function attachUsersToSubjects($subjects)
+{
+    return $subjects->map(function($subject) {
+        $subjectUsers = User::whereIn('id', function($query) use ($subject) {
+            $query->select('user_id')
+                ->from('teacher_subject_years')
+                ->where('subject_id', $subject->id);
+        })->get();
+
+        $subject->users = $subjectUsers;
+        return $subject;
+    });
+}
+
+
+
+
+
+
+
+
+
+
+//  store new category
+public function store(CategoryRequest $request)
     {
         $user = Auth::user();
-        $request->validate([
-            'category_id' => 'required|integer|exists:categories,id',
-            'category' => 'string|unique:categories,category',
-            'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240'
-        ]);
-
-        $category = Category::where('id', $request->category_id)
-            ->first();
-
-        if (!$category) {
-            return response()->json(
-                ['message' => 'Category not found'],
-                404
-            );
-        }
-
-        if ($request->has('category')) {
-            $category->category = $request->category;
-        }
-
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('category_images', 'public');
-            $imageUrl = Storage::url($imagePath);
-
-            if ($category->image_url) {
-
-                $oldImagePath = str_replace('/storage', 'public', $category->image_url);
-
-                Storage::delete($oldImagePath);
-            }
-
-            $category->image_url = $imageUrl;
-        }
-
-        $category->save();
-
+        $data = $request->validated();
+        $category = $this->categoryService->createCategory($data);
         return response()->json(
             [
-                'message' => 'Category updated successfully',
+                'message' => 'Category created successfully',
                 'category' => $category
-            ],
-            200
+            ]
         );
     }
+
+
+
+
+
+    // update category
+    public function update(CategoryRequest $request , $category_id)
+{
+    $data = $request->validated();
+    $category = $this->categoryService->editCategory($data,$category_id);
+    return response()->json(
+        [
+            'message' => 'Category updated successfully',
+            'category' => $category
+        ],
+        200
+    );
+}
+
+
+
+
+
+
+
 
     //  show soft deleted categories
     public function showSoftDeleted()
@@ -175,7 +181,7 @@ class CategoryController extends Controller
     }
 
     //  soft delete category
-    public function destroy(Request $request)
+    public function destroy(Request $request)//*
     {
         $user = Auth::user();
         $category_id=$request->category_id;

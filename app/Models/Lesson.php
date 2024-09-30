@@ -13,7 +13,7 @@ class Lesson extends Model
         'description',
         'unit_id',
         'image',
-        'price',
+        // 'price',
         'video_id',
         'file_id',
         'teacher_id',

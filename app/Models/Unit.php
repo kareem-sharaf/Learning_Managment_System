@@ -12,7 +12,7 @@ class Unit extends Model
         'id',
         'name',
         'description',
-        'image_url',
+        'image',
         // 'video_id',
         // 'file_id',
         'subject_id',

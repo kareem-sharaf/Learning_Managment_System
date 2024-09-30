@@ -30,51 +30,50 @@ class AuthController extends Controller
     }
 
     public function registerWeb(Request $request)
-    {
-        $UserVerification = UserVerification::find($request->user_id);
+{
+    $UserVerification = UserVerification::find($request->user_id);
 
-        if ($UserVerification->role_id == 4) {
-            return response()->json(
-                ['message' => 'unauthorized'],
-                401
-            );
-        }
-        $request->validate([
-            'name' => 'required|string|min:4',
-            'password' => [
-                'required',
-                'regex:/[A-Z]/',
-                'regex:/[0-9]/',
-                'min:8',
-            ],
-        ], [
-            'password.regex' => 'The password must be at least 8 characters long and contain at least one uppercase letter and one number.',
-        ]);
-        $user = new User([
-            'name' => $request->name,
-            'email' => $UserVerification->email,
-            'password' => Hash::make($request->password),
-            'role_id' => $UserVerification->role_id
-        ]);
-
-        if ($user->save()) {
-            $token = $user->createToken('Personal Access Token')->plainTextToken;
-            Auth::login($user, $remember = true);
-            return response()->json(
-                [
-                    'message' => 'User logged in successfully',
-                    'access_token' => $token,
-                    'user' => $user
-                ],
-                201
-            );
-        } else {
-            return response()->json(
-                ['message' => 'provide proper details'],
-                422
-            );
-        }
+    if (!$UserVerification) {
+        return response()->json(['message' => 'User not found'], 404);
     }
+
+    if ($UserVerification->role_id == 4) {
+        return response()->json(['message' => 'unauthorized'], 401);
+    }
+
+    $request->validate([
+        'name' => 'required|string|min:4',
+        'password' => [
+            'required',
+            'regex:/[A-Z]/',
+            'regex:/[0-9]/',
+            'min:8',
+        ],
+    ],
+    [
+        'password.regex' => 'The password must be at least 8 characters long and contain at least one uppercase letter and one number.',
+    ]);
+
+    $user = new User([
+        'name' => $request->name,
+        'email' => $UserVerification->email,
+        'password' => Hash::make($request->password),
+        'role_id' => $UserVerification->role_id
+    ]);
+
+    if ($user->save()) {
+        $token = $user->createToken('Personal Access Token')->plainTextToken;
+        Auth::login($user, $remember = true);
+        return response()->json([
+            'message' => 'User logged in successfully',
+            'access_token' => $token,
+            'user' => $user
+        ], 201);
+    } else {
+        return response()->json(['message' => 'provide proper details'], 422);
+    }
+}
+
 
     //  Create students (mobile);
     public function register(Request $request)

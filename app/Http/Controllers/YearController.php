@@ -20,9 +20,9 @@ class YearController extends Controller
     public function index()
     {
         $years = Year::all();
-        return response()->json(['years' => $years]);
+        return response()->json($years);
     }
-    
+
     //  search for a year
     public function search(Request $request)
     {
