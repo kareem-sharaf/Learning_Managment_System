@@ -25,7 +25,11 @@ use App\Http\Requests\CategoryRequest;
 use App\Services\CategoryService;
 use App\Services\SubjectService;
 use App\Services\UserService;
-use App\Services\YearService;
+use App\Services\UnitService;
+use App\Services\LessonService;
+use App\Services\ImageService;
+use App\Services\VideoService;
+use App\Services\FileService;
 
 use App\Http\Requests\SubjectRequest;
 use Illuminate\Http\Request;
@@ -36,20 +40,34 @@ use Illuminate\Support\Facades\DB;
 class SubjectController extends Controller
 {
     protected $categoryService;
-    protected $subjectService;
     protected $userService;
-    protected $yearService;
+    protected $unitService;
+    protected $lessonService;
+    protected $subjectService;
+    protected $imageService;
+    protected $videoService;
+    protected $fileService;
+
 
     public function __construct(
         CategoryService $categoryService,
-        SubjectService $subjectService,
         UserService $userService,
-        YearService $yearService,
+        UnitService $unitService,
+        LessonService $lessonService,
+        SubjectService $subjectService,
+        ImageService $imageService,
+        VideoService $videoService,
+        FileService $fileService
+
     ) {
         $this->categoryService = $categoryService;
-        $this->subjectService = $subjectService;
         $this->userService = $userService;
-        $this->yearService = $yearService;
+        $this->unitService = $unitService;
+        $this->lessonService = $lessonService;
+        $this->subjectService = $subjectService;
+        $this->imageService = $imageService;
+        $this->videoService = $videoService;
+        $this->fileService = $fileService;
     }
 
     //**********************************************************************************************\/
@@ -111,6 +129,7 @@ class SubjectController extends Controller
      need year_id and if we don't have year_id we will show the years.*/
     public function show_all_subjects($category_id, $year_id = null)
     {
+        // if the cat = 1 and year doesn't exist the response is years .
         if (!$this->categoryService->validateCategoryYear($category_id, $year_id)) {
             return response()->json([
                 'message' => 'Please select a year!',
@@ -137,11 +156,7 @@ class SubjectController extends Controller
     {
         $subject = Subject::where('id', $subject_id)->first();
         if (!$subject) {
-            return response()->json(
-                [
-                    'message' => 'the subject does not exist ! .',
-                ]
-            );
+            return response()->json(['message' => 'the subject does not exist ! .']);
         }
         $subjects = collect([$subject]);
         return response()->json(
@@ -155,87 +170,64 @@ class SubjectController extends Controller
     public function add_subject(SubjectRequest $request)
     {
         $user_id = Auth::id();
+        $data
+        = $request->validated();
 
-        // Validate request
-        $request->validate([
-            'category_id' => 'required|integer|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'description' => 'required|string',
-            'image' => 'required|image|max:10240',
-            'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
-            'video_name' => 'nullable|string|max:255',
-            'file_name' => 'nullable|string|max:255',
-            'file' => 'nullable|file|max:20480',
-            'year_id' => 'nullable|integer|exists:years,id',
-        ]);
 
-        // Handle image upload and store it in 'subject_images'
-        $image = $request->file('image');
-        $imageName = time() . '.' . $image->getClientOriginalExtension();
-        $image->move(public_path('subject_images'), $imageName);
-        $imageUrl = url('subject_images/' . $imageName);
+        $data['image'] = $this->imageService->uploadImage($request->file('image'), 'subjects_images');
+        $subject = Subject::create($data);
 
-        // Create the subject
-        $subject = new Subject([
-            'name' => $request->name,
-            'price' => $request->price,
-            'description' => $request->description,
-            'image' => $imageUrl,
-            'category_id' => $request->category_id,
-        ]);
 
-        if ($subject->save()) {
-            // Handle video upload
-            if ($request->hasFile('video')) {
-                $videoPath = $request->file('video')->store('videos', 'public');
-                $video = new Video();
-                $video->video = Storage::url($videoPath);
-                $video->name = $request->video_name;
-                $video->subject_id = $subject->id;
-                $video->save();
+        // Handle video upload
+        if ($request->hasFile('video')) {
+            $videoPath = $request->file('video')->store('videos', 'public');
+            $video = new Video();
+            $video->video = Storage::url($videoPath);
+            $video->name = $request->video_name;
+            $video->subject_id = $subject->id;
+            $video->save();
 
-                $subject->video_id = $video->id;
-                $subject->save();
-            }
-
-            // Handle file upload
-            if ($request->hasFile('file')) {
-                $filePath = $request->file('file')->store('files', 'public');
-                $file = new File();
-                $file->file = Storage::url($filePath);
-                $file->name = $request->file_name;
-                $file->subject_id = $subject->id;
-                $file->save();
-
-                $subject->file_id = $file->id;
-                $subject->save();
-            }
-
-            // Handle year association if category is educational
-            if ($request->category_id == 1) {
-                if ($request->has('year_id')) {
-                    $yearId = $request->year_id;
-                    $existingYear = Year::find($yearId);
-                    if (!$existingYear) {
-                        return response()->json(['message' => 'Year not found.'], 404);
-                    }
-                    $subject->years_users()->attach($user_id, ['year_id' => $yearId]);
-                } else {
-                    return response()->json(['message' => 'You need to specify a year.'], 404);
-                }
-            } else {
-                $subject->years_users()->attach($user_id);
-            }
-
-            $subject->load('videos');
-            $subject->load('files');
-
-            return response()->json([
-                'message' => 'Subject added successfully.',
-                'data' => $subject,
-            ]);
+            $subject->video_id = $video->id;
+            $subject->save();
         }
+
+        // Handle file upload
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('files', 'public');
+            $file = new File();
+            $file->file = Storage::url($filePath);
+            $file->name = $request->file_name;
+            $file->subject_id = $subject->id;
+            $file->save();
+
+            $subject->file_id = $file->id;
+            $subject->save();
+        }
+
+        // Handle year association if category is educational
+        if ($request->category_id == 1) {
+            if ($request->has('year_id')) {
+                $yearId = $request->year_id;
+                $existingYear = Year::find($yearId);
+                if (!$existingYear) {
+                    return response()->json(['message' => 'Year not found.'], 404);
+                }
+                $subject->years_users()->attach($user_id, ['year_id' => $yearId]);
+            } else {
+                return response()->json(['message' => 'You need to specify a year.'], 404);
+            }
+        } else {
+            $subject->years_users()->attach($user_id);
+        }
+
+        $subject->load('videos');
+        $subject->load('files');
+
+        return response()->json([
+            'message' => 'Subject added successfully.',
+            'data' => $subject,
+        ]);
+
 
         return response()->json(['message' => 'Failed to add subject.'], 500);
     }

@@ -116,7 +116,6 @@ class CategoryController extends Controller
     {
 
         $data = $request->validated();
-        // Handle image upload
         $data['image'] = $this->imageService->uploadImage($request->file('image'), 'categories_images');
 
         $category = Category::create($data);
