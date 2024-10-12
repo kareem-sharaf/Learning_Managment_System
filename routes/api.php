@@ -83,7 +83,7 @@ Route::group(['prefix' => 'category'], function () {
     Route::controller(CategoryController::class)->group(function () {
         Route::get('index', 'index');
         Route::get('search', 'search');
-        Route::post('show', 'show');
+        Route::get('showOne/{category_id}', 'showOne');
         Route::group(['middleware' => ['auth:sanctum', 'CheckIfManagerOrAdminOrTeacher']], function () {
             Route::post('store', 'store');
             Route::post('update/{id}', 'update');
@@ -188,16 +188,12 @@ Route::group(['prefix' => 'progress'], function () {
 //  subject routes
 Route::group(['prefix' => 'subject'], function () {
     Route::controller(SubjectController::class)->group(function () {
-        Route::post('show_all_subjects', 'show_all_subjects');
-        Route::get('all_subjects_in_year', 'all_subjects_in_year');
-        Route::get('show_one_subject', 'show_one_subject');
-        Route::Post('search', 'search');
-        Route::get('search_in_subjects', 'search_in_subjects');
+        Route::get('show_all_subjects/{category_id}/{year_id?}', 'show_all_subjects');
+        Route::get('showOne/{subject_id}', 'showOne');
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('index', 'index');
             Route::group(['middleware' => 'CheckIfManagerOrAdminOrTeacher:sanctum'], function () {
-                Route::post('index', 'index');
                 Route::post('add_subject', 'add_subject');
                 Route::post('edit_subject', 'edit_subject');
                 Route::post('delete_subject', 'delete_subject');

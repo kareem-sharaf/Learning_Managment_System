@@ -1,66 +1,70 @@
 <?php
 
 namespace App\Services;
+
 use App\Models\Category;
-use Twilio\Rest\Client;
-use Illuminate\Http\Response;
-use App\Http\Responses\ApiSuccessResponse;
-use App\Http\Responses\ApiErrorResponse;
+use App\Models\Subject;
+use App\Models\User;
 
-class CategoryService
+
+class  CategoryService
 {
-    public function index()
-    {
-        $categories = Category::where('exist', true)->get();
 
-        if ($categories->isEmpty()) {
-            return new ApiErrorResponse('no categories found!',Response::HTTP_NOT_FOUND);
+    public function getCategory($category_id)
+    {
+        $category = Category::where('id', $category_id)->first();
+        if ($category) {
+            return $category;
+        } else{
+            return null;
+        }
+    }
+
+    public function validateCategoryYear($category_id, $year_id)
+    {
+        if ($category_id == 1 && !$year_id) {
+            return false;
+        }
+        return true;
+    }
+
+    public function getSubjects($category_id, $year_id, $category)
+    {
+        if ($category_id == 1 && $year_id) {
+            return Subject::where('category_id', $category_id)
+                ->whereHas('years_users', function ($query) use ($year_id) {
+                    $query->where('teacher_subject_years.year_id', $year_id);
+                })
+                ->where('exist', true)
+                ->get();
         }
 
-        return new ApiSuccessResponse('this is the all Categories',$categories);
+        return Subject::where('category_id', $category_id)
+            ->where('exist', true)
+            ->get();
+    }
+
+    public function attachUsersToSubjects($subjects)
+    {
+        return $subjects->map(function ($subject) {
+            $subjectUsers = User::whereIn('id', function ($query) use ($subject) {
+                $query->select('user_id')
+                    ->from('teacher_subject_years')
+                    ->where('subject_id', $subject->id);
+            })->get();
+
+            $subject->users = $subjectUsers;
+            return $subject;
+        });
     }
 
 
 
-    public function createCategory($data)
+    public function search($name)
     {
-        $imageUrl = $data['image'];
-        $newName = time() . '.' . $imageUrl->getClientOriginalExtension();
-        $imageUrl->move(public_path('category_images'), $newName);
-        $imageUrl = url('category_images/' . $newName);
-
-        return Category::create([
-            'category' => $data['category'],
-            'image' => $imageUrl,
-        ]);
-    }
-
-
-    public function editCategory($data,$id)
-    {
-        $category = Category::find($id);
-
-        if (!$category) {
-            return response()->json(
-                ['message' => 'Category not found'],
-                404
-            );
-        }
-
-
-            $category->category = $data['category'];
-
-        if (isset($data['image'])) {
-            $imageUrl = $data['image'];
-            $newName = time() . '.' . $imageUrl->getClientOriginalExtension();
-            $imageUrl->move(public_path('category_images'), $newName);
-            if ($category->image && file_exists(public_path('category_images/' . basename($category->image)))) {
-                unlink(public_path('category_images/' . basename($category->image)));
-            }
-            $category->image = url('category_images/' . $newName);
-        }
-        $category->save();
-        return $category;
+        return Category::where('category', 'like', '%' . $name . '%')
+            ->where('exist', true)
+            ->get();
     }
 
 }
