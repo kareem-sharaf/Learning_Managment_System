@@ -30,6 +30,7 @@ use App\Services\LessonService;
 use App\Services\ImageService;
 use App\Services\VideoService;
 use App\Services\FileService;
+use App\Services\YearService;
 
 use App\Http\Requests\SubjectRequest;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class SubjectController extends Controller
     protected $imageService;
     protected $videoService;
     protected $fileService;
-
+    protected $yearService;
 
     public function __construct(
         CategoryService $categoryService,
@@ -57,8 +58,8 @@ class SubjectController extends Controller
         SubjectService $subjectService,
         ImageService $imageService,
         VideoService $videoService,
-        FileService $fileService
-
+        FileService $fileService,
+        YearService $yearService
     ) {
         $this->categoryService = $categoryService;
         $this->userService = $userService;
@@ -68,6 +69,7 @@ class SubjectController extends Controller
         $this->imageService = $imageService;
         $this->videoService = $videoService;
         $this->fileService = $fileService;
+        $this->yearService = $yearService;
     }
 
     //**********************************************************************************************\/
@@ -170,8 +172,7 @@ class SubjectController extends Controller
     public function add_subject(SubjectRequest $request)
     {
         $user_id = Auth::id();
-        $data
-        = $request->validated();
+        $data = $request->validated();
 
 
         $data['image'] = $this->imageService->uploadImage($request->file('image'), 'subjects_images');
@@ -180,28 +181,26 @@ class SubjectController extends Controller
 
         // Handle video upload
         if ($request->hasFile('video')) {
-            $videoPath = $request->file('video')->store('videos', 'public');
-            $video = new Video();
-            $video->video = Storage::url($videoPath);
-            $video->name = $request->video_name;
-            $video->subject_id = $subject->id;
-            $video->save();
+            $videoDetails = $this->videoService->uploadVideo($request->file('video'));
 
-            $subject->video_id = $video->id;
-            $subject->save();
+            $video = new Video();
+            $video->video = $videoDetails['path'];
+            $video->name = $request->video_name;
+            $video->type_id = $subject->id;
+            $video->type_type = get_class($subject);
+            $video->save();
         }
 
         // Handle file upload
         if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('files', 'public');
-            $file = new File();
-            $file->file = Storage::url($filePath);
-            $file->name = $request->file_name;
-            $file->subject_id = $subject->id;
-            $file->save();
+            $fileDetails = $this->fileService->uploadFile($request->file('file'), $request->file_name);
 
-            $subject->file_id = $file->id;
-            $subject->save();
+            $file = new File();
+            $file->file = $fileDetails['path'];
+            $file->name = $request->file_name;
+            $file->type_id = $subject->id;
+            $file->type_type = get_class($subject);
+            $file->save();
         }
 
         // Handle year association if category is educational
@@ -220,16 +219,13 @@ class SubjectController extends Controller
             $subject->years_users()->attach($user_id);
         }
 
-        $subject->load('videos');
-        $subject->load('files');
+
 
         return response()->json([
             'message' => 'Subject added successfully.',
             'data' => $subject,
         ]);
 
-
-        return response()->json(['message' => 'Failed to add subject.'], 500);
     }
 
 

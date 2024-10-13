@@ -7,25 +7,23 @@ class VideoService
 {
 
 
-    // Existing upload method
-    public function uploadVideo($video, $videoName)
+    public function uploadVideo($video)
     {
-        $videoPath = $video->store('videos', 'public');
+        $videoName = time() . '.' . $video->getClientOriginalExtension();
+        $video->move(public_path('videos'), $videoName);
+
         return [
-            'path' => Storage::url($videoPath),
-            'name' => $videoName,
+            'path' => url('videos/' . $videoName),
+            'name' => $videoName
         ];
     }
 
-    // Method to replace the video
-    public function replaceVideo($newVideo, $oldVideoPath, $videoName)
+    public function replaceVideo($newVideo, $oldVideoPath)
     {
-        // Delete old video if it exists
-        if ($oldVideoPath && Storage::disk('public')->exists(basename($oldVideoPath))) {
-            Storage::disk('public')->delete(basename($oldVideoPath));
+        if ($oldVideoPath && file_exists(public_path('videos/' . basename($oldVideoPath)))) {
+            unlink(public_path('videos/' . basename($oldVideoPath)));
         }
 
-        // Upload new video
-        return $this->uploadVideo($newVideo, $videoName);
+        return $this->uploadVideo($newVideo);
     }
 }

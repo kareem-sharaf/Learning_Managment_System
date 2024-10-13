@@ -15,20 +15,21 @@ class FilesSeeder extends Seeder
     {
         File::create([
             'id' => '1',
-            'name' => 'part 1',
-            'unit_id' => '1',
-            'subject_id' => '0',
-            'lesson_id' => '0',
-            'file' => '2.pdf',
+            'name'
+            => 'part 1',
+            'file' => '1',
+            'type_id' => 5,
+            'type_type' => 'App\Models\Subject',
+
 
         ]);
         File::create([
             'id' => '2',
             'name' => 'part 1',
-            'unit_id' => '2',
-            'subject_id' => '0',
-            'lesson_id' => '0',
-            'file' => '2.pdf',
+            'file' => '1',
+            'type_id' => 4,
+            'type_type' => 'App\Models\Subject',
+
 
         ]);
     }

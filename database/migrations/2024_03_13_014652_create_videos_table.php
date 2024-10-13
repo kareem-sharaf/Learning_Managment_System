@@ -15,10 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('video');
-            $table->unsignedBigInteger('subject_id')->nullable()->constrained('subjects')->cascadeOnDelete();
-            $table->unsignedBigInteger('unit_id')->nullable()->constrained('units')->cascadeOnDelete();
-            $table->unsignedBigInteger('lesson_id')->nullable()->constrained('lessons')->cascadeOnDelete();
-            $table->unsignedBigInteger('ad_id')->nullable()->constrained('a_d_s')->cascadeOnDelete();
+            $table->morphs('type');
             $table->timestamps();
         });
     }

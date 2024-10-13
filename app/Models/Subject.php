@@ -13,8 +13,6 @@ class Subject extends Model
         'description',
         'image',
         'price',
-        // 'video_id',
-        // 'file_id',
         'category_id',
         'exist'
 
@@ -53,13 +51,22 @@ class Subject extends Model
 
 
 
+    // public function videos()
+    // {
+    //     return $this->hasMany(Video::class);
+    // }
+
+    // public function files()
+    // {
+    //     return $this->hasMany(File::class);
+    // }
+
     public function videos()
     {
-        return $this->hasMany(Video::class);
+        return $this->morphMany(Video::class, 'videoable');
     }
-
     public function files()
     {
-        return $this->hasMany(File::class);
+        return $this->morphMany(File::class, 'fileable');
     }
 }

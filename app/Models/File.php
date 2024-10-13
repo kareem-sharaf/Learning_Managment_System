@@ -11,14 +11,16 @@ class File extends Model
     protected $fillable = [
         'name',
         'file',
-        'subject_id',
-        'unit_id',
-        'lesson_id'];
-
-public function subject()
-{
-    return $this->belongsTo(Subject::class);
-}
+        'type'
+    ];
+    public function subject()
+    {
+        return $this->morphMany(Subject::class, 'subjectable');
+    }
+//     public function subject()
+// {
+//     return $this->belongsTo(Subject::class);
+// }
 
 public function unit()
 {

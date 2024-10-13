@@ -8,12 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class Video extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'video', 'subject_id', 'unit_id', 'lesson_id', 'ad_id'];
+    // protected $fillable = ['name', 'video', 'subject_id', 'unit_id', 'lesson_id', 'ad_id'];
+
+protected $fillable = ['name', 'video','type'];
 
     public function subject()
     {
-        return $this->belongsTo(Subject::class);
+        return $this->morphMany(Subject::class, 'subjectable');
     }
+
+    // public function subject()
+    // {
+    //     return $this->belongsTo(Subject::class);
+    // }
 
     public function unit()
     {
@@ -37,4 +44,6 @@ class Video extends Model
     {
         return $this->morphMany(Bookmark::class, 'bookmarkable');
     }
+
+
 }

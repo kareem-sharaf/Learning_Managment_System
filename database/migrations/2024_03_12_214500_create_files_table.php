@@ -13,10 +13,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('file');
-            $table->unsignedBigInteger('subject_id')->nullable()->constrained('subjects')->cascadeOnDelete();
-            $table->unsignedBigInteger('unit_id')->nullable()->constrained('units')->cascadeOnDelete();
-            $table->unsignedBigInteger('lesson_id')->nullable()->constrained('lessons')->cascadeOnDelete();
-
+            $table->morphs('type');
             $table->timestamps();
         });
     }
