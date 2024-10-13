@@ -5,6 +5,18 @@ use Illuminate\Support\Facades\Storage;
 
 class VideoService
 {
+
+
+    // Existing upload method
+    public function uploadVideo($video, $videoName)
+    {
+        $videoPath = $video->store('videos', 'public');
+        return [
+            'path' => Storage::url($videoPath),
+            'name' => $videoName,
+        ];
+    }
+
     // Method to replace the video
     public function replaceVideo($newVideo, $oldVideoPath, $videoName)
     {
@@ -15,15 +27,5 @@ class VideoService
 
         // Upload new video
         return $this->uploadVideo($newVideo, $videoName);
-    }
-
-    // Existing upload method
-    public function uploadVideo($video, $videoName)
-    {
-        $videoPath = $video->store('videos', 'public');
-        return [
-            'path' => Storage::url($videoPath),
-            'name' => $videoName,
-        ];
     }
 }
