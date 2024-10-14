@@ -20,7 +20,7 @@ class VideoSeeder extends Seeder
             'video' => '1',
             'type_id' => 5,
             'type_type' => 'App\Models\Subject',
-
+            'exist' => true
 
         ]);
         Video::create([
@@ -29,7 +29,7 @@ class VideoSeeder extends Seeder
             'video' => '1',
             'type_id' => 4,
             'type_type' => 'App\Models\Subject',
-
+            'exist' => true
 
         ]);
     }

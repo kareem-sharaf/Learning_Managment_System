@@ -18,11 +18,11 @@ class Subject extends Model
 
     ];
 
-    public $timestamps=false;
+    public $timestamps = false;
 
     public function users()
     {
-        return $this->belongsToMany(User::class,'subscriptions');
+        return $this->belongsToMany(User::class, 'subscriptions');
     }
     public function stage()
     {
@@ -41,7 +41,7 @@ class Subject extends Model
     public function years_users()
     {
         return $this->belongsToMany(User::class, 'teacher_subject_years', 'subject_id', 'user_id')
-                    ->withPivot('year_id');
+            ->withPivot('year_id');
     }
 
     public function youtubeVideos()
@@ -63,10 +63,10 @@ class Subject extends Model
 
     public function videos()
     {
-        return $this->morphMany(Video::class, 'videoable');
+        return $this->morphMany(Video::class, 'type');
     }
     public function files()
     {
-        return $this->morphMany(File::class, 'fileable');
+        return $this->morphMany(File::class, 'type');
     }
 }

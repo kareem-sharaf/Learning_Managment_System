@@ -5,23 +5,40 @@ namespace App\Services;
 use App\Models\Category;
 use App\Models\Subject;
 use App\Models\User;
+use App\Models\Year;
 
 use Twilio\Rest\Client;
 use Illuminate\Http\Response;
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Responses\ApiErrorResponse;
 
-class  SubjectService
+class
+
+SubjectService
 {
+
+
     //******************************************************************************************* */
 
     protected $userService;
-
+    protected $unitService;
+    protected $lessonService;
+    protected $videoService;
+    protected $fileService;
 
     public function __construct(
-        UserService $userService
+        UserService $userService,
+        UnitService $unitService,
+        LessonService $lessonService,
+        VideoService $videoService,
+        FileService $fileService
+
     ) {
         $this->userService = $userService;
+        $this->unitService = $unitService;
+        $this->lessonService = $lessonService;
+        $this->videoService = $videoService;
+        $this->fileService = $fileService;
     }
     //******************************************************************************************* */
 
@@ -36,11 +53,22 @@ class  SubjectService
                 ->get();
         }
 
-        return Subject::where('category_id', $category_id)
+        return
+            Subject::where('category_id', $category_id)
             ->where('exist', true)
             ->get();
     }
+    //******************************************************************************************* */
 
+    public function getSubject($subject_id)
+    {
+        $subject = Subject::where('id', $subject_id)->first();
+        if ($subject) {
+            return $subject;
+        } else {
+            return null;
+        }
+    }
     //******************************************************************************************* */
 
     public function search($name)
@@ -51,5 +79,39 @@ class  SubjectService
         return $this->userService->attachUsersToSubjects($subjects);
     }
     //******************************************************************************************* */
+    public function associateYear($subject, $yearId, $userId)
+    {
+        $existingYear = Year::find($yearId);
+        if (! $existingYear) {
+            throw new \Exception('Year not found.');
+        }
 
+        $subject->years_users()->attach($userId, ['year_id' => $yearId]);
+    }
+
+    //******************************************************************************************* */
+
+    public function associateUser($subject, $userId)
+    {
+        $subject->years_users()->attach($userId);
+    }
+    //******************************************************************************************* */
+    public function deleteSubjectWithRelations($subject_id)
+    {
+        $subject = $this->getSubject($subject_id);
+
+        if ($subject) {
+            $this->unitService->deleteUnits($subject_id);
+            $this->lessonService->deleteLessons($subject_id);
+            $this->videoService->deleteVideos($subject_id);
+            $this->fileService->deleteFiles($subject_id);
+            $this->deleteSubject($subject);
+        }
+    }
+
+    //*******************************************************************************************
+    public function deleteSubject(Subject $subject)
+    {
+        $subject->update(['exist' => false]);
+    }
 }

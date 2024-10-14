@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('file');
             $table->morphs('type');
+            $table->boolean('exist');
             $table->timestamps();
         });
     }

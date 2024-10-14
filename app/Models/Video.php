@@ -5,16 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Video extends Model
+class Video
+
+extends Model
 {
     use HasFactory;
-    // protected $fillable = ['name', 'video', 'subject_id', 'unit_id', 'lesson_id', 'ad_id'];
 
-protected $fillable = ['name', 'video','type'];
+    protected $fillable = ['name', 'video', 'type','exist'];
 
-    public function subject()
+    public function type()
     {
-        return $this->morphMany(Subject::class, 'subjectable');
+        return $this->morphTo();
     }
 
     // public function subject()
@@ -44,6 +45,4 @@ protected $fillable = ['name', 'video','type'];
     {
         return $this->morphMany(Bookmark::class, 'bookmarkable');
     }
-
-
 }

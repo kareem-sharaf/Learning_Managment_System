@@ -195,8 +195,8 @@ Route::group(['prefix' => 'subject'], function () {
             Route::get('index', 'index');
             Route::group(['middleware' => 'CheckIfManagerOrAdminOrTeacher:sanctum'], function () {
                 Route::post('add_subject', 'add_subject');
-                Route::post('edit_subject', 'edit_subject');
-                Route::post('delete_subject', 'delete_subject');
+                Route::post('edit_subject/{subject_id}', 'edit_subject');
+                Route::get('delete_subject/{subject_id}', 'delete_subject');
             });
             Route::get('buy_subject', 'buy_subject');
         });

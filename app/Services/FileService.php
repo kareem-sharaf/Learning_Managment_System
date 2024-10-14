@@ -2,11 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Storage;
+use App\Models\File;
 
-class
-
-FileService
+class FileService
 {
     public function uploadFile($file, $fileName)
     {
@@ -19,12 +17,42 @@ FileService
         ];
     }
 
-    public function replaceFile($newFile, $oldFilePath, $fileName)
+    public function replaceFile($newFile, $type, $fileName)
     {
-        if ($oldFilePath && file_exists(public_path('files/' . basename($oldFilePath)))) {
-            unlink(public_path('files/' . basename($oldFilePath)));
+        $files = File::where('type_id', $type->id)->get();
+
+        foreach ($files as $file) {
+            $oldFilePath = public_path('files/' . basename($file->file));
+            if (file_exists($oldFilePath)) {
+                unlink($oldFilePath);
+            }
+
+            $file->delete();
         }
 
-        return $this->uploadFile($newFile, $fileName);
+        return $this->saveFile($newFile, $type, $fileName);
+    }
+
+    public function saveFile($file, $type, $fileName)
+    {
+        $fileDetails = $this->uploadFile($file,$fileName);
+
+        $newFile = new File();
+        $newFile->file = $fileDetails['path'];
+        $newFile->name = $fileName;
+        $newFile->type_id = $type->id;
+        $newFile->type_type = get_class($type);
+        $newFile->exist =true;
+
+        $newFile->save();
+
+        return $newFile;
+    }
+
+
+    public function deleteFiles($type_id)
+    {
+        File::where('type_id',$type_id)
+            ->update(['exist' => false]);
     }
 }

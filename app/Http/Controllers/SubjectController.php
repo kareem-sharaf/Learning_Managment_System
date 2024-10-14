@@ -164,7 +164,7 @@ class SubjectController extends Controller
         return response()->json(
             [
                 'message' => 'this is the subject .',
-                'subject'=>$this->userService->attachUsersToSubjects($subjects)
+                'subject' => $this->userService->attachUsersToSubjects($subjects)
             ]
         );
     }
@@ -181,196 +181,85 @@ class SubjectController extends Controller
 
         // Handle video upload
         if ($request->hasFile('video')) {
-            $videoDetails = $this->videoService->uploadVideo($request->file('video'));
-
-            $video = new Video();
-            $video->video = $videoDetails['path'];
-            $video->name = $request->video_name;
-            $video->type_id = $subject->id;
-            $video->type_type = get_class($subject);
-            $video->save();
+            $this->videoService->saveVideo($request->file('video'), $subject, $request->video_name);
         }
 
         // Handle file upload
         if ($request->hasFile('file')) {
-            $fileDetails = $this->fileService->uploadFile($request->file('file'), $request->file_name);
-
-            $file = new File();
-            $file->file = $fileDetails['path'];
-            $file->name = $request->file_name;
-            $file->type_id = $subject->id;
-            $file->type_type = get_class($subject);
-            $file->save();
+            $this->fileService->saveFile($request->file('file'), $subject, $request->file_name);
         }
 
-        // Handle year association if category is educational
+        // Handle year association
         if ($request->category_id == 1) {
-            if ($request->has('year_id')) {
-                $yearId = $request->year_id;
-                $existingYear = Year::find($yearId);
-                if (!$existingYear) {
-                    return response()->json(['message' => 'Year not found.'], 404);
-                }
-                $subject->years_users()->attach($user_id, ['year_id' => $yearId]);
-            } else {
-                return response()->json(['message' => 'You need to specify a year.'], 404);
-            }
+            $this->subjectService->associateYear($subject, $request->year_id, $user_id);
         } else {
-            $subject->years_users()->attach($user_id);
+            $this->subjectService->associateUser($subject, $user_id);
         }
-
-
 
         return response()->json([
             'message' => 'Subject added successfully.',
             'data' => $subject,
         ]);
-
     }
 
 
     //***********************************************************************************************************************\\
-    public function edit_subject(Request $request)
+    public function edit_subject(SubjectRequest $request, $subject_id)
     {
-        $user_id = Auth::id();
-
-        // Validate request
-        $request->validate([
-            'subject_id' => 'required|integer|exists:subjects,id',
-            'category_id' => 'integer|exists:categories,id|nullable',
-            'name' => 'string|max:255|nullable',
-            'price' => 'numeric|nullable',
-            'description' => 'string|nullable',
-            'image' => 'image|mimes:jpeg,png,jpg,gif|max:10240|nullable',
-            'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
-            'video_name' => 'nullable|string|max:255',
-            'file.*' => 'nullable|file|max:204800',
-            'file_name.*' => 'nullable|string|max:255',
-        ]);
-
-        // Find subject
-        $subject = Subject::find($request->subject_id);
-
+        $data = $request->validated();
+        $subject = $this->subjectService->getSubject($subject_id);
         if (!$subject) {
-            return response()->json(['message' => 'Subject not found.'], 404);
+            return response()->json(
+                [
+                    'message' => 'subject does not exist!.',
+                ],
+                404
+            );
         }
-
-        $subjectData = $request->only(['name', 'price', 'description', 'category_id']);
-
         // Handle image upload
         if ($request->hasFile('image')) {
-            // Delete old image
-            if ($subject->image) {
-                $oldImagePath = public_path('subject_images/' . basename($subject->image));
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
-            }
-
-            // Store new image
-            $image = $request->file('image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('subject_images'), $imageName);
-            $subject->image = url('subject_images/' . $imageName);
+            $data['image'] = $this->imageService->replaceImage($request->file('image'), $subject->image, 'subjects_images');
         }
-
         // Handle video upload
         if ($request->hasFile('video')) {
-            $video = Video::find($subject->video_id);
-
-            if ($video) {
-                // Delete old video
-                $oldVideoPath = public_path('videos/' . basename($video->video));
-                if (file_exists($oldVideoPath)) {
-                    unlink($oldVideoPath);
-                }
-            } else {
-                // Create new video instance if it doesn't exist
-                $video = new Video();
-                $video->subject_id = $subject->id;
-            }
-
-            // Store new video
-            $videoPath = $request->file('video')->store('videos', 'public');
-            $video->video = Storage::url($videoPath);
-
-            if ($request->filled('video_name')) {
-                $video->name = $request->video_name;
-            }
-
-            $video->save();
-            $subject->video_id = $video->id;
+            $this->videoService->replaceVideo($request->file('video'), $subject, $request->video_name);
         }
-
         // Handle file upload
         if ($request->hasFile('file')) {
-            $file = File::find($subject->file_id);
-
-            if ($file) {
-                // Delete old file
-                $oldFilePath = public_path('files/' . basename($file->file));
-                if (file_exists($oldFilePath)) {
-                    unlink($oldFilePath);
-                }
-            } else {
-                // Create new file instance if it doesn't exist
-                $file = new File();
-                $file->subject_id = $subject->id;
-            }
-
-            // Store new file
-            $filePath = $request->file('file')->store('files', 'public');
-            $file->file = Storage::url($filePath);
-
-            if ($request->filled('file_name')) {
-                $file->name = $request->file_name;
-            }
-
-            $file->save();
-            $subject->file_id = $file->id;
+            $this->fileService->replaceFile($request->file('file'),$subject,$request->file_name);
         }
-
         // Update subject data
-        $subject->update($subjectData);
-
-        return response()->json([
-            'message' => 'Subject updated successfully',
-            'data' => $subject,
-        ], 200);
+        $subject->update($data);
+        return response()->json(
+            [
+                'message' => 'Subject updated successfully',
+                'data' => $subject,
+            ],
+            200
+        );
     }
 
 
 
     //***********************************************************************************************************************\\
-    public function delete_subject(Request $request)
+    public function delete_subject($subject_id)
     {
         $user = Auth::user();
         $user_id = $user->id;
-        $role_id = $user->role_id;
-        $subject_id = $request->subject_id;
-        $subject = Subject::find($subject_id);
+
         $teacher_subject = TeacherSubjectYear::where('user_id', $user_id)
             ->where('subject_id', $subject_id)->first();
-        if (($teacher_subject && $role_id == 3) || $role_id == 2 || $role_id == 1) {
-            if ($subject) {
-                $subject->update(['exist' => false]);
 
-                Unit::where('subject_id', $subject->id)
-                    ->update(['exist' => false]);
-
-                Lesson::whereIn('unit_id', function ($query) use ($subject) {
-                    $query->select('id')
-                        ->from('units')
-                        ->where('subject_id', $subject->id);
-                })->update(['exist' => false]);
-
-                return response()->json(['message' => 'Subject and related items have been deleted successfuly.']);
-            } else {
-                return response()->json(['message' => 'Subject not found.'], 404);
-            }
-        } else {
-            return response()->json(['message' => 'you cannot delete this subject.'], 403);
+        if (!$teacher_subject) {
+            return response()->json(['message' => 'You cannot delete this subject.'], 403);
         }
+
+
+        $this->subjectService->deleteSubjectWithRelations($subject_id);
+
+        return response()->json(['message' => 'Subject and related items have been deleted successfuly.']);
+
+
     }
 
     //***********************************************************************************************************************\\

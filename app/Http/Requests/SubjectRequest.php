@@ -28,7 +28,7 @@ class SubjectRequest extends FormRequest
             'price' => 'required|numeric',
             'description' => 'required|string',
             'image' => 'required|image|max:10240',
-            'video' => 'nullable|mimes:mp4,mov,avi,flv|max:204800',
+            'video' => 'nullable|mimes:mp4,ogg,mov,avi,flv|max:204800',
             'video_name' => 'nullable|string|max:255',
             'file_name' => 'nullable|string|max:255',
             'file' => 'nullable|file|max:20480',

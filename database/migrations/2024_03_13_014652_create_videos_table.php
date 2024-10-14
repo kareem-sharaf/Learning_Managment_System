@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('video');
             $table->morphs('type');
+            $table->boolean('exist');
+
             $table->timestamps();
         });
     }
