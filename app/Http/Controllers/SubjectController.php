@@ -3,25 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
-use App\Models\Year;
-use App\Models\Stage;
-use App\Models\SubjectYear;
-use App\Models\User;
 use App\Models\TeacherSubjectYear;
-use App\Models\Category;
-use App\Models\Lesson;
-use App\Models\Unit;
-use App\Models\Subscription;
-use App\Models\Video;
-use App\Models\File;
-
-use App\Http\Responses\ApiSuccessResponse;
-use App\Http\Responses\ApiErrorResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-//  use Illuminate\Support\Facades\File;
-
-use App\Http\Requests\CategoryRequest;
 use App\Services\CategoryService;
 use App\Services\SubjectService;
 use App\Services\UserService;
@@ -31,12 +14,8 @@ use App\Services\ImageService;
 use App\Services\VideoService;
 use App\Services\FileService;
 use App\Services\YearService;
-
 use App\Http\Requests\SubjectRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use App\Http\Controllers\TeachersController;
-use Illuminate\Support\Facades\DB;
+
 
 class SubjectController extends Controller
 {
@@ -226,7 +205,7 @@ class SubjectController extends Controller
         }
         // Handle file upload
         if ($request->hasFile('file')) {
-            $this->fileService->replaceFile($request->file('file'),$subject,$request->file_name);
+            $this->fileService->replaceFile($request->file('file'), $subject, $request->file_name);
         }
         // Update subject data
         $subject->update($data);
@@ -258,8 +237,6 @@ class SubjectController extends Controller
         $this->subjectService->deleteSubjectWithRelations($subject_id);
 
         return response()->json(['message' => 'Subject and related items have been deleted successfuly.']);
-
-
     }
 
     //***********************************************************************************************************************\\

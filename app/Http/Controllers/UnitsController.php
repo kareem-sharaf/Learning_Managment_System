@@ -3,50 +3,69 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
-use App\Models\Teacher;
-use App\Models\Year;
-use App\Models\Stage;
-use App\Models\SubjectYear;
-use App\Models\User;
-use App\Models\TeacherSubjectYear;
-use App\Models\Category;
+
 use App\Models\Lesson;
 use App\Models\Unit;
-use App\Models\Subscription;
 use App\Models\Video;
-use App\Models\File;
+use App\Models\TeacherSubjectYear;
+
+use App\Services\UserService;
+use App\Services\UnitService;
+use App\Services\LessonService;
+use App\Services\VideoService;
+use App\Services\FileService;
+use App\Services\SubjectService;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
-// use Illuminate\Support\Facades\File;
 
-use App\Http\Responses\ApiSuccessResponse;
-use App\Http\Responses\ApiErrorResponse;
 use Illuminate\Support\Facades\Auth;
 
 class UnitsController extends Controller
 {
+    protected $userService;
+    protected $unitService;
+    protected $lessonService;
+    protected $videoService;
+    protected $fileService;
+    protected $subjectService;
+
+    public function __construct(
+        UserService $userService,
+        UnitService $unitService,
+        LessonService $lessonService,
+        VideoService $videoService,
+        FileService $fileService,
+        SubjectService $subjectService,
+
+    ) {
+        $this->userService = $userService;
+        $this->unitService = $unitService;
+        $this->lessonService = $lessonService;
+        $this->videoService = $videoService;
+        $this->fileService = $fileService;
+        $this->subjectService = $subjectService;
+    }
     //******************************************************************************************* */
-    public function show_all_units(Request $request)
+    public function show_all_units($subject_id)
     {
-        $user = Auth::user();
+        return 'No units found in this subject!';
+        // $subject = $this->subjectService->getSubject($subject_id);
+        // if (!$subject) {
+        //     return response()->json(['error' => 'Subject does not exist!.'], 404);
+        // }
 
-        $user_id = $user->id;
-        $role_id = $user->role_id;
-        $subject_id = $request->subject_id;
+        // $units = $this->unitService->getUnits($subject_id);
+        // if ($units->isEmpty()) {
+        //     return response()->json(['message' => 'No units found in this subject!'], 404);
+        // }
 
-        if (!$subject_id) {
-            return response()->json(['error' => 'Subject ID is required'], 400);
-        }
-
-        $unit = Unit::where('subject_id', $subject_id)->where('exist', true)
-            ->get();
-
-        return response()->json([
-            'message' => 'This is all units',
-            'data' => $unit
-        ]);
+        // return response()->json([
+        //     'message' => 'This is all units',
+        //     'data' => $units
+        // ]);
     }
     //************************************************************************************************************** */
     public function search_to_unit(Request $request)

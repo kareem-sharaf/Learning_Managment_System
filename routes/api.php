@@ -251,13 +251,10 @@ Route::group(['prefix' => 'subscription'], function () {
 });
 
 //  unit routes
-Route::group(['prefix' => 'unit'], function () {
+Route::group(['prefix'=> 'unit'], function () {
     Route::controller(UnitsController::class)->group(function () {
+        Route::get('show_all_units/{subject_id}', 'show_all_units');
         Route::post('search_to_unit', 'search_to_unit');
-        Route::group(['middleware' => ['auth:sanctum']], function () {
-            Route::post('show_all_units', 'show_all_units');
-        });
-
         Route::group(['middleware' => ['auth:sanctum', 'CheckIfManagerOrAdminOrTeacher']], function () {
             Route::post('add_unit', 'add_unit');
             Route::post('edit_unit', 'edit_unit');
@@ -299,8 +296,6 @@ Route::prefix('lessons')->group(function () {
             Route::post('/get', 'getLessonsByUnitId');
             Route::post('/show', 'getLessonById');
         });
-
-
     });
 });
 
