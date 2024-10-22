@@ -150,6 +150,7 @@ class SubjectController extends Controller
     //************************************************************************************************************** */
     public function add_subject(SubjectRequest $request)
     {
+        
         $user_id = Auth::id();
         $data = $request->validated();
 

@@ -8,6 +8,8 @@ use App\Models\Subject;
 use App\Models\Unit;
 use App\Models\Lesson;
 
+use App\Models\TeacherSubjectYear;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
@@ -85,9 +87,12 @@ class CategoryController extends Controller
     in case the user has year_id will see just one subject in his year else he will see all subjects.*/
     public function search(Request $request)
     {
-        $name = $request->query('name');
 
-        if (!$name) {
+        $name = $request->query('name');
+        $year_id = $request->query('year_id',null);
+
+        
+            if (!$name) {
             return response()->json([
                 'message' => "There is nothing to search.",
             ]);
@@ -97,7 +102,7 @@ class CategoryController extends Controller
         $teachers = $this->userService->search($name);
         $units = $this->unitService->search($name);
         $lessons = $this->lessonService->search($name);
-        $subjects = $this->subjectService->search($name);
+        $subjects = $this->subjectService->search($name,$year_id);
 
         return response()->json([
             'message' => "There are the items.",

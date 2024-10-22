@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Subject;
 use App\Models\Year;
-
+use App\Models\TeacherSubjectYear;
 
 class
 
@@ -65,13 +65,21 @@ SubjectService
     }
     //******************************************************************************************* */
 
-    public function search($name)
-    {
-        $subjects = Subject::where('name', 'like', '%' . $name . '%')
-            ->where('exist', true)
-            ->get();
-        return $this->userService->attachUsersToSubjects($subjects);
-    }
+    public function search($name, $year_id)
+{
+    $subjectIds = TeacherSubjectYear::where(function($query) use ($year_id) {
+            $query->where('year_id', $year_id)
+                  ->orWhereNull('year_id');
+        })->pluck('subject_id');
+
+    $subjects = Subject::where('name', 'like', '%' . $name . '%')
+        ->where('exist', true)
+        ->whereIn('id', $subjectIds)
+        ->get();
+
+    return $this->userService->attachUsersToSubjects($subjects);
+}
+
     //******************************************************************************************* */
     public function associateYear($subject, $yearId, $userId)
     {
@@ -95,8 +103,7 @@ SubjectService
         $subject = $this->getSubject($subject_id);
 
         if ($subject) {
-            $this->unitService->deleteUnits($subject_id);
-            $this->lessonService->deleteLessons($subject_id);
+            $this->unitService->deleteUnitsBySubject($subject_id);
             $this->videoService->deleteVideos($subject_id);
             $this->fileService->deleteFiles($subject_id);
             $this->deleteSubject($subject);

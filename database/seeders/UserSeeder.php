@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 class UserSeeder extends Seeder
 {
@@ -23,7 +24,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2002/3/29",
             'gender' => 1,
             'role_id' => 1,
-            'fcm'=>"fdgd",
+            'fcm' => "fdgd",
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "kareem sharaf",
@@ -34,8 +36,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/24",
             'gender' => 0,
             'role_id' => 2,
-            'fcm'=>"fdgds",
-
+            'fcm' => "fdgds",
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "malek",
@@ -46,8 +48,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 3,
-            'fcm'=>"fdgd",
-
+            'fcm' => "fdgd",
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "ahmad",
@@ -58,8 +60,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 3,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "khaled",
@@ -70,8 +72,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 3,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "samer",
@@ -82,8 +84,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 3,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "jojo",
@@ -94,8 +96,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 3,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "parhom",
@@ -106,8 +108,8 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 3,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
+            'email_sent_at' => Carbon::now(),  // Add this line
 
         ]);
         User::create([
@@ -119,10 +121,9 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 4,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
             'balance' => 500000,
-
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "aya",
@@ -134,10 +135,9 @@ class UserSeeder extends Seeder
             'device_id' => 'mmm9',
             'gender' => 0,
             'role_id' => 4,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
             'balance' => 500000,
-
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "saaaa",
@@ -148,10 +148,9 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 4,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
             'balance' => 500000,
-
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "mooo",
@@ -162,10 +161,9 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 4,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
             'balance' => 500000,
-
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
         User::create([
             'name' => "booo",
@@ -176,10 +174,9 @@ class UserSeeder extends Seeder
             'birth_date' => "2003/5/11",
             'gender' => 0,
             'role_id' => 4,
-            'fcm'=>"fdgd"
-,
+            'fcm' => "fdgd",
             'balance' => 500000,
-
+            'email_sent_at' => Carbon::now(),  // Add this line
         ]);
     }
 }

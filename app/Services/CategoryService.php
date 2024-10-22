@@ -44,6 +44,7 @@ class  CategoryService
             ->get();
     }
 
+    
     public function attachUsersToSubjects($subjects)
     {
         return $subjects->map(function ($subject) {

@@ -257,8 +257,8 @@ Route::group(['prefix'=> 'unit'], function () {
         Route::post('search_to_unit', 'search_to_unit');
         Route::group(['middleware' => ['auth:sanctum', 'CheckIfManagerOrAdminOrTeacher']], function () {
             Route::post('add_unit', 'add_unit');
-            Route::post('edit_unit', 'edit_unit');
-            Route::post('delete_unit', 'delete_unit');
+            Route::post('edit_unit/{unit_id}', 'edit_unit');
+            Route::post('delete_unit/{unit_id}', 'delete_unit');
         });
     });
 });
